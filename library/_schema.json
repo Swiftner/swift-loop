@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Swift Loop Formula Library Entry",
+  "type": "object",
+  "required": ["id", "name", "formulas", "cols", "rows"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "name": { "type": "string", "minLength": 1, "maxLength": 40 },
+    "description": { "type": "string", "maxLength": 200 },
+    "tags": { "type": "array", "items": { "type": "string" }, "maxItems": 8 },
+    "author": { "type": "string" },
+    "cols": { "type": "integer", "minimum": 1, "maximum": 100 },
+    "rows": { "type": "integer", "minimum": 1, "maximum": 100 },
+    "formulas": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "string" },
+        "y": { "type": "string" },
+        "rotation": { "type": "string" },
+        "scaleX": { "type": "string" },
+        "scaleY": { "type": "string" },
+        "opacity": { "type": "string" }
+      }
+    }
+  }
+}

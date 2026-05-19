@@ -1,0 +1,13 @@
+{
+  "id": "radial-burst",
+  "name": "Radial Burst",
+  "description": "Shapes arranged in a circle, rotating outward.",
+  "tags": ["radial", "rotation"],
+  "author": "@swiftner",
+  "cols": 24, "rows": 1,
+  "formulas": {
+    "x": "x = cos(t * TAU) * 150",
+    "y": "y = sin(t * TAU) * 150",
+    "rotation": "rotation = t * 360"
+  }
+}

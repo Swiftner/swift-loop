@@ -1,0 +1,13 @@
+{
+  "id": "pinwheel",
+  "name": "Pinwheel",
+  "description": "Radial layout with rotating cells.",
+  "tags": ["radial", "rotation"],
+  "author": "@swiftner",
+  "cols": 12, "rows": 1,
+  "formulas": {
+    "x": "x = cos(t * TAU) * 120",
+    "y": "y = sin(t * TAU) * 120",
+    "rotation": "rotation = t * 360 + 90"
+  }
+}

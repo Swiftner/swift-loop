@@ -1,0 +1,12 @@
+{
+  "id": "ribbon",
+  "name": "Ribbon",
+  "description": "Sinusoidal X with phase drift across rows.",
+  "tags": ["wave", "grid"],
+  "author": "@swiftner",
+  "cols": 20, "rows": 6,
+  "formulas": {
+    "x": "x = c * 25 + sin(ty * TAU + tx * PI) * 30",
+    "y": "y = r * 30"
+  }
+}

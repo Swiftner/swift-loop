@@ -1,0 +1,13 @@
+{
+  "id": "fountain",
+  "name": "Fountain",
+  "description": "Parabolic toss with gravity-like decay.",
+  "tags": ["arc", "physics"],
+  "author": "@swiftner",
+  "cols": 24, "rows": 1,
+  "formulas": {
+    "x": "x = (t - 0.5) * 400",
+    "y": "y = -200 * (1 - 4 * (t - 0.5) * (t - 0.5))",
+    "opacity": "opacity = 100 * (1 - t * 0.5)"
+  }
+}

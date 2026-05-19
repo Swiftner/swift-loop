@@ -1,0 +1,12 @@
+{
+  "id": "phyllotaxis",
+  "name": "Phyllotaxis",
+  "description": "Sunflower seed pattern via golden angle (~137.5°).",
+  "tags": ["radial", "organic"],
+  "author": "@swiftner",
+  "cols": 100, "rows": 1,
+  "formulas": {
+    "x": "x = cos(i * 2.39996) * sqrt(i) * 18",
+    "y": "y = sin(i * 2.39996) * sqrt(i) * 18"
+  }
+}

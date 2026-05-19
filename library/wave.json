@@ -1,0 +1,12 @@
+{
+  "id": "wave",
+  "name": "Wave",
+  "description": "Sinusoidal Y displacement across columns.",
+  "tags": ["wave", "grid"],
+  "author": "@swiftner",
+  "cols": 30, "rows": 1,
+  "formulas": {
+    "x": "x = c * 20",
+    "y": "y = sin(tx * TAU * 2) * 60"
+  }
+}

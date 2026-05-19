@@ -1,0 +1,14 @@
+{
+  "id": "confetti",
+  "name": "Confetti",
+  "description": "Heavy random jitter on position and rotation.",
+  "tags": ["random", "chaos"],
+  "author": "@swiftner",
+  "cols": 40, "rows": 1,
+  "formulas": {
+    "x": "x = (rand() - 0.5) * 400",
+    "y": "y = (rand() - 0.5) * 400",
+    "rotation": "rotation = rand() * 360",
+    "opacity": "opacity = 40 + rand() * 60"
+  }
+}

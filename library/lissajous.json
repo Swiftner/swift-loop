@@ -1,0 +1,12 @@
+{
+  "id": "lissajous",
+  "name": "Lissajous",
+  "description": "Interlocking sine curves on X and Y axes.",
+  "tags": ["wave", "curve"],
+  "author": "@swiftner",
+  "cols": 80, "rows": 1,
+  "formulas": {
+    "x": "x = sin(t * TAU * 3) * 150",
+    "y": "y = sin(t * TAU * 2) * 150"
+  }
+}
