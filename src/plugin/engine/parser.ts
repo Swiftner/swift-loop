@@ -1,5 +1,7 @@
 // src/plugin/engine/parser.ts
 
+import { easingFns } from './easing'
+
 export class ParseError extends Error {
   constructor(message: string, public column: number) {
     super(`Parse error at column ${column}: ${message}`)
@@ -119,6 +121,11 @@ const BUILTINS: Record<string, (...args: number[]) => number> = {
   sqrt: Math.sqrt, pow: Math.pow, exp: Math.exp, log: Math.log,
   abs: Math.abs, floor: Math.floor, ceil: Math.ceil, round: Math.round,
   min: Math.min, max: Math.max,
+  // easing functions (registered so compile.ts and user formulas can call them)
+  linear: easingFns.linear,
+  ease: easingFns.ease,
+  easeIn: easingFns.easeIn,
+  easeOut: easingFns.easeOut,
   // rand handled specially
   rand: () => 0,
 }
