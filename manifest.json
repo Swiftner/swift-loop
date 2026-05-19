@@ -1,0 +1,17 @@
+{
+  "api": "1.0.0",
+  "editorType": [
+    "figma",
+    "figjam"
+  ],
+  "id": "swift-loop-dev",
+  "name": "Swift Loop",
+  "main": "build/main.js",
+  "ui": "build/ui.js",
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": [
+      "none"
+    ]
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "name": "swift-loop",
+  "version": "0.1.0",
+  "description": "A modernized Figma plugin for creating iterated and grid-arrayed graphics. A fork of Looper.",
+  "license": "ISC",
+  "type": "module",
+  "scripts": {
+    "build": "build-figma-plugin --typecheck",
+    "watch": "build-figma-plugin --typecheck --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "biome check src tests",
+    "lint:fix": "biome check --write src tests"
+  },
+  "dependencies": {
+    "@create-figma-plugin/ui": "^4.0.1",
+    "@create-figma-plugin/utilities": "^4.0.1",
+    "preact": "^10.22.0"
+  },
+  "devDependencies": {
+    "@create-figma-plugin/build": "^4.0.1",
+    "@create-figma-plugin/tsconfig": "^4.0.1",
+    "@figma/plugin-typings": "^1.103.0",
+    "@biomejs/biome": "^1.9.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0",
+    "@types/node": "^22.0.0"
+  },
+  "figma-plugin": {
+    "id": "swift-loop-dev",
+    "editorType": ["figma", "figjam"],
+    "documentAccess": "dynamic-page",
+    "networkAccess": { "allowedDomains": ["none"] },
+    "name": "Swift Loop",
+    "main": "src/main.ts",
+    "ui": "src/ui.tsx"
+  }
+}

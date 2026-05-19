@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "lib": ["DOM", "ES2020"],
+    "module": "ES2020",
+    "moduleResolution": "Node",
+    "strict": true,
+    "baseUrl": ".",
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
+    "types": ["@figma/plugin-typings", "node"],
+    "paths": {
+      "react": ["./node_modules/preact/compat"],
+      "react/jsx-runtime": ["./node_modules/preact/jsx-runtime"]
+    }
+  },
+  "include": ["src/**/*", "tests/**/*"]
+}
