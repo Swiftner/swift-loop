@@ -15,10 +15,10 @@ export type EasingKind = 'linear' | 'ease' | 'easeIn' | 'easeOut'
 
 export interface NumericProperty {
   value: number
-  end: number | null      // null = no end interpolation
-  random: number          // ± range; 0 = disabled
-  unlocked: boolean       // true = use `formula` instead of sugar
-  formula: string | null  // freeform formula, used when unlocked
+  end: number | null // null = no end interpolation
+  random: number // ± range; 0 = disabled
+  unlocked: boolean // true = use `formula` instead of sugar
+  formula: string | null // freeform formula, used when unlocked
 }
 
 export interface ScalarProperty extends NumericProperty {
@@ -26,9 +26,9 @@ export interface ScalarProperty extends NumericProperty {
 }
 
 export interface SinusoidalLayer {
-  amplitude: number  // 0 = disabled
-  frequency: number  // radians
-  phase: number      // radians
+  amplitude: number // 0 = disabled
+  frequency: number // radians
+  phase: number // radians
 }
 
 export interface LoopConfig {
@@ -57,8 +57,8 @@ export interface LoopConfig {
   easing: EasingKind
 
   // Modes
-  fxMode: boolean        // global formula UI mode
-  seed: number           // PRNG seed
+  fxMode: boolean // global formula UI mode
+  seed: number // PRNG seed
 }
 
 export type FormulaProperty = 'x' | 'y' | 'rotation' | 'scaleX' | 'scaleY' | 'opacity'
@@ -88,7 +88,7 @@ export interface Scope {
 }
 
 export interface CompiledFormula {
-  source: string         // original formula text
+  source: string // original formula text
   evaluate: (scope: Scope, propertyKey: FormulaProperty) => number
 }
 

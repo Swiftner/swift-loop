@@ -3,7 +3,8 @@
     {
       "name": "Linear fade",
       "config": {
-        "cols": 20, "rows": 1,
+        "cols": 20,
+        "rows": 1,
         "x": { "value": 12, "end": null, "random": 0, "unlocked": false, "formula": null },
         "opacity": { "value": 100, "end": 0, "random": 0, "unlocked": false, "formula": null },
         "easing": "easeOut"
@@ -12,7 +13,8 @@
     {
       "name": "Spin",
       "config": {
-        "cols": 36, "rows": 1,
+        "cols": 36,
+        "rows": 1,
         "rotation": { "value": 10, "end": null, "random": 0, "unlocked": false, "formula": null },
         "opacity": { "value": 100, "end": 30, "random": 0, "unlocked": false, "formula": null }
       }
@@ -20,7 +22,8 @@
     {
       "name": "Grid wave",
       "config": {
-        "cols": 8, "rows": 8,
+        "cols": 8,
+        "rows": 8,
         "x": { "value": 30, "end": null, "random": 0, "unlocked": false, "formula": null },
         "y": { "value": 30, "end": null, "random": 0, "unlocked": false, "formula": null },
         "rotationSinusoidal": { "amplitude": 15, "frequency": 0.5, "phase": 0 }

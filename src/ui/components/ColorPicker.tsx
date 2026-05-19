@@ -1,5 +1,5 @@
-import type { Color } from '../../shared/types'
 import { hexToRgb, rgbToHex } from '../../shared/color'
+import type { Color } from '../../shared/types'
 
 interface Props {
   label: string
@@ -33,7 +33,11 @@ export function ColorPicker({ label, color, onChange }: Props) {
           if (c) onChange(c)
         }}
       />
-      {color && <button class="color-picker-clear" type="button" onClick={() => onChange(null)}>×</button>}
+      {color && (
+        <button class="color-picker-clear" type="button" onClick={() => onChange(null)}>
+          ×
+        </button>
+      )}
     </div>
   )
 }

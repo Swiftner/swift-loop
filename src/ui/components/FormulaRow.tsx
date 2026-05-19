@@ -17,7 +17,11 @@ export function FormulaRow({ label, formula, error, onChange }: Props) {
         rows={1}
         value={draft}
         spellcheck={false}
-        onInput={(e) => { const v = (e.target as HTMLTextAreaElement).value; setDraft(v); onChange(v) }}
+        onInput={(e) => {
+          const v = (e.target as HTMLTextAreaElement).value
+          setDraft(v)
+          onChange(v)
+        }}
       />
       {error && <div class="formula-row-error-message">{error}</div>}
     </div>

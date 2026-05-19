@@ -22,11 +22,16 @@ function interpFactor(config: LoopConfig): string {
 function baseSugarFor(property: FormulaProperty, config: LoopConfig): string {
   const p = config[property] as NumericProperty
   switch (property) {
-    case 'x': return `c * ${p.value}`
-    case 'y': return `r * ${p.value}`
-    case 'rotation': return `(c + r) * ${p.value}`
-    case 'scaleX': return `(c + r) * ${p.value}`
-    case 'scaleY': return `(c + r) * ${p.value}`
+    case 'x':
+      return `c * ${p.value}`
+    case 'y':
+      return `r * ${p.value}`
+    case 'rotation':
+      return `(c + r) * ${p.value}`
+    case 'scaleX':
+      return `(c + r) * ${p.value}`
+    case 'scaleY':
+      return `(c + r) * ${p.value}`
     case 'opacity': {
       if (p.end === null) return `${p.value}`
       const f = lerpTerm(config.easing, interpFactor(config))

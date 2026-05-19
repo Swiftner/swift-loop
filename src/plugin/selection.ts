@@ -1,6 +1,15 @@
 // src/plugin/selection.ts
 
-const SUPPORTED = new Set(['VECTOR', 'STAR', 'LINE', 'ELLIPSE', 'POLYGON', 'RECTANGLE', 'TEXT', 'GROUP'])
+const SUPPORTED = new Set([
+  'VECTOR',
+  'STAR',
+  'LINE',
+  'ELLIPSE',
+  'POLYGON',
+  'RECTANGLE',
+  'TEXT',
+  'GROUP',
+])
 
 export function isValidSelection(): boolean {
   const sel = figma.currentPage.selection

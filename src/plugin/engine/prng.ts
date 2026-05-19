@@ -19,7 +19,7 @@ export function makeRng(seed: number): () => number {
   return () => {
     state = xorshift32(state)
     // unsigned 32-bit to [0, 1)
-    return ((state >>> 0) / 0x1_0000_0000)
+    return (state >>> 0) / 0x1_0000_0000
   }
 }
 
@@ -37,7 +37,7 @@ function hashString(s: string): number {
  * so cells get stable but different values per property.
  */
 export function rand(seed: number, i: number, propertyKey: string): number {
-  const mixed = (seed ^ (i + 1) * 0x9e3779b1 ^ hashString(propertyKey)) | 0
+  const mixed = (seed ^ ((i + 1) * 0x9e3779b1) ^ hashString(propertyKey)) | 0
   // run xorshift twice for better mixing
   const s1 = xorshift32(mixed === 0 ? 1 : mixed)
   const s2 = xorshift32(s1)

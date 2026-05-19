@@ -1,7 +1,7 @@
-// src/plugin/loop/apply.ts
-import type { EvaluatedValues, Color, ColorStop, ScalarProperty } from '../../shared/types'
 import { lerpColorHsl } from '../../shared/color'
-import { applyEasing, type EasingKind } from '../engine/easing'
+// src/plugin/loop/apply.ts
+import type { Color, ColorStop, EvaluatedValues, ScalarProperty } from '../../shared/types'
+import { type EasingKind, applyEasing } from '../engine/easing'
 import { rotateAroundCenter } from '../figma/rotate'
 
 export interface ApplyInput {
@@ -40,7 +40,11 @@ export async function applyToClone(input: ApplyInput): Promise<void> {
     await rotateAroundCenter(clone, values.rotation)
   }
   if (dirty.has('opacity')) {
-    if ('opacity' in clone) (clone as MinimalFillsMixin & { opacity: number }).opacity = Math.max(0, Math.min(1, values.opacity / 100))
+    if ('opacity' in clone)
+      (clone as MinimalFillsMixin & { opacity: number }).opacity = Math.max(
+        0,
+        Math.min(1, values.opacity / 100),
+      )
   }
 
   if (dirty.has('fill') && 'fills' in clone) {

@@ -70,7 +70,9 @@ describe('formulaForProperty (sugar generation)', () => {
   it('sinusoidal appended to rotation', () => {
     const c = baseConfig()
     c.rotationSinusoidal = { amplitude: 8, frequency: 0.5, phase: 0 }
-    expect(formulaForProperty(c, 'rotation')).toBe('rotation = (c + r) * 5 + 8 * sin((c + r) * 0.5 + 0)')
+    expect(formulaForProperty(c, 'rotation')).toBe(
+      'rotation = (c + r) * 5 + 8 * sin((c + r) * 0.5 + 0)',
+    )
   })
 
   it('random + sinusoidal compose', () => {
@@ -78,7 +80,7 @@ describe('formulaForProperty (sugar generation)', () => {
     c.rotation.random = 3
     c.rotationSinusoidal = { amplitude: 8, frequency: 0.5, phase: 0 }
     expect(formulaForProperty(c, 'rotation')).toBe(
-      'rotation = (c + r) * 5 + 8 * sin((c + r) * 0.5 + 0) + (rand() - 0.5) * 2 * 3'
+      'rotation = (c + r) * 5 + 8 * sin((c + r) * 0.5 + 0) + (rand() - 0.5) * 2 * 3',
     )
   })
 
@@ -105,7 +107,11 @@ describe('compileConfig', () => {
     const c = baseConfig()
     const cf = compileConfig(c)
     for (const col of [0, 1, 2, 3, 4]) {
-      const scope = buildScope({ cols: 5, rows: 1, seed: 1, sourceWidth: 0, sourceHeight: 0 }, col, 0)
+      const scope = buildScope(
+        { cols: 5, rows: 1, seed: 1, sourceWidth: 0, sourceHeight: 0 },
+        col,
+        0,
+      )
       expect(cf.rotation.evaluate(scope, 'rotation')).toBe(col * 5)
     }
   })

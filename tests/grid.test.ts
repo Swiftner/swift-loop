@@ -4,7 +4,8 @@ import { buildScope } from '../src/plugin/engine/scope'
 import type { LoopConfig } from '../src/shared/types'
 
 const cfg = (cols: number, rows: number): LoopConfig => ({
-  cols, rows,
+  cols,
+  rows,
   x: { value: 10, end: null, random: 0, unlocked: false, formula: null },
   y: { value: 8, end: null, random: 0, unlocked: false, formula: null },
   rotation: { value: 4, end: null, random: 0, unlocked: false, formula: null },

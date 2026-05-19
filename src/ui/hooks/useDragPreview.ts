@@ -8,8 +8,12 @@ import { useCallback, useRef } from 'preact/hooks'
 export function useDragPreview() {
   const dragging = useRef(false)
 
-  const begin = useCallback(() => { dragging.current = true }, [])
-  const end = useCallback(() => { dragging.current = false }, [])
+  const begin = useCallback(() => {
+    dragging.current = true
+  }, [])
+  const end = useCallback(() => {
+    dragging.current = false
+  }, [])
   const isDragging = useCallback(() => dragging.current, [])
 
   return { begin, end, isDragging }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { parse, ParseError } from '../../src/plugin/engine/parser'
+import { ParseError, parse } from '../../src/plugin/engine/parser'
 
 const ev = (src: string, scope: Record<string, number> = {}, rand?: () => number) => {
   const node = parse(src)
@@ -56,7 +56,10 @@ describe('parser: functions', () => {
 describe('parser: rand()', () => {
   it('returns the rng output', () => {
     let n = 0
-    const fakeRand = () => { n++; return 0.42 }
+    const fakeRand = () => {
+      n++
+      return 0.42
+    }
     const r = ev('rand()', {}, fakeRand)
     expect(r).toBe(0.42)
     expect(n).toBe(1)
@@ -71,7 +74,9 @@ describe('parser: error reporting', () => {
     expect(() => parse('1 +')).toThrow(ParseError)
   })
   it('error includes column', () => {
-    try { parse('1 ++ 2') } catch (e) {
+    try {
+      parse('1 ++ 2')
+    } catch (e) {
       expect(e).toBeInstanceOf(ParseError)
       if (e instanceof ParseError) expect(typeof e.column).toBe('number')
     }

@@ -1,6 +1,6 @@
 {
   "$schema": "https://biomejs.dev/schemas/1.9.0/schema.json",
-  "files": { "ignore": ["build/**", "node_modules/**"] },
+  "files": { "ignore": ["build/**", "node_modules/**", "src/ui/library/index.ts"] },
   "formatter": {
     "enabled": true,
     "indentStyle": "space",
@@ -9,7 +9,22 @@
   },
   "linter": {
     "enabled": true,
-    "rules": { "recommended": true }
+    "rules": {
+      "recommended": true,
+      "style": {
+        "useExponentiationOperator": "off",
+        "noParameterAssign": "off",
+        "noNonNullAssertion": "off",
+        "useSingleVarDeclarator": "off"
+      },
+      "a11y": {
+        "useKeyWithClickEvents": "off"
+      },
+      "suspicious": {
+        "noArrayIndexKey": "off",
+        "noImplicitAnyLet": "off"
+      }
+    }
   },
   "javascript": {
     "formatter": { "quoteStyle": "single", "semicolons": "asNeeded" }

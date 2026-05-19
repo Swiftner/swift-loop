@@ -5,7 +5,11 @@ import { buildScope } from '../../src/plugin/engine/scope'
 describe('compileFormula', () => {
   it('compiles and evaluates a base formula', () => {
     const f = compileFormula('x = c * 5', 'x')
-    const scope = buildScope({ cols: 5, rows: 1, seed: 1, sourceWidth: 100, sourceHeight: 100 }, 3, 0)
+    const scope = buildScope(
+      { cols: 5, rows: 1, seed: 1, sourceWidth: 100, sourceHeight: 100 },
+      3,
+      0,
+    )
     expect(f.evaluate(scope, 'x')).toBe(15)
   })
 

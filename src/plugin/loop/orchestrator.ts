@@ -3,10 +3,19 @@ import type { LoopConfig } from '../../shared/types'
 import { compileConfig } from '../engine/compile'
 import { buildScope } from '../engine/scope'
 import { applyToClone } from './apply'
-import { diffConfig, type DiffResult, type DirtyProperty } from './diff'
-import { LastRunStore } from './state'
+import { type DiffResult, type DirtyProperty, diffConfig } from './diff'
+import type { LastRunStore } from './state'
 
-const SUPPORTED_TYPES = ['VECTOR', 'STAR', 'LINE', 'ELLIPSE', 'POLYGON', 'RECTANGLE', 'TEXT', 'GROUP']
+const SUPPORTED_TYPES = [
+  'VECTOR',
+  'STAR',
+  'LINE',
+  'ELLIPSE',
+  'POLYGON',
+  'RECTANGLE',
+  'TEXT',
+  'GROUP',
+]
 
 interface GenerateInput {
   source: SceneNode
@@ -21,10 +30,16 @@ export async function generate(input: GenerateInput): Promise<void> {
   if (!SUPPORTED_TYPES.includes(source.type)) return
 
   const prevRecord = store.get()
-  const diff = diffConfig(previousConfig, config, prevRecord ? {
-    previousSourceId: prevRecord.originalId,
-    currentSourceId: source.id,
-  } : null)
+  const diff = diffConfig(
+    previousConfig,
+    config,
+    prevRecord
+      ? {
+          previousSourceId: prevRecord.originalId,
+          currentSourceId: source.id,
+        }
+      : null,
+  )
 
   if (diff.mode === 'noop') return
 
@@ -37,7 +52,11 @@ export async function generate(input: GenerateInput): Promise<void> {
   if (commit) figma.commitUndo()
 }
 
-async function fullRegen(source: SceneNode, config: LoopConfig, store: LastRunStore): Promise<void> {
+async function fullRegen(
+  source: SceneNode,
+  config: LoopConfig,
+  store: LastRunStore,
+): Promise<void> {
   // remove previous clones
   const prev = store.get()
   if (prev) {
@@ -59,8 +78,15 @@ async function fullRegen(source: SceneNode, config: LoopConfig, store: LastRunSt
     const c = i % config.cols
     const r = Math.floor(i / config.cols)
     const scope = buildScope(
-      { cols: config.cols, rows: config.rows, seed: config.seed, sourceWidth: source.width, sourceHeight: source.height },
-      c, r
+      {
+        cols: config.cols,
+        rows: config.rows,
+        seed: config.seed,
+        sourceWidth: source.width,
+        sourceHeight: source.height,
+      },
+      c,
+      r,
     )
     const clone = (source as SceneNode & { clone: () => SceneNode }).clone()
     clone.name = `${source.name}_${i}`
@@ -83,7 +109,17 @@ async function fullRegen(source: SceneNode, config: LoopConfig, store: LastRunSt
       strokeWeight: config.strokeWeight,
       easing: config.easing,
       interpFactor,
-      dirty: new Set<string>(['x', 'y', 'rotation', 'scaleX', 'scaleY', 'opacity', 'fill', 'stroke', 'strokeWeight']),
+      dirty: new Set<string>([
+        'x',
+        'y',
+        'rotation',
+        'scaleX',
+        'scaleY',
+        'opacity',
+        'fill',
+        'stroke',
+        'strokeWeight',
+      ]),
     })
 
     cloneIds.push(clone.id)
@@ -104,7 +140,12 @@ async function fullRegen(source: SceneNode, config: LoopConfig, store: LastRunSt
   figma.viewport.scrollAndZoomIntoView([group])
 }
 
-async function inPlaceMutation(source: SceneNode, config: LoopConfig, store: LastRunStore, diff: DiffResult): Promise<void> {
+async function inPlaceMutation(
+  source: SceneNode,
+  config: LoopConfig,
+  store: LastRunStore,
+  diff: DiffResult,
+): Promise<void> {
   const prev = store.get()
   if (!prev) return
 
@@ -121,8 +162,15 @@ async function inPlaceMutation(source: SceneNode, config: LoopConfig, store: Las
     const c = i % config.cols
     const r = Math.floor(i / config.cols)
     const scope = buildScope(
-      { cols: config.cols, rows: config.rows, seed: config.seed, sourceWidth: source.width, sourceHeight: source.height },
-      c, r
+      {
+        cols: config.cols,
+        rows: config.rows,
+        seed: config.seed,
+        sourceWidth: source.width,
+        sourceHeight: source.height,
+      },
+      c,
+      r,
     )
     const interpFactor = computeInterpFactor(config, scope.tx, scope.ty)
     await applyToClone({

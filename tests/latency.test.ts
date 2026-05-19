@@ -2,12 +2,13 @@
 import { describe, expect, it } from 'vitest'
 import { compileConfig } from '../src/plugin/engine/compile'
 import { buildScope } from '../src/plugin/engine/scope'
-import type { LoopConfig, FormulaProperty } from '../src/shared/types'
+import type { FormulaProperty, LoopConfig } from '../src/shared/types'
 
 const PROPERTIES: FormulaProperty[] = ['x', 'y', 'rotation', 'scaleX', 'scaleY', 'opacity']
 
 const richConfig = (cols: number, rows: number): LoopConfig => ({
-  cols, rows,
+  cols,
+  rows,
   x: { value: 5, end: null, random: 2, unlocked: false, formula: null },
   y: { value: 5, end: null, random: 2, unlocked: false, formula: null },
   rotation: { value: 3, end: null, random: 1, unlocked: false, formula: null },
@@ -44,7 +45,8 @@ describe('latency', () => {
         for (let col = 0; col < c.cols; col++) {
           const scope = buildScope(
             { cols: c.cols, rows: c.rows, seed: c.seed, sourceWidth: 100, sourceHeight: 100 },
-            col, r
+            col,
+            r,
           )
           for (const p of PROPERTIES) acc += compiled[p].evaluate(scope, p)
         }

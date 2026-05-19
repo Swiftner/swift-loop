@@ -7,11 +7,11 @@ import type { LibraryEntry } from '../library/types'
 
 interface Props {
   entry: LibraryEntry
-  size?: number  // px
+  size?: number // px
 }
 
 const FORMULA_PROPS: FormulaProperty[] = ['x', 'y', 'rotation', 'scaleX', 'scaleY', 'opacity']
-const THUMB_SEED = 1  // deterministic — every thumbnail uses seed=1
+const THUMB_SEED = 1 // deterministic — every thumbnail uses seed=1
 
 interface CellPoint {
   x: number
@@ -30,7 +30,8 @@ function evaluateEntry(entry: LibraryEntry): CellPoint[] {
     for (let c = 0; c < entry.cols; c++) {
       const scope = buildScope(
         { cols: entry.cols, rows: entry.rows, seed: THUMB_SEED, sourceWidth: 40, sourceHeight: 40 },
-        c, r
+        c,
+        r,
       )
       try {
         const x = compiled.x ? compiled.x.evaluate(scope, 'x') : 0
@@ -49,10 +50,12 @@ export function Thumbnail({ entry, size = 80 }: Props) {
   const { points, viewBox } = useMemo(() => {
     const pts = evaluateEntry(entry)
     if (pts.length === 0) return { points: [], viewBox: '0 0 100 100' }
-    const xs = pts.map(p => p.x)
-    const ys = pts.map(p => p.y)
-    const minX = Math.min(...xs), maxX = Math.max(...xs)
-    const minY = Math.min(...ys), maxY = Math.max(...ys)
+    const xs = pts.map((p) => p.x)
+    const ys = pts.map((p) => p.y)
+    const minX = Math.min(...xs),
+      maxX = Math.max(...xs)
+    const minY = Math.min(...ys),
+      maxY = Math.max(...ys)
     const w = Math.max(maxX - minX, 1)
     const hgt = Math.max(maxY - minY, 1)
     const sq = Math.max(w, hgt) * 1.2

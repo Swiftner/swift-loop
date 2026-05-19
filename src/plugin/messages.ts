@@ -1,9 +1,9 @@
 // src/plugin/messages.ts
 import { emit, on, showUI } from '@create-figma-plugin/utilities'
 import type { LoopConfig } from '../shared/types'
+import { ensurePagesLoaded } from './figma/async'
 import { generate, revert } from './loop/orchestrator'
 import { LastRunStore } from './loop/state'
-import { ensurePagesLoaded } from './figma/async'
 import { getSelected, isValidSelection } from './selection'
 
 const STORAGE_KEY = 'swift-loop:last-config'
@@ -14,7 +14,7 @@ export async function bootstrap(): Promise<void> {
   await ensurePagesLoaded()
   showUI({ width: 320, height: 640 })
 
-  const saved = await figma.clientStorage.getAsync(STORAGE_KEY) as LoopConfig | undefined
+  const saved = (await figma.clientStorage.getAsync(STORAGE_KEY)) as LoopConfig | undefined
   emit('loop:initial-config', { config: saved ?? null })
   emit('loop:selection-change', { valid: isValidSelection() })
 

@@ -12,8 +12,8 @@ const LIB_DIR = join(__dirname, '..', 'library')
 
 function loadEntries(): LibraryEntry[] {
   return readdirSync(LIB_DIR)
-    .filter(f => f.endsWith('.json') && !f.startsWith('_'))
-    .map(f => JSON.parse(readFileSync(join(LIB_DIR, f), 'utf8')) as LibraryEntry)
+    .filter((f) => f.endsWith('.json') && !f.startsWith('_'))
+    .map((f) => JSON.parse(readFileSync(join(LIB_DIR, f), 'utf8')) as LibraryEntry)
 }
 
 const FORMULA_PROPS: FormulaProperty[] = ['x', 'y', 'rotation', 'scaleX', 'scaleY', 'opacity']
@@ -52,7 +52,11 @@ describe('library entries', () => {
           const compiled = compileFormula(src, k)
           for (let r = 0; r < rows; r++) {
             for (let c = 0; c < cols; c++) {
-              const scope = buildScope({ cols, rows, seed: 1, sourceWidth: 100, sourceHeight: 100 }, c, r)
+              const scope = buildScope(
+                { cols, rows, seed: 1, sourceWidth: 100, sourceHeight: 100 },
+                c,
+                r,
+              )
               const v = compiled.evaluate(scope, k)
               expect(Number.isFinite(v)).toBe(true)
             }
@@ -63,7 +67,7 @@ describe('library entries', () => {
   }
 
   it('all ids are unique', () => {
-    const ids = entries.map(e => e.id)
+    const ids = entries.map((e) => e.id)
     expect(new Set(ids).size).toBe(ids.length)
   })
 })

@@ -1,17 +1,17 @@
-import { useCallback, useEffect, useState } from 'preact/hooks'
 import { emit, on } from '@create-figma-plugin/utilities'
+import { useCallback, useEffect, useState } from 'preact/hooks'
 import type { LoopConfig, Snapshot } from '../shared/types'
 import { FxPill } from './components/FxPill'
 import { HeaderLink } from './components/HeaderLink'
-import { useLooperConfig } from './hooks/useLooperConfig'
 import { useFxMode } from './hooks/useFxMode'
-import { SnapshotsBar } from './sections/SnapshotsBar'
-import { IterationsSection } from './sections/IterationsSection'
-import { TransformSection } from './sections/TransformSection'
-import { ModulationSection } from './sections/ModulationSection'
+import { useLooperConfig } from './hooks/useLooperConfig'
 import { AppearanceSection } from './sections/AppearanceSection'
-import { PresetsSection } from './sections/PresetsSection'
+import { IterationsSection } from './sections/IterationsSection'
 import { LibraryOverlay } from './sections/LibraryOverlay'
+import { ModulationSection } from './sections/ModulationSection'
+import { PresetsSection } from './sections/PresetsSection'
+import { SnapshotsBar } from './sections/SnapshotsBar'
+import { TransformSection } from './sections/TransformSection'
 
 const SNAPSHOTS_KEY = 'swift-loop:snapshots'
 
@@ -40,13 +40,15 @@ export function App() {
   useEffect(() => {
     const stored = window.localStorage.getItem(SNAPSHOTS_KEY)
     if (stored) {
-      try { setSnapshots(JSON.parse(stored) as Snapshot[]) } catch {}
+      try {
+        setSnapshots(JSON.parse(stored) as Snapshot[])
+      } catch {}
     }
   }, [])
 
   const recordSnapshot = useCallback((c: LoopConfig) => {
     const s: Snapshot = { config: c, timestamp: Date.now(), label: buildLabel(c) }
-    setSnapshots(prev => {
+    setSnapshots((prev) => {
       const next = [s, ...prev].slice(0, 8)
       window.localStorage.setItem(SNAPSHOTS_KEY, JSON.stringify(next))
       return next
@@ -107,13 +109,20 @@ export function App() {
         open={libraryOpen}
         config={config}
         onClose={() => setLibraryOpen(false)}
-        onApply={(next) => { update(next, true); recordSnapshot(next) }}
+        onApply={(next) => {
+          update(next, true)
+          recordSnapshot(next)
+        }}
       />
       <footer class="app-footer">
-        <button type="button" onClick={onRevert}>Revert</button>
+        <button type="button" onClick={onRevert}>
+          Revert
+        </button>
         <button class={generateButtonClass(cellCount)} type="button" onClick={onGenerate}>
           Generate
-          {cellCount > 2500 && <span class="cell-badge">~{Math.round(cellCount / 100) * 100 / 1000}k</span>}
+          {cellCount > 2500 && (
+            <span class="cell-badge">~{(Math.round(cellCount / 100) * 100) / 1000}k</span>
+          )}
         </button>
       </footer>
     </div>

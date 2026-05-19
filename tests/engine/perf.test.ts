@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { compileConfig } from '../../src/plugin/engine/compile'
 import { buildScope } from '../../src/plugin/engine/scope'
-import type { LoopConfig, FormulaProperty } from '../../src/shared/types'
+import type { FormulaProperty, LoopConfig } from '../../src/shared/types'
 
 const richConfig = (): LoopConfig => ({
   cols: 50,
@@ -34,9 +34,15 @@ describe('Day-1 perf spike', () => {
     for (let r = 0; r < config.rows; r++) {
       for (let c = 0; c < config.cols; c++) {
         const scope = buildScope(
-          { cols: config.cols, rows: config.rows, seed: config.seed, sourceWidth: 100, sourceHeight: 100 },
+          {
+            cols: config.cols,
+            rows: config.rows,
+            seed: config.seed,
+            sourceWidth: 100,
+            sourceHeight: 100,
+          },
           c,
-          r
+          r,
         )
         for (const p of PROPERTIES) {
           acc += compiled[p].evaluate(scope, p)

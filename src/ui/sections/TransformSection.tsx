@@ -35,7 +35,7 @@ export function TransformSection({ config, update }: Props) {
                     ...config,
                     [row.key]: { ...cur, unlocked: true, formula: text },
                   },
-                  false
+                  false,
                 )
               }
             />
@@ -58,9 +58,7 @@ export function TransformSection({ config, update }: Props) {
             max={row.max}
             step={row.step}
             formulaIndicator={cur.unlocked}
-            onChange={(v, commit) =>
-              update({ ...config, [row.key]: { ...cur, value: v } }, commit)
-            }
+            onChange={(v, commit) => update({ ...config, [row.key]: { ...cur, value: v } }, commit)}
           />
         )
       })}

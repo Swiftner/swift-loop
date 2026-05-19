@@ -8,21 +8,24 @@ export function hexToRgb(hex: string): Color | null {
   if (!m) return null
   const h = m[1]
   const expand = h.length === 3
-  const r = parseInt(expand ? h[0] + h[0] : h.slice(0, 2), 16) / 255
-  const g = parseInt(expand ? h[1] + h[1] : h.slice(2, 4), 16) / 255
-  const b = parseInt(expand ? h[2] + h[2] : h.slice(4, 6), 16) / 255
+  const r = Number.parseInt(expand ? h[0] + h[0] : h.slice(0, 2), 16) / 255
+  const g = Number.parseInt(expand ? h[1] + h[1] : h.slice(2, 4), 16) / 255
+  const b = Number.parseInt(expand ? h[2] + h[2] : h.slice(4, 6), 16) / 255
   return { r, g, b }
 }
 
 export function rgbToHex({ r, g, b }: Color): string {
-  const c = (v: number) => Math.max(0, Math.min(255, Math.round(v * 255))).toString(16).padStart(2, '0')
+  const c = (v: number) =>
+    Math.max(0, Math.min(255, Math.round(v * 255)))
+      .toString(16)
+      .padStart(2, '0')
   return `${c(r)}${c(g)}${c(b)}`
 }
 
 export interface Hsl {
-  h: number  // 0..1
-  s: number  // 0..1
-  l: number  // 0..1
+  h: number // 0..1
+  s: number // 0..1
+  l: number // 0..1
 }
 
 export function rgbToHsl({ r, g, b }: Color): Hsl {
@@ -35,9 +38,15 @@ export function rgbToHsl({ r, g, b }: Color): Hsl {
     const d = max - min
     s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
     switch (max) {
-      case r: h = (g - b) / d + (g < b ? 6 : 0); break
-      case g: h = (b - r) / d + 2; break
-      case b: h = (r - g) / d + 4; break
+      case r:
+        h = (g - b) / d + (g < b ? 6 : 0)
+        break
+      case g:
+        h = (b - r) / d + 2
+        break
+      case b:
+        h = (r - g) / d + 4
+        break
     }
     h /= 6
   }

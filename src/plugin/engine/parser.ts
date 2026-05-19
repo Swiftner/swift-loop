@@ -3,7 +3,10 @@
 import { easingFns } from './easing'
 
 export class ParseError extends Error {
-  constructor(message: string, public column: number) {
+  constructor(
+    message: string,
+    public column: number,
+  ) {
     super(`Parse error at column ${column}: ${message}`)
     this.name = 'ParseError'
   }
@@ -16,10 +19,19 @@ export interface AstNode {
 // --- Tokens ---
 
 type TokenKind =
-  | 'NUM' | 'IDENT'
-  | '+' | '-' | '*' | '/' | '^' | 'MOD'
-  | '(' | ')' | ','
-  | '=' | 'EOF'
+  | 'NUM'
+  | 'IDENT'
+  | '+'
+  | '-'
+  | '*'
+  | '/'
+  | '^'
+  | 'MOD'
+  | '('
+  | ')'
+  | ','
+  | '='
+  | 'EOF'
 
 interface Token {
   kind: TokenKind
@@ -33,12 +45,20 @@ function tokenize(input: string): Token[] {
   let i = 0
   while (i < input.length) {
     const ch = input[i]
-    if (/\s/.test(ch)) { i++; continue }
+    if (/\s/.test(ch)) {
+      i++
+      continue
+    }
     const col = i
     if (/[0-9]/.test(ch) || (ch === '.' && /[0-9]/.test(input[i + 1] ?? ''))) {
       let j = i
       while (j < input.length && /[0-9.]/.test(input[j])) j++
-      tokens.push({ kind: 'NUM', text: input.slice(i, j), value: parseFloat(input.slice(i, j)), col })
+      tokens.push({
+        kind: 'NUM',
+        text: input.slice(i, j),
+        value: Number.parseFloat(input.slice(i, j)),
+        col,
+      })
       i = j
       continue
     }
@@ -66,7 +86,9 @@ function tokenize(input: string): Token[] {
 
 class NumNode implements AstNode {
   constructor(private v: number) {}
-  evaluate() { return this.v }
+  evaluate() {
+    return this.v
+  }
 }
 class VarNode implements AstNode {
   constructor(private name: string) {}
@@ -79,35 +101,53 @@ class VarNode implements AstNode {
 }
 class ConstNode implements AstNode {
   constructor(private v: number) {}
-  evaluate() { return this.v }
+  evaluate() {
+    return this.v
+  }
 }
 class BinNode implements AstNode {
-  constructor(private op: string, private l: AstNode, private r: AstNode) {}
+  constructor(
+    private op: string,
+    private l: AstNode,
+    private r: AstNode,
+  ) {}
   evaluate(scope: Record<string, number>, rand: () => number): number {
     const a = this.l.evaluate(scope, rand)
     const b = this.r.evaluate(scope, rand)
     switch (this.op) {
-      case '+': return a + b
-      case '-': return a - b
-      case '*': return a * b
-      case '/': return a / b
-      case '^': return Math.pow(a, b)
-      case 'mod': return a - Math.floor(a / b) * b
+      case '+':
+        return a + b
+      case '-':
+        return a - b
+      case '*':
+        return a * b
+      case '/':
+        return a / b
+      case '^':
+        return Math.pow(a, b)
+      case 'mod':
+        return a - Math.floor(a / b) * b
     }
     throw new Error(`unknown op: ${this.op}`)
   }
 }
 class UnaryNode implements AstNode {
-  constructor(private op: string, private c: AstNode) {}
+  constructor(
+    private op: string,
+    private c: AstNode,
+  ) {}
   evaluate(scope: Record<string, number>, rand: () => number): number {
     const v = this.c.evaluate(scope, rand)
     return this.op === '-' ? -v : v
   }
 }
 class FuncNode implements AstNode {
-  constructor(private name: string, private args: AstNode[]) {}
+  constructor(
+    private name: string,
+    private args: AstNode[],
+  ) {}
   evaluate(scope: Record<string, number>, rand: () => number): number {
-    const a = this.args.map(x => x.evaluate(scope, rand))
+    const a = this.args.map((x) => x.evaluate(scope, rand))
     const fn = BUILTINS[this.name]
     if (!fn) throw new ReferenceError(`unknown function: ${this.name}`)
     if (this.name === 'rand') return rand()
@@ -116,11 +156,23 @@ class FuncNode implements AstNode {
 }
 
 const BUILTINS: Record<string, (...args: number[]) => number> = {
-  sin: Math.sin, cos: Math.cos, tan: Math.tan,
-  asin: Math.asin, acos: Math.acos, atan: Math.atan, atan2: Math.atan2,
-  sqrt: Math.sqrt, pow: Math.pow, exp: Math.exp, log: Math.log,
-  abs: Math.abs, floor: Math.floor, ceil: Math.ceil, round: Math.round,
-  min: Math.min, max: Math.max,
+  sin: Math.sin,
+  cos: Math.cos,
+  tan: Math.tan,
+  asin: Math.asin,
+  acos: Math.acos,
+  atan: Math.atan,
+  atan2: Math.atan2,
+  sqrt: Math.sqrt,
+  pow: Math.pow,
+  exp: Math.exp,
+  log: Math.log,
+  abs: Math.abs,
+  floor: Math.floor,
+  ceil: Math.ceil,
+  round: Math.round,
+  min: Math.min,
+  max: Math.max,
   // easing functions (registered so compile.ts and user formulas can call them)
   linear: easingFns.linear,
   ease: easingFns.ease,
@@ -131,7 +183,9 @@ const BUILTINS: Record<string, (...args: number[]) => number> = {
 }
 
 const CONSTANTS: Record<string, number> = {
-  PI: Math.PI, E: Math.E, TAU: 2 * Math.PI,
+  PI: Math.PI,
+  E: Math.E,
+  TAU: 2 * Math.PI,
 }
 
 // --- Parser ---
@@ -139,8 +193,12 @@ const CONSTANTS: Record<string, number> = {
 class Parser {
   private pos = 0
   constructor(private tokens: Token[]) {}
-  private peek() { return this.tokens[this.pos] }
-  private eat(): Token { return this.tokens[this.pos++] }
+  private peek() {
+    return this.tokens[this.pos]
+  }
+  private eat(): Token {
+    return this.tokens[this.pos++]
+  }
   private expect(kind: TokenKind): Token {
     const t = this.peek()
     if (t.kind !== kind) throw new ParseError(`expected ${kind}, got ${t.kind || t.text}`, t.col)
@@ -168,14 +226,17 @@ class Parser {
       if (bp === null || bp.l < minBp) break
       this.eat()
       const rhs = this.parseExpr(bp.r)
-      lhs = new BinNode(op === 'MOD' ? 'mod' : op as string, lhs, rhs)
+      lhs = new BinNode(op === 'MOD' ? 'mod' : (op as string), lhs, rhs)
     }
     return lhs
   }
 
   private parsePrefix(): AstNode {
     const t = this.peek()
-    if (t.kind === 'NUM') { this.eat(); return new NumNode(t.value!) }
+    if (t.kind === 'NUM') {
+      this.eat()
+      return new NumNode(t.value!)
+    }
     if (t.kind === '-') {
       this.eat()
       const c = this.parseExpr(100) // unary binds tight
@@ -214,12 +275,16 @@ class Parser {
 function infixBp(op: TokenKind): { l: number; r: number } | null {
   switch (op) {
     case '+':
-    case '-': return { l: 10, r: 11 }
+    case '-':
+      return { l: 10, r: 11 }
     case '*':
     case '/':
-    case 'MOD': return { l: 20, r: 21 }
-    case '^': return { l: 30, r: 29 } // right-assoc
-    default: return null
+    case 'MOD':
+      return { l: 20, r: 21 }
+    case '^':
+      return { l: 30, r: 29 } // right-assoc
+    default:
+      return null
   }
 }
 

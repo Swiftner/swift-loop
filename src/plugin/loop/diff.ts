@@ -2,8 +2,15 @@
 import type { LoopConfig } from '../../shared/types'
 
 export type DirtyProperty =
-  | 'x' | 'y' | 'rotation' | 'scaleX' | 'scaleY' | 'opacity'
-  | 'fill' | 'stroke' | 'strokeWeight'
+  | 'x'
+  | 'y'
+  | 'rotation'
+  | 'scaleX'
+  | 'scaleY'
+  | 'opacity'
+  | 'fill'
+  | 'stroke'
+  | 'strokeWeight'
 
 export interface DiffResult {
   mode: 'full' | 'in-place' | 'noop'
@@ -22,7 +29,11 @@ function eqNumericProperty(a: LoopConfig[keyof LoopConfig], b: typeof a): boolea
   return JSON.stringify(a) === JSON.stringify(b)
 }
 
-export function diffConfig(prev: LoopConfig | null, next: LoopConfig, ctx: DiffContext | null): DiffResult {
+export function diffConfig(
+  prev: LoopConfig | null,
+  next: LoopConfig,
+  ctx: DiffContext | null,
+): DiffResult {
   if (prev === null) return { mode: 'full', dirty: ALL_PROPS }
   if (ctx && ctx.previousSourceId !== ctx.currentSourceId) {
     return { mode: 'full', dirty: ALL_PROPS }

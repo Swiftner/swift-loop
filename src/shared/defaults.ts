@@ -2,10 +2,18 @@
 import type { LoopConfig, NumericProperty, ScalarProperty } from './types'
 
 const num = (value: number): NumericProperty => ({
-  value, end: null, random: 0, unlocked: false, formula: null,
+  value,
+  end: null,
+  random: 0,
+  unlocked: false,
+  formula: null,
 })
 const scalar = (value: number): ScalarProperty => ({
-  value, end: null, random: 0, unlocked: false, formula: null,
+  value,
+  end: null,
+  random: 0,
+  unlocked: false,
+  formula: null,
 })
 
 export const DEFAULT_CONFIG: LoopConfig = {

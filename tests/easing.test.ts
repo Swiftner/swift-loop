@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { applyEasing, easingFns, type EasingKind } from '../src/plugin/engine/easing'
+import { type EasingKind, applyEasing, easingFns } from '../src/plugin/engine/easing'
 
 const kinds: EasingKind[] = ['linear', 'ease', 'easeIn', 'easeOut']
 
@@ -34,7 +34,7 @@ describe('easing', () => {
 
   it('all easings are monotonic increasing', () => {
     for (const k of kinds) {
-      let prev = -Infinity
+      let prev = Number.NEGATIVE_INFINITY
       for (let t = 0; t <= 1; t += 0.05) {
         const v = applyEasing(k, t)
         expect(v).toBeGreaterThanOrEqual(prev - 1e-9)

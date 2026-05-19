@@ -3,7 +3,8 @@ import { diffConfig } from '../src/plugin/loop/diff'
 import type { LoopConfig } from '../src/shared/types'
 
 const base = (): LoopConfig => ({
-  cols: 5, rows: 1,
+  cols: 5,
+  rows: 1,
   x: { value: 5, end: null, random: 0, unlocked: false, formula: null },
   y: { value: 0, end: null, random: 0, unlocked: false, formula: null },
   rotation: { value: 0, end: null, random: 0, unlocked: false, formula: null },

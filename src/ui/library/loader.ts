@@ -2,10 +2,12 @@
 import { libraryEntries } from './index'
 import type { LibraryEntry } from './types'
 
-export const library: LibraryEntry[] = [...libraryEntries].sort((a, b) => a.name.localeCompare(b.name))
+export const library: LibraryEntry[] = [...libraryEntries].sort((a, b) =>
+  a.name.localeCompare(b.name),
+)
 
 export function libraryById(id: string): LibraryEntry | undefined {
-  return library.find(e => e.id === id)
+  return library.find((e) => e.id === id)
 }
 
 export function libraryTags(): string[] {

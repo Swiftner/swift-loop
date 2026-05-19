@@ -12,18 +12,30 @@ interface Props {
   onSeedChange: (v: number, commit: boolean) => void
 }
 
-export function SnapshotsBar({ snapshots, activeSeed, config, onSelect, onReroll, onSeedChange }: Props) {
+export function SnapshotsBar({
+  snapshots,
+  activeSeed,
+  config,
+  onSelect,
+  onReroll,
+  onSeedChange,
+}: Props) {
   const [open, setOpen] = useState(false)
   return (
     <div class={`snapshots-bar ${open ? 'is-open' : ''}`}>
-      <button class="snapshots-toggle" type="button" onClick={() => setOpen(o => !o)}>
+      <button class="snapshots-toggle" type="button" onClick={() => setOpen((o) => !o)}>
         {open ? '▲ recent' : '▼ recent'}
       </button>
       {open && (
         <div class="snapshots-body">
           <div class="snapshots-swatches">
             {snapshots.map((s, i) => (
-              <SwatchChip key={i} snapshot={s} active={s.config.seed === activeSeed} onSelect={() => onSelect(s)} />
+              <SwatchChip
+                key={i}
+                snapshot={s}
+                active={s.config.seed === activeSeed}
+                onSelect={() => onSelect(s)}
+              />
             ))}
           </div>
           <div class="seed-row" onClick={onReroll}>
@@ -36,7 +48,9 @@ export function SnapshotsBar({ snapshots, activeSeed, config, onSelect, onReroll
               step={1}
               onChange={(v, commit) => onSeedChange(v, commit)}
             />
-            <span class="seed-reroll" aria-label="Re-roll">↻</span>
+            <span class="seed-reroll" aria-label="Re-roll">
+              ↻
+            </span>
           </div>
         </div>
       )}

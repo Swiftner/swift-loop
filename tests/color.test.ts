@@ -1,11 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  hexToRgb,
-  rgbToHex,
-  rgbToHsl,
-  hslToRgb,
-  lerpColorHsl,
-} from '../src/shared/color'
+import { hexToRgb, hslToRgb, lerpColorHsl, rgbToHex, rgbToHsl } from '../src/shared/color'
 
 describe('color', () => {
   it('hex 6-digit round-trips through rgb', () => {
