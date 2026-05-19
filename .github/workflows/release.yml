@@ -1,0 +1,26 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+      - run: bun install
+      - run: bun run test
+      - run: bun run build
+      - name: Package
+        run: |
+          mkdir -p dist
+          zip -r "dist/swift-loop-${GITHUB_REF_NAME}.zip" manifest.json build README.md LICENSE
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/swift-loop-*.zip
+          generate_release_notes: true
