@@ -39,15 +39,26 @@ export function App() {
     const stored = window.localStorage.getItem(SNAPSHOTS_KEY)
     if (stored) {
       try {
-        setSnapshots(JSON.parse(stored) as Snapshot[])
+        const parsed = JSON.parse(stored) as Snapshot[]
+        const seen = new Set<number>()
+        const deduped = parsed.filter((s) => {
+          if (seen.has(s.config.seed)) return false
+          seen.add(s.config.seed)
+          return true
+        })
+        setSnapshots(deduped)
+        if (deduped.length !== parsed.length) {
+          window.localStorage.setItem(SNAPSHOTS_KEY, JSON.stringify(deduped))
+        }
       } catch {}
     }
   }, [])
 
   const recordSnapshot = useCallback((c: LoopConfig) => {
-    const s: Snapshot = { config: c, timestamp: Date.now(), label: buildLabel(c) }
     setSnapshots((prev) => {
-      const next = [s, ...prev].slice(0, 8)
+      const filtered = prev.filter((p) => p.config.seed !== c.seed)
+      const s: Snapshot = { config: c, timestamp: Date.now(), label: buildLabel(c) }
+      const next = [s, ...filtered].slice(0, 8)
       window.localStorage.setItem(SNAPSHOTS_KEY, JSON.stringify(next))
       return next
     })

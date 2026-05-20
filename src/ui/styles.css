@@ -382,13 +382,14 @@ body,
 .snapshots-bar {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 16px 8px;
+  gap: 10px;
+  padding: 5px 16px 7px;
   border-bottom: 1px solid var(--hairline);
 }
 .snapshots-label {
+  font-family: var(--mono);
   font-size: 9px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
   flex: 0 0 auto;
@@ -397,19 +398,25 @@ body,
   display: flex;
   gap: 4px;
   flex: 1;
-  overflow-x: auto;
+  flex-wrap: wrap;
 }
 .swatch-chip {
-  width: 20px;
-  height: 20px;
-  border-radius: 3px;
-  border: 1px solid var(--hairline);
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 0;
+  padding: 0;
   cursor: pointer;
-  background: var(--bg);
+  background: var(--muted);
   flex: 0 0 auto;
+  transition: transform 120ms ease, background 120ms ease, box-shadow 120ms ease;
+}
+.swatch-chip:hover {
+  transform: scale(1.4);
+  background: var(--fg);
 }
 .swatch-chip.is-active {
-  box-shadow: 0 0 0 2px var(--accent);
+  background: var(--fg);
 }
 
 /* Presets */
