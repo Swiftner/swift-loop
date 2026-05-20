@@ -1,9 +1,8 @@
 import { emit, on } from '@create-figma-plugin/utilities'
 import { useCallback, useEffect, useState } from 'preact/hooks'
 import type { LoopConfig, Snapshot } from '../shared/types'
-import { FxPill } from './components/FxPill'
 import { HeaderLink } from './components/HeaderLink'
-import { useFxMode } from './hooks/useFxMode'
+import { SeedControl } from './components/SeedControl'
 import { useLooperConfig } from './hooks/useLooperConfig'
 import { AppearanceSection } from './sections/AppearanceSection'
 import { IterationsSection } from './sections/IterationsSection'
@@ -27,7 +26,6 @@ function generateButtonClass(cells: number): string {
 
 export function App() {
   const { config, update } = useLooperConfig()
-  const fx = useFxMode(config, update)
   const [snapshots, setSnapshots] = useState<Snapshot[]>([])
   const [selectionValid, setSelectionValid] = useState(true)
   const [libraryOpen, setLibraryOpen] = useState(false)
@@ -87,16 +85,15 @@ export function App() {
     <div class="app">
       <header class="app-header">
         <HeaderLink />
-        <FxPill active={fx.active} onToggle={fx.toggle} />
+        <SeedControl value={config.seed} onChange={onSeedChange} onReroll={onReroll} />
       </header>
-      <SnapshotsBar
-        snapshots={snapshots}
-        activeSeed={config.seed}
-        config={config}
-        onSelect={onSelectSnapshot}
-        onReroll={onReroll}
-        onSeedChange={onSeedChange}
-      />
+      {snapshots.length > 0 && (
+        <SnapshotsBar
+          snapshots={snapshots}
+          activeSeed={config.seed}
+          onSelect={onSelectSnapshot}
+        />
+      )}
       {!selectionValid && (
         <div class="selection-warning">Select a single Vector, Shape, Text, or Group</div>
       )}

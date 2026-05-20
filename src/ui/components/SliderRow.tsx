@@ -8,7 +8,9 @@ interface Props {
   max: number
   step: number
   unit?: string
-  formulaIndicator?: boolean // shows tiny "f" if an unlocked formula is stashed
+  formulaIndicator?: boolean // shows "fx" badge if a custom formula is stashed
+  formula?: string // expandable formula editor content
+  onFormulaChange?: (next: string) => void
   onChange: (next: number, commit: boolean) => void
 }
 
@@ -20,10 +22,13 @@ export function SliderRow({
   step,
   unit,
   formulaIndicator,
+  formula,
+  onFormulaChange,
   onChange,
 }: Props) {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(value.toString())
+  const [expanded, setExpanded] = useState(false)
   const dragging = useRef(false)
 
   const handleInput = useCallback(
@@ -53,11 +58,25 @@ export function SliderRow({
     setEditing(false)
   }
 
+  const hasFormula = formula !== undefined && onFormulaChange !== undefined
+
   return (
-    <div class="slider-row">
+    <div class={`slider-row${expanded ? ' is-expanded' : ''}`}>
       <div class="slider-row-header">
         <span class="slider-row-label">{label}</span>
-        {formulaIndicator && <span class="slider-row-fx-indicator">f</span>}
+        {hasFormula ? (
+          <button
+            class={`slider-row-fx-toggle${formulaIndicator ? ' is-active' : ''}`}
+            type="button"
+            onClick={() => setExpanded((x) => !x)}
+            aria-label={expanded ? 'Hide formula' : 'Show formula'}
+            aria-expanded={expanded}
+          >
+            fx
+          </button>
+        ) : (
+          formulaIndicator && <span class="slider-row-fx-indicator">fx</span>
+        )}
         {editing ? (
           <input
             class="slider-row-value-input"
@@ -97,6 +116,15 @@ export function SliderRow({
         onChange={handleChange}
         onPointerDown={onPointerDown}
       />
+      {hasFormula && expanded && (
+        <textarea
+          class="slider-row-formula"
+          rows={1}
+          value={formula ?? ''}
+          spellcheck={false}
+          onInput={(e) => onFormulaChange?.((e.target as HTMLTextAreaElement).value)}
+        />
+      )}
     </div>
   )
 }

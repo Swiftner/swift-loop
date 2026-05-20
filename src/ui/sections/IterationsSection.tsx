@@ -9,7 +9,14 @@ interface Props {
 export function IterationsSection({ config, update }: Props) {
   return (
     <section class="section">
-      <h2 class="section-title">Iterations</h2>
+      <div class="section-head">
+        <h2 class="section-title">Iterations</h2>
+        <span class="section-chip" aria-label={`${config.cols * config.rows} cells`}>
+          {config.cols}
+          <span class="section-chip-sep">×</span>
+          {config.rows}
+        </span>
+      </div>
       <SliderRow
         label="Columns"
         value={config.cols}

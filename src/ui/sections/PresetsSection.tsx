@@ -34,7 +34,9 @@ export function PresetsSection({ config, update, onOpenLibrary }: Props) {
 
   return (
     <section class="section">
-      <h2 class="section-title">Presets</h2>
+      <div class="section-head">
+        <h2 class="section-title">Presets</h2>
+      </div>
       <button class="library-open-btn" type="button" onClick={onOpenLibrary}>
         Browse Library →
       </button>

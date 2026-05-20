@@ -1,6 +1,7 @@
 // src/plugin/loop/orchestrator.ts
-import type { LoopConfig } from '../../shared/types'
-import { compileConfig } from '../engine/compile'
+import type { LoopConfig, Scope } from '../../shared/types'
+import { type CompiledFactors, compileConfig, compileFactors } from '../engine/compile'
+import { applyEasing } from '../engine/easing'
 import { buildScope } from '../engine/scope'
 import { applyToClone } from './apply'
 import { type DiffResult, type DirtyProperty, diffConfig } from './diff'
@@ -67,6 +68,7 @@ async function fullRegen(
   }
 
   const compiled = compileConfig(config)
+  const factors = compileFactors(config)
   const parent = source.parent
   if (!parent) return
 
@@ -92,7 +94,7 @@ async function fullRegen(
     clone.name = `${source.name}_${i}`
     if ('insertChild' in parent) (parent as ChildrenMixin).insertChild(0, clone)
 
-    const interpFactor = computeInterpFactor(config, scope.tx, scope.ty)
+    const f = evalFactors(config, factors, scope)
     await applyToClone({
       clone,
       source,
@@ -107,8 +109,9 @@ async function fullRegen(
       fill: config.fill,
       stroke: config.stroke,
       strokeWeight: config.strokeWeight,
-      easing: config.easing,
-      interpFactor,
+      fillFactor: f.fill,
+      strokeFactor: f.stroke,
+      strokeWeightFactor: f.strokeWeight,
       dirty: new Set<string>([
         'x',
         'y',
@@ -150,6 +153,7 @@ async function inPlaceMutation(
   if (!prev) return
 
   const compiled = compileConfig(config)
+  const factors = compileFactors(config)
   const dirty = new Set<string>(diff.dirty as DirtyProperty[])
   const n = config.cols * config.rows
 
@@ -172,7 +176,7 @@ async function inPlaceMutation(
       c,
       r,
     )
-    const interpFactor = computeInterpFactor(config, scope.tx, scope.ty)
+    const f = evalFactors(config, factors, scope)
     await applyToClone({
       clone: clone as SceneNode,
       source,
@@ -187,10 +191,26 @@ async function inPlaceMutation(
       fill: config.fill,
       stroke: config.stroke,
       strokeWeight: config.strokeWeight,
-      easing: config.easing,
-      interpFactor,
+      fillFactor: f.fill,
+      strokeFactor: f.stroke,
+      strokeWeightFactor: f.strokeWeight,
       dirty,
     })
+  }
+}
+
+function evalFactors(
+  config: LoopConfig,
+  factors: CompiledFactors,
+  scope: Scope,
+): { fill: number; stroke: number; strokeWeight: number } {
+  const baseEased = applyEasing(config.easing, computeInterpFactor(config, scope.tx, scope.ty))
+  return {
+    fill: factors.fill ? factors.fill.evaluate(scope, 'fillFactor') : baseEased,
+    stroke: factors.stroke ? factors.stroke.evaluate(scope, 'strokeFactor') : baseEased,
+    strokeWeight: factors.strokeWeight
+      ? factors.strokeWeight.evaluate(scope, 'strokeWeightFactor')
+      : baseEased,
   }
 }
 

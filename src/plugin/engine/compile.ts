@@ -1,9 +1,12 @@
 // src/plugin/engine/compile.ts
 import type {
+  ColorStop,
+  CompiledFormula,
   CompiledFormulas,
   FormulaProperty,
   LoopConfig,
   NumericProperty,
+  ScalarProperty,
 } from '../../shared/types'
 import { compileFormula } from './evaluate'
 
@@ -69,6 +72,43 @@ export function formulaForProperty(config: LoopConfig, property: FormulaProperty
 }
 
 const PROPERTIES: FormulaProperty[] = ['x', 'y', 'rotation', 'scaleX', 'scaleY', 'opacity']
+
+function defaultFactorFormula(config: LoopConfig): string {
+  return lerpTerm(config.easing, interpFactor(config))
+}
+
+export function factorForColorStop(config: LoopConfig, stop: ColorStop): string {
+  if (stop.unlocked && stop.formula != null) return stop.formula
+  return defaultFactorFormula(config)
+}
+
+export function factorForScalar(config: LoopConfig, scalar: ScalarProperty): string {
+  if (scalar.unlocked && scalar.formula != null) return scalar.formula
+  return defaultFactorFormula(config)
+}
+
+export interface CompiledFactors {
+  fill: CompiledFormula | null
+  stroke: CompiledFormula | null
+  strokeWeight: CompiledFormula | null
+}
+
+export function compileFactors(config: LoopConfig): CompiledFactors {
+  return {
+    fill:
+      config.fill.unlocked && config.fill.formula != null
+        ? compileFormula(config.fill.formula, 'fillFactor')
+        : null,
+    stroke:
+      config.stroke.unlocked && config.stroke.formula != null
+        ? compileFormula(config.stroke.formula, 'strokeFactor')
+        : null,
+    strokeWeight:
+      config.strokeWeight.unlocked && config.strokeWeight.formula != null
+        ? compileFormula(config.strokeWeight.formula, 'strokeWeightFactor')
+        : null,
+  }
+}
 
 export function compileConfig(config: LoopConfig): CompiledFormulas {
   const out: Partial<CompiledFormulas> = {}

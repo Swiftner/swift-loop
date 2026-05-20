@@ -9,6 +9,8 @@ export interface Color {
 export interface ColorStop {
   color: Color | null
   end: Color | null
+  unlocked?: boolean // true = use `formula` as the lerp factor (overrides global easing)
+  formula?: string | null // formula returning a number in [0, 1] used as the start→end lerp factor
 }
 
 export type EasingKind = 'linear' | 'ease' | 'easeIn' | 'easeOut'
@@ -89,7 +91,7 @@ export interface Scope {
 
 export interface CompiledFormula {
   source: string // original formula text
-  evaluate: (scope: Scope, propertyKey: FormulaProperty) => number
+  evaluate: (scope: Scope, propertyKey: string) => number
 }
 
 export interface CompiledFormulas {

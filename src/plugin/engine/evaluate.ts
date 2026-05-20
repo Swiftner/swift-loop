@@ -1,14 +1,14 @@
 // src/plugin/engine/evaluate.ts
-import type { CompiledFormula, FormulaProperty, Scope } from '../../shared/types'
+import type { CompiledFormula, Scope } from '../../shared/types'
 import { parse } from './parser'
 import { rand } from './prng'
 
-export function compileFormula(source: string, _propertyKey: FormulaProperty): CompiledFormula {
+export function compileFormula(source: string, _propertyKey: string): CompiledFormula {
   // parse throws on syntax error — bubble up
   const node = parse(source)
   return {
     source,
-    evaluate(scope: Scope, propertyKey: FormulaProperty): number {
+    evaluate(scope: Scope, propertyKey: string): number {
       const scopeRecord: Record<string, number> = {
         i: scope.i,
         n: scope.n,

@@ -1,6 +1,5 @@
 import { formulaForProperty } from '../../plugin/engine/compile'
 import type { FormulaProperty, LoopConfig } from '../../shared/types'
-import { FormulaRow } from '../components/FormulaRow'
 import { SliderRow } from '../components/SliderRow'
 
 interface Props {
@@ -17,36 +16,11 @@ const ROWS: { key: FormulaProperty; label: string; min: number; max: number; ste
 ]
 
 export function TransformSection({ config, update }: Props) {
-  if (config.fxMode) {
-    return (
-      <section class="section">
-        <h2 class="section-title">Transform · fx</h2>
-        {ROWS.map((row) => {
-          const cur = config[row.key]
-          const formula = formulaForProperty(config, row.key)
-          return (
-            <FormulaRow
-              key={row.key}
-              label={row.label}
-              formula={formula}
-              onChange={(text) =>
-                update(
-                  {
-                    ...config,
-                    [row.key]: { ...cur, unlocked: true, formula: text },
-                  },
-                  false,
-                )
-              }
-            />
-          )
-        })}
-      </section>
-    )
-  }
   return (
     <section class="section">
-      <h2 class="section-title">Transform</h2>
+      <div class="section-head">
+        <h2 class="section-title">Transform</h2>
+      </div>
       {ROWS.map((row) => {
         const cur = config[row.key]
         return (
@@ -58,7 +32,23 @@ export function TransformSection({ config, update }: Props) {
             max={row.max}
             step={row.step}
             formulaIndicator={cur.unlocked}
-            onChange={(v, commit) => update({ ...config, [row.key]: { ...cur, value: v } }, commit)}
+            formula={formulaForProperty(config, row.key)}
+            onFormulaChange={(text) => {
+              const trimmed = text.trim()
+              update(
+                {
+                  ...config,
+                  [row.key]:
+                    trimmed === ''
+                      ? { ...cur, unlocked: false, formula: null }
+                      : { ...cur, unlocked: true, formula: text },
+                },
+                false,
+              )
+            }}
+            onChange={(v, commit) =>
+              update({ ...config, [row.key]: { ...cur, value: v } }, commit)
+            }
           />
         )
       })}
