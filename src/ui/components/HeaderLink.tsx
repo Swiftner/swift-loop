@@ -1,6 +1,6 @@
 import { useState } from 'preact/hooks'
 
-const VERSION = '0.1.0'
+const VERSION = '0.1.1'
 
 export function HeaderLink() {
   const [open, setOpen] = useState(false)
