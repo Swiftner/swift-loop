@@ -1,7 +1,9 @@
 import { emit, on } from '@create-figma-plugin/utilities'
 import { useCallback, useEffect, useState } from 'preact/hooks'
 import type { LoopConfig, Snapshot } from '../shared/types'
+import { ResizeHandle } from './components/ResizeHandle'
 import { useLooperConfig } from './hooks/useLooperConfig'
+import { libraryById } from './library/loader'
 import { AppearanceSection } from './sections/AppearanceSection'
 import { IterationsSection } from './sections/IterationsSection'
 import { LibraryOverlay } from './sections/LibraryOverlay'
@@ -31,6 +33,36 @@ export function App() {
 
   useEffect(() => {
     return on('loop:selection-change', (p: { valid: boolean }) => setSelectionValid(p.valid))
+  }, [])
+
+  // First-launch default: apply the Grid library entry when the user hasn't
+  // been welcomed yet. Tracked in localStorage (UI side) so it's independent
+  // of figma.clientStorage's saved config — early test installs may already
+  // have a saved config that pre-dates this default-grid behaviour.
+  useEffect(() => {
+    return on('loop:initial-config', (payload: { config: LoopConfig | null }) => {
+      const welcomed = window.localStorage.getItem('swift-loop:welcomed') === '1'
+      if (welcomed) return
+      const grid = libraryById('grid')
+      if (!grid) {
+        window.localStorage.setItem('swift-loop:welcomed', '1')
+        return
+      }
+      const base = payload.config ?? config
+      const next: LoopConfig = {
+        ...base,
+        cols: grid.cols,
+        rows: grid.rows,
+        x: { ...base.x, unlocked: true, formula: grid.formulas.x ?? null },
+        y: { ...base.y, unlocked: true, formula: grid.formulas.y ?? null },
+      }
+      update(next, true)
+      setAppliedName(grid.name)
+      window.localStorage.setItem('swift-loop:welcomed', '1')
+    })
+    // intentionally not depending on config/update — subscribes once at mount
+    // and reads the latest config via closure each handler invocation
+    // biome-ignore lint/correctness/useExhaustiveDependencies: see comment
   }, [])
 
   // load snapshots from clientStorage (UI-side)
@@ -104,16 +136,23 @@ export function App() {
       {!selectionValid && (
         <div class="selection-warning">Select a single Vector, Shape, Text, or Group</div>
       )}
-      <IterationsSection config={config} update={update} appliedName={appliedName} />
-      <TransformSection config={config} update={update} />
-      <ModulationSection config={config} update={update} />
-      <AppearanceSection config={config} update={update} />
-      <PresetsSection
-        config={config}
-        update={update}
-        onOpenLibrary={() => setLibraryOpen(true)}
-        onApplied={(name) => setAppliedName(name)}
-      />
+      <main class="app-content">
+        <IterationsSection
+          config={config}
+          update={update}
+          appliedName={appliedName}
+          onOpenLibrary={() => setLibraryOpen(true)}
+        />
+        <TransformSection config={config} update={update} />
+        <ModulationSection config={config} update={update} />
+        <AppearanceSection config={config} update={update} />
+        <PresetsSection
+          config={config}
+          update={update}
+          onOpenLibrary={() => setLibraryOpen(true)}
+          onApplied={(name) => setAppliedName(name)}
+        />
+      </main>
       <LibraryOverlay
         open={libraryOpen}
         config={config}
@@ -135,6 +174,7 @@ export function App() {
           )}
         </button>
       </footer>
+      <ResizeHandle />
     </div>
   )
 }

@@ -4,13 +4,17 @@ import { applyEasing, type EasingKind } from '../../plugin/engine/easing'
 
 interface Props {
   label: string
-  readout: ComponentChildren
+  /** Right-aligned readout in the meta row (hex codes, etc). May be empty. */
+  readout?: ComponentChildren
   /** SVG-string background for the strip-bar (gradient, fade, etc) */
   barBackground?: string
-  /** Endpoint chips, rendered at left and right edges of the strip-bar */
-  startEndpoint: ComponentChildren
-  endEndpoint: ComponentChildren
-  /** Extra layers (e.g. stroke-width wedge) drawn under the curve overlay */
+  /** Slot rendered in the left column (start endpoint — swatch or number) */
+  startCol: ComponentChildren
+  /** Slot rendered in the right column (end endpoint) */
+  endCol: ComponentChildren
+  /** Extra modifier class for the bar (e.g. 'is-opacity', 'has-wedge') */
+  barClass?: string
+  /** Extra layers drawn under the curve (e.g. stroke-width wedge) */
   barOverlay?: ComponentChildren
   /** Active easing key (drives default curve preview) */
   easing: EasingKind
@@ -25,8 +29,9 @@ export function Strip({
   label,
   readout,
   barBackground,
-  startEndpoint,
-  endEndpoint,
+  startCol,
+  endCol,
+  barClass,
   barOverlay,
   easing,
   formulaActive,
@@ -52,23 +57,23 @@ export function Strip({
           fx
         </button>
       </div>
-      <div
-        class="appearance-strip-bar"
-        style={barBackground ? `--strip-bg: ${barBackground}` : undefined}
-      >
-        {barOverlay}
-        <svg
-          class="appearance-strip-curve"
-          viewBox="0 0 100 30"
-          preserveAspectRatio="none"
-          aria-hidden="true"
+      <div class="appearance-strip-row">
+        <div class="appearance-strip-col is-start">{startCol}</div>
+        <div
+          class={`appearance-strip-bar${barClass ? ` ${barClass}` : ''}`}
+          style={barBackground ? `--strip-bg: ${barBackground}` : undefined}
         >
-          <path d={path} />
-        </svg>
-        <div class="appearance-strip-endpoints">
-          {startEndpoint}
-          {endEndpoint}
+          {barOverlay}
+          <svg
+            class="appearance-strip-curve"
+            viewBox="0 0 100 24"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <path d={path} />
+          </svg>
         </div>
+        <div class="appearance-strip-col is-end">{endCol}</div>
       </div>
       {expanded && (
         <textarea
@@ -83,11 +88,11 @@ export function Strip({
   )
 }
 
-/** Sample the easing function into an SVG polyline path (viewBox 100×30). */
+/** Sample the easing function into an SVG polyline path (viewBox 100×24). */
 function curvePathForEasing(easing: EasingKind): string {
   const steps = 24
   const W = 100
-  const H = 30
+  const H = 24
   const pts: string[] = []
   for (let i = 0; i <= steps; i++) {
     const t = i / steps

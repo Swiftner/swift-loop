@@ -1,5 +1,5 @@
-import { useState } from 'preact/hooks'
 import type { LoopConfig } from '../../shared/types'
+import { Section } from '../components/Section'
 import { SliderRow } from '../components/SliderRow'
 
 interface Props {
@@ -8,16 +8,9 @@ interface Props {
 }
 
 export function ModulationSection({ config, update }: Props) {
-  const [open, setOpen] = useState(false)
   return (
-    <section class="section">
-      <button class="section-disclosure" onClick={() => setOpen((o) => !o)} type="button">
-        <h2 class="section-title">Modulation</h2>
-        <span>{open ? '−' : '+'}</span>
-      </button>
-      {open && (
-        <div>
-          <h3 class="subsection-title">Random ±</h3>
+    <Section id="modulation" title="Modulation" defaultOpen={false}>
+      <h3 class="subsection-title">Random ±</h3>
           {(['x', 'y', 'rotation', 'scaleX', 'scaleY', 'opacity'] as const).map((k) => (
             <SliderRow
               key={k}
@@ -111,8 +104,6 @@ export function ModulationSection({ config, update }: Props) {
               )
             }
           />
-        </div>
-      )}
-    </section>
+    </Section>
   )
 }

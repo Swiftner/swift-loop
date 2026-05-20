@@ -1,5 +1,6 @@
 import { formulaForProperty } from '../../plugin/engine/compile'
 import type { FormulaProperty, LoopConfig } from '../../shared/types'
+import { Section } from '../components/Section'
 import { SliderRow } from '../components/SliderRow'
 
 interface Props {
@@ -17,10 +18,7 @@ const ROWS: { key: FormulaProperty; label: string; min: number; max: number; ste
 
 export function TransformSection({ config, update }: Props) {
   return (
-    <section class="section">
-      <div class="section-head">
-        <h2 class="section-title">Transform</h2>
-      </div>
+    <Section id="transform" title="Transform">
       {ROWS.map((row) => {
         const cur = config[row.key]
         return (
@@ -52,6 +50,6 @@ export function TransformSection({ config, update }: Props) {
           />
         )
       })}
-    </section>
+    </Section>
   )
 }

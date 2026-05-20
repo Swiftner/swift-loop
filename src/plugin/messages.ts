@@ -7,12 +7,16 @@ import { LastRunStore } from './loop/state'
 import { getSelected, isValidSelection } from './selection'
 
 const STORAGE_KEY = 'swift-loop:last-config'
+const SIZE_KEY = 'swift-loop:ui-size'
 const store = new LastRunStore()
 let previousConfig: LoopConfig | null = null
 
 export async function bootstrap(): Promise<void> {
   await ensurePagesLoaded()
-  showUI({ width: 320, height: 640 })
+  const savedSize = (await figma.clientStorage.getAsync(SIZE_KEY)) as
+    | { width: number; height: number }
+    | undefined
+  showUI({ width: savedSize?.width ?? 320, height: savedSize?.height ?? 720 })
 
   const saved = (await figma.clientStorage.getAsync(STORAGE_KEY)) as LoopConfig | undefined
   emit('loop:initial-config', { config: saved ?? null })
@@ -51,5 +55,10 @@ export async function bootstrap(): Promise<void> {
 
   on('loop:close', () => {
     figma.closePlugin()
+  })
+
+  on('loop:resize', async ({ width, height }: { width: number; height: number }) => {
+    figma.ui.resize(width, height)
+    await figma.clientStorage.setAsync(SIZE_KEY, { width, height })
   })
 }
