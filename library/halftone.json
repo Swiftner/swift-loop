@@ -1,0 +1,15 @@
+{
+  "id": "halftone",
+  "name": "Halftone",
+  "description": "Grid where cells shrink and fade with distance from the center.",
+  "tags": ["grid", "scale", "radial"],
+  "author": "@swiftner",
+  "cols": 10, "rows": 10,
+  "formulas": {
+    "x": "x = c * w",
+    "y": "y = r * h",
+    "scaleX": "scaleX = 1 - sqrt((c - cols / 2)^2 + (r - rows / 2)^2) / 8",
+    "scaleY": "scaleY = 1 - sqrt((c - cols / 2)^2 + (r - rows / 2)^2) / 8",
+    "opacity": "opacity = 100 - sqrt((c - cols / 2)^2 + (r - rows / 2)^2) * 12"
+  }
+}

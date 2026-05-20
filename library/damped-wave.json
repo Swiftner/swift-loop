@@ -1,0 +1,12 @@
+{
+  "id": "damped-wave",
+  "name": "Damped Wave",
+  "description": "Sine wave whose amplitude decays exponentially across the row.",
+  "tags": ["wave", "linear"],
+  "author": "@swiftner",
+  "cols": 40, "rows": 1,
+  "formulas": {
+    "x": "x = i * w / 4",
+    "y": "y = sin(i * 0.5) * exp(-i * 0.08) * 80"
+  }
+}

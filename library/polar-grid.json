@@ -1,0 +1,12 @@
+{
+  "id": "polar-grid",
+  "name": "Polar Grid",
+  "description": "Concentric rings with evenly spaced spokes — `cols` spokes × `rows` rings.",
+  "tags": ["polar", "radial", "grid"],
+  "author": "@swiftner",
+  "cols": 12, "rows": 5,
+  "formulas": {
+    "x": "x = cos(c * TAU / cols) * (r + 1) * 20",
+    "y": "y = sin(c * TAU / cols) * (r + 1) * 20"
+  }
+}

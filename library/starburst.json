@@ -1,0 +1,13 @@
+{
+  "id": "starburst",
+  "name": "Starburst",
+  "description": "Radial rays from origin with alternating short and long arms.",
+  "tags": ["radial", "polar"],
+  "author": "@swiftner",
+  "cols": 24, "rows": 1,
+  "formulas": {
+    "x": "x = cos(i * TAU / 24) * (40 + (i mod 2) * 40)",
+    "y": "y = sin(i * TAU / 24) * (40 + (i mod 2) * 40)",
+    "rotation": "rotation = i * 360 / 24"
+  }
+}
