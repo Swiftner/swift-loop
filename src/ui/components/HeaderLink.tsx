@@ -19,7 +19,12 @@ export function HeaderLink() {
             <hr />
             <div>Based on Looper by Kuldar Kalvik</div>
             <div>Looper Legacy fork by Stas Haas (@girafic)</div>
-            <div>Modernized by Swiftner</div>
+            <div>
+              Modernized by{' '}
+              <a href="https://swiftner.com" target="_blank" rel="noreferrer">
+                Swiftner
+              </a>
+            </div>
           </div>
         </div>
       )}

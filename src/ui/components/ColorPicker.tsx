@@ -33,11 +33,15 @@ export function ColorPicker({ label, color, onChange }: Props) {
           if (c) onChange(c)
         }}
       />
-      {color && (
-        <button class="color-picker-clear" type="button" onClick={() => onChange(null)}>
-          ×
-        </button>
-      )}
+      <button
+        class={`color-picker-clear${color ? '' : ' is-hidden'}`}
+        type="button"
+        aria-hidden={color ? undefined : true}
+        tabIndex={color ? undefined : -1}
+        onClick={() => onChange(null)}
+      >
+        ×
+      </button>
     </div>
   )
 }

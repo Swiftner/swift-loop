@@ -310,10 +310,18 @@ body,
   border-radius: 2px;
 }
 .color-picker-clear {
+  width: 16px;
+  flex: 0 0 16px;
   background: none;
   border: 0;
+  padding: 0;
   color: var(--muted);
   cursor: pointer;
+  text-align: center;
+}
+.color-picker-clear.is-hidden {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 /* Presets */

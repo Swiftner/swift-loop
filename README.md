@@ -57,4 +57,4 @@ ISC. See `LICENSE`.
 
 ## Credit
 
-Based on Looper by [Kuldar Kalvik](https://github.com/kuldar). Looper Legacy fork by [Stas Haas (@girafic)](https://github.com/girafic). Modernized by Swiftner.
+Based on Looper by [Kuldar Kalvik](https://github.com/kuldar). Looper Legacy fork by [Stas Haas (@girafic)](https://github.com/girafic). Modernized by [Swiftner](https://swiftner.com).
