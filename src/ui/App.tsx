@@ -1,8 +1,6 @@
 import { emit, on } from '@create-figma-plugin/utilities'
 import { useCallback, useEffect, useState } from 'preact/hooks'
 import type { LoopConfig, Snapshot } from '../shared/types'
-import { HeaderLink } from './components/HeaderLink'
-import { SeedControl } from './components/SeedControl'
 import { useLooperConfig } from './hooks/useLooperConfig'
 import { AppearanceSection } from './sections/AppearanceSection'
 import { IterationsSection } from './sections/IterationsSection'
@@ -29,6 +27,7 @@ export function App() {
   const [snapshots, setSnapshots] = useState<Snapshot[]>([])
   const [selectionValid, setSelectionValid] = useState(true)
   const [libraryOpen, setLibraryOpen] = useState(false)
+  const [appliedName, setAppliedName] = useState<string | null>(null)
 
   useEffect(() => {
     return on('loop:selection-change', (p: { valid: boolean }) => setSelectionValid(p.valid))
@@ -94,32 +93,35 @@ export function App() {
 
   return (
     <div class="app">
-      <header class="app-header">
-        <HeaderLink />
-        <SeedControl value={config.seed} onChange={onSeedChange} onReroll={onReroll} />
-      </header>
-      {snapshots.length > 0 && (
-        <SnapshotsBar
-          snapshots={snapshots}
-          activeSeed={config.seed}
-          onSelect={onSelectSnapshot}
-        />
-      )}
+      <SnapshotsBar
+        snapshots={snapshots}
+        activeSeed={config.seed}
+        seed={config.seed}
+        onSelect={onSelectSnapshot}
+        onSeedChange={onSeedChange}
+        onReroll={onReroll}
+      />
       {!selectionValid && (
         <div class="selection-warning">Select a single Vector, Shape, Text, or Group</div>
       )}
-      <IterationsSection config={config} update={update} />
+      <IterationsSection config={config} update={update} appliedName={appliedName} />
       <TransformSection config={config} update={update} />
       <ModulationSection config={config} update={update} />
       <AppearanceSection config={config} update={update} />
-      <PresetsSection config={config} update={update} onOpenLibrary={() => setLibraryOpen(true)} />
+      <PresetsSection
+        config={config}
+        update={update}
+        onOpenLibrary={() => setLibraryOpen(true)}
+        onApplied={(name) => setAppliedName(name)}
+      />
       <LibraryOverlay
         open={libraryOpen}
         config={config}
         onClose={() => setLibraryOpen(false)}
-        onApply={(next) => {
+        onApply={(next, sourceName) => {
           update(next, true)
           recordSnapshot(next)
+          setAppliedName(sourceName)
         }}
       />
       <footer class="app-footer">

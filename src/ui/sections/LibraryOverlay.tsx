@@ -9,7 +9,7 @@ interface Props {
   open: boolean
   config: LoopConfig
   onClose: () => void
-  onApply: (next: LoopConfig) => void
+  onApply: (next: LoopConfig, sourceName: string) => void
 }
 
 // Library entries only drive the geometric/transform side. Appearance (opacity,
@@ -88,7 +88,7 @@ export function LibraryOverlay({ open, config, onClose, onApply }: Props) {
             class="library-card"
             type="button"
             onClick={() => {
-              onApply(applyEntry(config, entry))
+              onApply(applyEntry(config, entry), entry.name)
               onClose()
             }}
             title={entry.description}

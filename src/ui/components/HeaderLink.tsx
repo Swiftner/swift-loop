@@ -1,13 +1,19 @@
 import { useState } from 'preact/hooks'
 
-const VERSION = '0.1.2'
+const VERSION = '0.1.3'
 
 export function HeaderLink() {
   const [open, setOpen] = useState(false)
   return (
     <div class="header-link-wrap">
-      <button class="header-link-title" type="button" onClick={() => setOpen((o) => !o)}>
-        Swift Loop
+      <button
+        class="header-link-info"
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-label="About Swift Loop"
+        title="About Swift Loop"
+      >
+        i
       </button>
       {open && (
         <div class="header-link-overlay" onClick={() => setOpen(false)}>

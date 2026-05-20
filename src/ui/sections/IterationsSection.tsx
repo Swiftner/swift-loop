@@ -4,9 +4,10 @@ import { SliderRow } from '../components/SliderRow'
 interface Props {
   config: LoopConfig
   update: (next: LoopConfig, commit?: boolean) => void
+  appliedName?: string | null
 }
 
-export function IterationsSection({ config, update }: Props) {
+export function IterationsSection({ config, update, appliedName }: Props) {
   return (
     <section class="section">
       <div class="section-head">
@@ -15,6 +16,12 @@ export function IterationsSection({ config, update }: Props) {
           {config.cols}
           <span class="section-chip-sep">×</span>
           {config.rows}
+          {appliedName && (
+            <>
+              <span class="section-chip-sep">·</span>
+              <span class="section-chip-source">{appliedName}</span>
+            </>
+          )}
         </span>
       </div>
       <SliderRow

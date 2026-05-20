@@ -1,17 +1,29 @@
 import type { Snapshot } from '../../shared/types'
+import { HeaderLink } from '../components/HeaderLink'
+import { SeedControl } from '../components/SeedControl'
 import { SwatchChip } from '../components/SwatchChip'
 
 interface Props {
   snapshots: Snapshot[]
   activeSeed: number
+  seed: number
   onSelect: (s: Snapshot) => void
+  onSeedChange: (v: number, commit: boolean) => void
+  onReroll: () => void
 }
 
-export function SnapshotsBar({ snapshots, activeSeed, onSelect }: Props) {
-  if (snapshots.length === 0) return null
+export function SnapshotsBar({
+  snapshots,
+  activeSeed,
+  seed,
+  onSelect,
+  onSeedChange,
+  onReroll,
+}: Props) {
+  const hasSnapshots = snapshots.length > 0
   return (
     <div class="snapshots-bar">
-      <span class="snapshots-label">recent</span>
+      {hasSnapshots && <span class="snapshots-label">recent</span>}
       <div class="snapshots-swatches">
         {snapshots.map((s, i) => (
           <SwatchChip
@@ -22,6 +34,8 @@ export function SnapshotsBar({ snapshots, activeSeed, onSelect }: Props) {
           />
         ))}
       </div>
+      <SeedControl value={seed} onChange={onSeedChange} onReroll={onReroll} />
+      <HeaderLink />
     </div>
   )
 }

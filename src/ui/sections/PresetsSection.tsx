@@ -6,6 +6,7 @@ interface Props {
   config: LoopConfig
   update: (next: LoopConfig, commit?: boolean) => void
   onOpenLibrary: () => void
+  onApplied?: (sourceName: string) => void
 }
 
 interface Preset {
@@ -14,12 +15,25 @@ interface Preset {
 }
 const data = presetsJson as { presets: Preset[] }
 
-export function PresetsSection({ config, update, onOpenLibrary }: Props) {
+export function PresetsSection({ config, update, onOpenLibrary, onApplied }: Props) {
   const applyPreset = (p: Preset) => {
     update({ ...DEFAULT_CONFIG, ...p.config }, true)
+    onApplied?.(p.name)
   }
   const copyToClipboard = async () => {
     await navigator.clipboard.writeText(JSON.stringify(config, null, 2))
+  }
+  const downloadConfig = () => {
+    const json = JSON.stringify(config, null, 2)
+    const blob = new Blob([json], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `swift-loop-${config.cols}x${config.rows}-seed${config.seed}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
   }
   const pasteFromClipboard = async () => {
     try {
@@ -49,10 +63,13 @@ export function PresetsSection({ config, update, onOpenLibrary }: Props) {
       </div>
       <div class="presets-actions">
         <button type="button" onClick={copyToClipboard}>
-          Copy settings
+          Copy
         </button>
         <button type="button" onClick={pasteFromClipboard}>
-          Paste settings
+          Paste
+        </button>
+        <button type="button" onClick={downloadConfig}>
+          Download
         </button>
       </div>
     </section>
