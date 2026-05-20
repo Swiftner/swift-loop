@@ -1,0 +1,12 @@
+{
+  "id": "grid",
+  "name": "Grid",
+  "description": "Uniform rectangular tiling.",
+  "tags": ["grid", "tiling"],
+  "author": "@swiftner",
+  "cols": 8, "rows": 8,
+  "formulas": {
+    "x": "x = c * w",
+    "y": "y = r * h"
+  }
+}

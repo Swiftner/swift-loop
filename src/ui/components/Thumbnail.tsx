@@ -64,7 +64,7 @@ export function Thumbnail({ entry, size = 80 }: Props) {
     return {
       points: pts,
       viewBox: `${cx - sq / 2} ${cy - sq / 2} ${sq} ${sq}`,
-      radius: sq * 0.04,
+      radius: sq * 0.02,
     }
   }, [entry])
 
