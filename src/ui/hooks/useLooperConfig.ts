@@ -22,12 +22,16 @@ export function useLooperConfig() {
 
   useEffect(() => {
     return on('loop:initial-config', (payload: { config: LoopConfig | null }) => {
+      const initial = payload.config ?? DEFAULT_CONFIG
       if (payload.config) {
         setConfig(payload.config)
         lastCommitted.current = payload.config
         undoStack.current = []
         redoStack.current = []
       }
+      // Emit so figma sandbox / preview host has something to render on load.
+      // Uncommitted so it doesn't enter the undo history.
+      emit('loop:update', { config: initial, commit: false })
     })
   }, [])
 

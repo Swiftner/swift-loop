@@ -2,6 +2,7 @@ import { formulaForProperty } from '../../plugin/engine/compile'
 import type { FormulaProperty, LoopConfig } from '../../shared/types'
 import { Section } from '../components/Section'
 import { SliderRow } from '../components/SliderRow'
+import { rewriteTrailingScale } from '../formula-scale'
 
 interface Props {
   config: LoopConfig
@@ -44,17 +45,23 @@ export function TransformSection({ config, update }: Props) {
                 false,
               )
             }}
-            onChange={(v, commit) =>
+            onChange={(v, commit) => {
+              // If the active formula has a trailing `* <number>`, rewrite that
+              // literal so the slider drives the amplitude while keeping the
+              // formula's shape. Otherwise fall back to sugar so the slider
+              // still has an effect.
+              const rewritten =
+                cur.unlocked && cur.formula ? rewriteTrailingScale(cur.formula, v) : null
               update(
                 {
                   ...config,
-                  // grabbing the slider takes the property back to sugar mode so
-                  // the value the user is dragging is what drives the layout
-                  [row.key]: { ...cur, value: v, unlocked: false, formula: null },
+                  [row.key]: rewritten
+                    ? { ...cur, value: v, formula: rewritten }
+                    : { ...cur, value: v, unlocked: false, formula: null },
                 },
                 commit,
               )
-            }
+            }}
           />
         )
       })}

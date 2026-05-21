@@ -16,11 +16,14 @@ const scalar = (value: number): ScalarProperty => ({
   formula: null,
 })
 
+// Defaults aim for an immediately readable grid: dragging Cols/Rows or any
+// Transform slider should feel like it's already "doing something" instead of
+// stacking every clone on top of the source.
 export const DEFAULT_CONFIG: LoopConfig = {
   cols: 10,
-  rows: 1,
-  x: num(0),
-  y: num(0),
+  rows: 10,
+  x: num(60),
+  y: num(60),
   rotation: num(0),
   scaleX: num(0),
   scaleY: num(0),

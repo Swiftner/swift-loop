@@ -10,6 +10,7 @@ interface Props {
   onSelect: (s: Snapshot) => void
   onSeedChange: (v: number, commit: boolean) => void
   onReroll: () => void
+  onReset: () => void
 }
 
 export function SnapshotsBar({
@@ -19,22 +20,35 @@ export function SnapshotsBar({
   onSelect,
   onSeedChange,
   onReroll,
+  onReset,
 }: Props) {
   const hasSnapshots = snapshots.length > 0
   return (
     <div class="snapshots-bar">
-      {hasSnapshots && <span class="snapshots-label">recent</span>}
-      <div class="snapshots-swatches">
-        {snapshots.map((s, i) => (
-          <SwatchChip
-            key={i}
-            snapshot={s}
-            active={s.config.seed === activeSeed}
-            onSelect={() => onSelect(s)}
-          />
-        ))}
-      </div>
+      <button
+        class="snapshots-reset"
+        type="button"
+        onClick={onReset}
+        title="Reset everything to defaults"
+      >
+        Reset
+      </button>
       <SeedControl value={seed} onChange={onSeedChange} onReroll={onReroll} />
+      {hasSnapshots && (
+        <div class="snapshots-history" title="Recent seeds — click to restore">
+          <span class="snapshots-label">history</span>
+          <div class="snapshots-swatches">
+            {snapshots.map((s, i) => (
+              <SwatchChip
+                key={i}
+                snapshot={s}
+                active={s.config.seed === activeSeed}
+                onSelect={() => onSelect(s)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
       <HeaderLink />
     </div>
   )

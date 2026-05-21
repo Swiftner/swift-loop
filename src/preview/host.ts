@@ -51,6 +51,20 @@ iframe.addEventListener('load', () => {
   }, 80)
 })
 
+// Forward Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z (or Ctrl+Y) from the host page into
+// the iframe so undo works even when the user's focus is on the SVG stage.
+window.addEventListener('keydown', (e) => {
+  if (!(e.ctrlKey || e.metaKey)) return
+  const key = e.key.toLowerCase()
+  if (key === 'z' && !e.shiftKey) {
+    e.preventDefault()
+    sendToUI('host:undo', null)
+  } else if ((key === 'z' && e.shiftKey) || key === 'y') {
+    e.preventDefault()
+    sendToUI('host:redo', null)
+  }
+})
+
 function render(): void {
   while (layer.firstChild) layer.removeChild(layer.firstChild)
 

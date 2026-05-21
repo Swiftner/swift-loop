@@ -2,6 +2,7 @@
 import { useMemo, useState } from 'preact/hooks'
 import type { FormulaProperty, LoopConfig } from '../../shared/types'
 import { Thumbnail } from '../components/Thumbnail'
+import { extractTrailingScale } from '../formula-scale'
 import { library, libraryTags } from '../library/loader'
 import type { LibraryEntry } from '../library/types'
 
@@ -22,12 +23,21 @@ function applyEntry(config: LoopConfig, entry: LibraryEntry): LoopConfig {
   const next: LoopConfig = { ...config, cols: entry.cols, rows: entry.rows, fxMode: true }
   for (const k of APPLIED_PROPS) {
     const src = entry.formulas[k]
-    // when the entry doesn't define a formula for this prop, drop any
-    // previously-unlocked formula so the new pattern starts clean
-    next[k] =
-      src === undefined
-        ? { ...next[k], unlocked: false, formula: null }
-        : { ...next[k], unlocked: true, formula: src }
+    if (src === undefined) {
+      // entry doesn't define this prop — drop any previously-unlocked formula
+      // so the new pattern starts clean
+      next[k] = { ...next[k], unlocked: false, formula: null }
+      continue
+    }
+    // If the formula ends with `* <number>`, surface that as the slider value
+    // so dragging the slider rewrites it (see TransformSection).
+    const scale = extractTrailingScale(src)
+    next[k] = {
+      ...next[k],
+      unlocked: true,
+      formula: src,
+      value: scale ? scale.value : next[k].value,
+    }
   }
   return next
 }

@@ -469,9 +469,26 @@ body,
 .snapshots-bar {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 5px 16px 7px;
+  gap: 12px;
+  padding: 6px 14px 7px;
   border-bottom: 1px solid var(--hairline);
+}
+.snapshots-reset {
+  font-family: inherit;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg);
+  background: transparent;
+  border: 1px solid var(--hairline);
+  border-radius: 4px;
+  padding: 3px 9px;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+.snapshots-reset:hover {
+  background: var(--hairline);
+  border-color: var(--muted);
 }
 .snapshots-label {
   font-family: var(--mono);
@@ -481,10 +498,17 @@ body,
   color: var(--muted);
   flex: 0 0 auto;
 }
+.snapshots-history {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  padding-left: 12px;
+  border-left: 1px solid var(--hairline);
+}
 .snapshots-swatches {
   display: flex;
-  gap: 4px;
-  flex: 1;
+  gap: 5px;
   flex-wrap: wrap;
 }
 .swatch-chip {

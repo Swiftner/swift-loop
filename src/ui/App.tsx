@@ -1,9 +1,9 @@
-import { emit, on } from '@create-figma-plugin/utilities'
+import { on } from '@create-figma-plugin/utilities'
 import { useCallback, useEffect, useState } from 'preact/hooks'
+import { DEFAULT_CONFIG } from '../shared/defaults'
 import type { LoopConfig, Snapshot } from '../shared/types'
 import { ResizeHandle } from './components/ResizeHandle'
 import { useLooperConfig } from './hooks/useLooperConfig'
-import { libraryById } from './library/loader'
 import { AppearanceSection } from './sections/AppearanceSection'
 import { IterationsSection } from './sections/IterationsSection'
 import { LibraryOverlay } from './sections/LibraryOverlay'
@@ -16,12 +16,6 @@ const SNAPSHOTS_KEY = 'swift-loop:snapshots'
 
 function buildLabel(c: LoopConfig): string {
   return `${c.cols}x${c.rows} · seed ${c.seed}`
-}
-
-function generateButtonClass(cells: number): string {
-  if (cells > 2500) return 'generate-btn warn-high'
-  if (cells > 400) return 'generate-btn warn-mid'
-  return 'generate-btn'
 }
 
 export function App() {
@@ -41,9 +35,17 @@ export function App() {
       if (!mod) return
       const key = e.key.toLowerCase()
       const target = e.target as HTMLElement | null
-      // don't hijack undo while the user is editing a text field
+      // only skip undo when the user is actually typing text — range/checkbox
+      // sliders don't have a native undo, so they shouldn't block ours
       const tag = target?.tagName
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || target?.isContentEditable) return
+      const isTextEntry =
+        tag === 'TEXTAREA' ||
+        target?.isContentEditable ||
+        (tag === 'INPUT' &&
+          /^(text|number|search|email|url|tel|password)$/.test(
+            (target as HTMLInputElement).type,
+          ))
+      if (isTextEntry) return
       if (key === 'z' && !e.shiftKey) {
         e.preventDefault()
         undo()
@@ -56,35 +58,20 @@ export function App() {
     return () => window.removeEventListener('keydown', handler)
   }, [undo, redo])
 
-  // First-launch default: apply the Grid library entry when the user hasn't
-  // been welcomed yet. Tracked in localStorage (UI side) so it's independent
-  // of figma.clientStorage's saved config — early test installs may already
-  // have a saved config that pre-dates this default-grid behaviour.
+  // host (dev preview / Figma) can forward undo intent when focus is outside
+  // the plugin UI iframe — this keeps Ctrl/Cmd+Z working from anywhere
   useEffect(() => {
-    return on('loop:initial-config', (payload: { config: LoopConfig | null }) => {
-      const welcomed = window.localStorage.getItem('swift-loop:welcomed') === '1'
-      if (welcomed) return
-      const grid = libraryById('grid')
-      if (!grid) {
-        window.localStorage.setItem('swift-loop:welcomed', '1')
-        return
-      }
-      const base = payload.config ?? config
-      const next: LoopConfig = {
-        ...base,
-        cols: grid.cols,
-        rows: grid.rows,
-        x: { ...base.x, unlocked: true, formula: grid.formulas.x ?? null },
-        y: { ...base.y, unlocked: true, formula: grid.formulas.y ?? null },
-      }
-      update(next, true)
-      setAppliedName(grid.name)
-      window.localStorage.setItem('swift-loop:welcomed', '1')
-    })
-    // intentionally not depending on config/update — subscribes once at mount
-    // and reads the latest config via closure each handler invocation
-    // biome-ignore lint/correctness/useExhaustiveDependencies: see comment
-  }, [])
+    const offUndo = on('host:undo', () => undo())
+    const offRedo = on('host:redo', () => redo())
+    return () => {
+      offUndo()
+      offRedo()
+    }
+  }, [undo, redo])
+
+  // (Previously this hook auto-applied the Grid library on first launch as a
+  // "welcomed" tour. Now that DEFAULT_CONFIG itself produces a readable 10×10
+  // grid, the tour is unnecessary — first load and Reset look identical.)
 
   // load snapshots from clientStorage (UI-side)
   useEffect(() => {
@@ -133,16 +120,10 @@ export function App() {
     if (commit) recordSnapshot(next)
   }
 
-  const onGenerate = () => {
-    update(config, true)
-    recordSnapshot(config)
+  const onReset = () => {
+    update(DEFAULT_CONFIG, true)
+    setAppliedName(null)
   }
-
-  const onRevert = () => {
-    emit('loop:revert')
-  }
-
-  const cellCount = config.cols * config.rows
 
   return (
     <div class="app">
@@ -153,6 +134,7 @@ export function App() {
         onSelect={onSelectSnapshot}
         onSeedChange={onSeedChange}
         onReroll={onReroll}
+        onReset={onReset}
       />
       {!selectionValid && (
         <div class="selection-warning">Select a single Vector, Shape, Text, or Group</div>
@@ -184,17 +166,6 @@ export function App() {
           setAppliedName(sourceName)
         }}
       />
-      <footer class="app-footer">
-        <button type="button" onClick={onRevert}>
-          Revert
-        </button>
-        <button class={generateButtonClass(cellCount)} type="button" onClick={onGenerate}>
-          Generate
-          {cellCount > 2500 && (
-            <span class="cell-badge">~{(Math.round(cellCount / 100) * 100) / 1000}k</span>
-          )}
-        </button>
-      </footer>
       <ResizeHandle />
     </div>
   )

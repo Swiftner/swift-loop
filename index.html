@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <title>Swift Loop — live preview</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <style>
       html, body { margin: 0; height: 100%; background: #f0f1f3; font: 12px system-ui, sans-serif; color: #222; }
       .layout {
@@ -92,7 +93,10 @@
             title="Download the most recent plugin build"
           >Download ↓</a>
         </div>
-        <iframe id="plugin-ui" src="./preview-ui.html" sandbox="allow-scripts allow-same-origin"></iframe>
+        <!-- No sandbox: allow-scripts + allow-same-origin together effectively
+             removes the sandbox anyway, and we need both for postMessage and
+             localStorage to work. -->
+        <iframe id="plugin-ui" src="./preview-ui.html"></iframe>
       </div>
       <div class="panel">
         <div class="panel-title">Preview <small id="preview-status">—</small></div>
