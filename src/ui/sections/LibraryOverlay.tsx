@@ -12,17 +12,22 @@ interface Props {
   onApply: (next: LoopConfig, sourceName: string) => void
 }
 
-// Library entries only drive the geometric/transform side. Appearance (opacity,
-// fill, stroke, stroke width, easing) is preserved across library picks so the
-// user's color/material choices survive switching patterns.
-const TRANSFORM_PROPS: FormulaProperty[] = ['x', 'y', 'rotation', 'scaleX', 'scaleY']
+// Library entries drive transforms AND opacity (when provided) — patterns like
+// Checker / Halftone rely on opacity formulas to express themselves. Colors,
+// strokes, and easing are still preserved across library picks so the user's
+// material choices survive switching patterns.
+const APPLIED_PROPS: FormulaProperty[] = ['x', 'y', 'rotation', 'scaleX', 'scaleY', 'opacity']
 
 function applyEntry(config: LoopConfig, entry: LibraryEntry): LoopConfig {
   const next: LoopConfig = { ...config, cols: entry.cols, rows: entry.rows, fxMode: true }
-  for (const k of TRANSFORM_PROPS) {
+  for (const k of APPLIED_PROPS) {
     const src = entry.formulas[k]
-    if (src === undefined) continue
-    next[k] = { ...next[k], unlocked: true, formula: src }
+    // when the entry doesn't define a formula for this prop, drop any
+    // previously-unlocked formula so the new pattern starts clean
+    next[k] =
+      src === undefined
+        ? { ...next[k], unlocked: false, formula: null }
+        : { ...next[k], unlocked: true, formula: src }
   }
   return next
 }

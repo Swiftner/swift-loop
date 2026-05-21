@@ -1,0 +1,98 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Swift Loop — live preview</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #f0f1f3; font: 12px system-ui, sans-serif; color: #222; }
+      .layout {
+        display: grid;
+        grid-template-columns: 340px 1fr;
+        gap: 16px;
+        padding: 16px;
+        height: 100vh;
+        box-sizing: border-box;
+      }
+      .panel {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,.06);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      .panel-title {
+        padding: 8px 12px;
+        border-bottom: 1px solid #eee;
+        font-weight: 600;
+        color: #555;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .panel-title small { font-weight: 400; color: #888; font-feature-settings: "tnum"; }
+      iframe#plugin-ui {
+        flex: 1 1 auto;
+        width: 100%;
+        border: 0;
+        background: #fff;
+      }
+      .preview-stage {
+        flex: 1 1 auto;
+        position: relative;
+        background:
+          linear-gradient(45deg, #f6f7f9 25%, transparent 25%) 0 0 / 16px 16px,
+          linear-gradient(-45deg, #f6f7f9 25%, transparent 25%) 0 8px / 16px 16px,
+          linear-gradient(45deg, transparent 75%, #f6f7f9 75%) 8px -8px / 16px 16px,
+          linear-gradient(-45deg, transparent 75%, #f6f7f9 75%) 8px 0 / 16px 16px,
+          #fff;
+        overflow: auto;
+      }
+      svg#preview {
+        display: block;
+        margin: 0 auto;
+      }
+      .controls {
+        padding: 8px 12px;
+        border-top: 1px solid #eee;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        color: #666;
+      }
+      .controls button {
+        padding: 4px 10px;
+        background: #f3f4f6;
+        border: 1px solid #d8dade;
+        border-radius: 4px;
+        cursor: pointer;
+        font: inherit;
+      }
+      .controls button:hover { background: #e9eaee; }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <div class="panel">
+        <div class="panel-title">Plugin UI <small>iframe</small></div>
+        <iframe id="plugin-ui" src="./preview-ui.html" sandbox="allow-scripts allow-same-origin"></iframe>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Preview <small id="preview-status">—</small></div>
+        <div class="preview-stage">
+          <svg id="preview" width="640" height="520" viewBox="0 0 640 520" xmlns="http://www.w3.org/2000/svg">
+            <g id="preview-layer"></g>
+          </svg>
+        </div>
+        <div class="controls">
+          <button id="reset-btn" type="button">Reset source</button>
+          <span>Dashed circle = source; filled = clones. Drag any control in the iframe to see it react.</span>
+        </div>
+      </div>
+    </div>
+    <script src="./build/preview.js"></script>
+    <script>
+      document.getElementById('reset-btn').addEventListener('click', () => location.reload());
+    </script>
+  </body>
+</html>

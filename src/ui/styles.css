@@ -211,12 +211,18 @@ body,
   font-family: "Söhne Mono", ui-monospace, monospace;
   background: none;
   border: 0;
-  cursor: text;
+  cursor: ew-resize;
   padding: 2px 4px;
   border-radius: 2px;
+  touch-action: none;
+  user-select: none;
 }
 .slider-row-value:hover {
   background: var(--hairline);
+}
+.slider-row-value.is-scrubbing {
+  background: var(--hairline);
+  cursor: ew-resize;
 }
 .slider-row-value-input {
   width: 64px;
@@ -416,11 +422,16 @@ body,
   border-radius: 3px;
   padding: 1px 5px;
   color: var(--fg);
-  cursor: text;
+  cursor: ew-resize;
   min-width: 32px;
   text-align: center;
+  touch-action: none;
+  user-select: none;
 }
 .seed-control-value:hover {
+  background: var(--hairline);
+}
+.seed-control-value.is-scrubbing {
   background: var(--hairline);
 }
 .seed-control-input {

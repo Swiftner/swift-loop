@@ -45,7 +45,15 @@ export function TransformSection({ config, update }: Props) {
               )
             }}
             onChange={(v, commit) =>
-              update({ ...config, [row.key]: { ...cur, value: v } }, commit)
+              update(
+                {
+                  ...config,
+                  // grabbing the slider takes the property back to sugar mode so
+                  // the value the user is dragging is what drives the layout
+                  [row.key]: { ...cur, value: v, unlocked: false, formula: null },
+                },
+                commit,
+              )
             }
           />
         )

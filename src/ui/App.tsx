@@ -25,7 +25,7 @@ function generateButtonClass(cells: number): string {
 }
 
 export function App() {
-  const { config, update } = useLooperConfig()
+  const { config, update, undo, redo } = useLooperConfig()
   const [snapshots, setSnapshots] = useState<Snapshot[]>([])
   const [selectionValid, setSelectionValid] = useState(true)
   const [libraryOpen, setLibraryOpen] = useState(false)
@@ -34,6 +34,27 @@ export function App() {
   useEffect(() => {
     return on('loop:selection-change', (p: { valid: boolean }) => setSelectionValid(p.valid))
   }, [])
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const mod = e.metaKey || e.ctrlKey
+      if (!mod) return
+      const key = e.key.toLowerCase()
+      const target = e.target as HTMLElement | null
+      // don't hijack undo while the user is editing a text field
+      const tag = target?.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || target?.isContentEditable) return
+      if (key === 'z' && !e.shiftKey) {
+        e.preventDefault()
+        undo()
+      } else if ((key === 'z' && e.shiftKey) || key === 'y') {
+        e.preventDefault()
+        redo()
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [undo, redo])
 
   // First-launch default: apply the Grid library entry when the user hasn't
   // been welcomed yet. Tracked in localStorage (UI side) so it's independent

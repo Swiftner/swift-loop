@@ -30,6 +30,7 @@ export function SliderRow({
   const [draft, setDraft] = useState(value.toString())
   const [expanded, setExpanded] = useState(false)
   const dragging = useRef(false)
+  const scrubState = useRef<{ startX: number; startV: number; scrubbed: boolean } | null>(null)
 
   const handleInput = useCallback(
     (e: Event) => {
@@ -56,6 +57,45 @@ export function SliderRow({
     const v = Number.parseFloat(draft)
     if (!Number.isNaN(v)) onChange(v, true)
     setEditing(false)
+  }
+
+  const onValuePointerDown = (e: PointerEvent) => {
+    e.preventDefault()
+    const target = e.currentTarget as HTMLElement
+    target.setPointerCapture(e.pointerId)
+    scrubState.current = { startX: e.clientX, startV: value, scrubbed: false }
+  }
+
+  const onValuePointerMove = (e: PointerEvent) => {
+    const s = scrubState.current
+    if (!s) return
+    const dx = e.clientX - s.startX
+    if (!s.scrubbed && Math.abs(dx) > 2) {
+      s.scrubbed = true
+      ;(e.currentTarget as HTMLElement).classList.add('is-scrubbing')
+    }
+    if (!s.scrubbed) return
+    let sensitivity = step / 2
+    if (e.shiftKey) sensitivity *= 0.1
+    if (e.altKey || e.metaKey) sensitivity *= 10
+    const raw = s.startV + dx * sensitivity
+    const snapped = Math.round(raw / step) * step
+    const clamped = Math.min(max, Math.max(min, snapped))
+    onChange(clamped, false)
+  }
+
+  const onValuePointerUp = (e: PointerEvent) => {
+    const s = scrubState.current
+    const target = e.currentTarget as HTMLElement
+    target.releasePointerCapture(e.pointerId)
+    target.classList.remove('is-scrubbing')
+    if (s && !s.scrubbed) {
+      setDraft(value.toString())
+      setEditing(true)
+    } else if (s) {
+      onChange(value, true)
+    }
+    scrubState.current = null
   }
 
   const hasFormula = formula !== undefined && onFormulaChange !== undefined
@@ -94,11 +134,12 @@ export function SliderRow({
         ) : (
           <button
             class="slider-row-value"
-            onClick={() => {
-              setDraft(value.toString())
-              setEditing(true)
-            }}
+            onPointerDown={onValuePointerDown}
+            onPointerMove={onValuePointerMove}
+            onPointerUp={onValuePointerUp}
+            onPointerCancel={onValuePointerUp}
             type="button"
+            title="Drag to scrub, click to type. Shift = fine, Alt = coarse."
           >
             {value.toFixed(step < 1 ? 1 : 0)}
             {unit ?? ''}

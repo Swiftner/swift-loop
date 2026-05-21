@@ -58,12 +58,21 @@ async function fullRegen(
   config: LoopConfig,
   store: LastRunStore,
 ): Promise<void> {
-  // remove previous clones
+  // remove previous clones and unwrap the previous SwiftLoopGroup so we don't
+  // nest a new group inside it on every regen.
   const prev = store.get()
   if (prev) {
     for (const id of prev.cloneIds) {
       const n = await figma.getNodeByIdAsync(id)
       if (n && !n.removed) n.remove()
+    }
+    const oldGroup = await figma.getNodeByIdAsync(prev.groupId)
+    if (oldGroup && !oldGroup.removed) {
+      const originalParent = await figma.getNodeByIdAsync(prev.parentId)
+      if (originalParent && !originalParent.removed && 'appendChild' in originalParent) {
+        ;(originalParent as ChildrenMixin).appendChild(source)
+      }
+      if (!oldGroup.removed) oldGroup.remove()
     }
   }
 
@@ -226,6 +235,22 @@ export async function revert(_source: SceneNode, store: LastRunStore): Promise<v
   for (const id of prev.cloneIds) {
     const n = await figma.getNodeByIdAsync(id)
     if (n && !n.removed) n.remove()
+  }
+  // unwrap the original source out of the SwiftLoopGroup before discarding it
+  const oldGroup = await figma.getNodeByIdAsync(prev.groupId)
+  if (oldGroup && !oldGroup.removed) {
+    const source = await figma.getNodeByIdAsync(prev.originalId)
+    const originalParent = await figma.getNodeByIdAsync(prev.parentId)
+    if (
+      source &&
+      !source.removed &&
+      originalParent &&
+      !originalParent.removed &&
+      'appendChild' in originalParent
+    ) {
+      ;(originalParent as ChildrenMixin).appendChild(source as SceneNode)
+    }
+    if (!oldGroup.removed) oldGroup.remove()
   }
   store.clear()
 }
