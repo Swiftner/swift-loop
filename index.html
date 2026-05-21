@@ -6,13 +6,39 @@
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <style>
       html, body { margin: 0; height: 100%; background: #f0f1f3; font: 12px system-ui, sans-serif; color: #222; }
+      body { display: flex; flex-direction: column; min-height: 100vh; }
       .layout {
         display: grid;
         grid-template-columns: 340px 1fr;
         gap: 16px;
         padding: 16px;
-        height: 100vh;
+        flex: 1 1 auto;
+        min-height: 0;
         box-sizing: border-box;
+      }
+      .attribution {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 14px 16px 18px;
+        color: #6a6a72;
+        font-size: 11px;
+        letter-spacing: 0.02em;
+      }
+      .attribution a {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: inherit;
+        text-decoration: none;
+        transition: opacity 150ms ease;
+      }
+      .attribution a:hover { opacity: 0.7; }
+      .attribution img {
+        height: 16px;
+        width: auto;
+        display: block;
       }
       .panel {
         background: #fff;
@@ -86,7 +112,7 @@
     <div class="layout">
       <div class="panel">
         <div class="panel-title">
-          Plugin UI <small>iframe</small>
+          Plugin UI
           <a
             class="download"
             href="https://github.com/Swiftner/swift-loop/releases/latest/download/swift-loop-latest.zip"
@@ -107,10 +133,16 @@
         </div>
         <div class="controls">
           <button id="reset-btn" type="button">Reset source</button>
-          <span>Dashed circle = source; filled = clones. Drag any control in the iframe to see it react.</span>
+          <span>Dashed circle = source; filled = clones. Drag any control to see it react.</span>
         </div>
       </div>
     </div>
+    <footer class="attribution">
+      <span>made by</span>
+      <a href="https://swiftner.com" target="_blank" rel="noreferrer">
+        <img src="./swiftner-logo.png" alt="Swiftner" />
+      </a>
+    </footer>
     <script src="./build/preview.js"></script>
     <script>
       document.getElementById('reset-btn').addEventListener('click', () => location.reload());

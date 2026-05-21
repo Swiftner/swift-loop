@@ -26,7 +26,7 @@ jobs:
       - name: Stage site
         run: |
           mkdir -p _site/build
-          cp index.html preview-ui.html favicon.svg _site/
+          cp index.html preview-ui.html favicon.svg swiftner-logo.png _site/
           cp build/ui.js build/preview.js _site/build/
           # disable Jekyll so the bundled build/ directory ships as-is
           touch _site/.nojekyll
