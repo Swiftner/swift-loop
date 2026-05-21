@@ -31,6 +31,16 @@
         align-items: center;
       }
       .panel-title small { font-weight: 400; color: #888; font-feature-settings: "tnum"; }
+      .panel-title a.download {
+        font-weight: 500;
+        color: #18a0fb;
+        text-decoration: none;
+        border: 1px solid #cfe9ff;
+        background: #f1f8ff;
+        padding: 2px 8px;
+        border-radius: 4px;
+      }
+      .panel-title a.download:hover { background: #e5f3ff; }
       iframe#plugin-ui {
         flex: 1 1 auto;
         width: 100%;
@@ -74,7 +84,14 @@
   <body>
     <div class="layout">
       <div class="panel">
-        <div class="panel-title">Plugin UI <small>iframe</small></div>
+        <div class="panel-title">
+          Plugin UI <small>iframe</small>
+          <a
+            class="download"
+            href="https://github.com/Swiftner/swift-loop/releases/latest/download/swift-loop-latest.zip"
+            title="Download the most recent plugin build"
+          >Download ↓</a>
+        </div>
         <iframe id="plugin-ui" src="./preview-ui.html" sandbox="allow-scripts allow-same-origin"></iframe>
       </div>
       <div class="panel">

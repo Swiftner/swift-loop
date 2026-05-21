@@ -20,6 +20,7 @@ jobs:
         run: |
           mkdir -p dist
           zip -r "dist/swift-loop-${GITHUB_REF_NAME}.zip" manifest.json build README.md LICENSE
+          cp "dist/swift-loop-${GITHUB_REF_NAME}.zip" dist/swift-loop-latest.zip
       - uses: softprops/action-gh-release@v2
         with:
           files: dist/swift-loop-*.zip
