@@ -1,6 +1,6 @@
 {
   "name": "swift-loop",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "A modernized Figma plugin for creating iterated and grid-arrayed graphics. A fork of Looper.",
   "license": "ISC",
   "type": "module",
