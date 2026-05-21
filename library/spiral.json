@@ -6,8 +6,8 @@
   "author": "@swiftner",
   "cols": 60, "rows": 1,
   "formulas": {
-    "x": "x = cos(t * TAU * 4) * (t * 200)",
-    "y": "y = sin(t * TAU * 4) * (t * 200)",
+    "x": "x = cos(t * TAU * 4) * (t * {x:200})",
+    "y": "y = sin(t * TAU * 4) * (t * {y:200})",
     "rotation": "rotation = t * 720"
   }
 }

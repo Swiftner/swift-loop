@@ -19,8 +19,24 @@ interface Props {
 // material choices survive switching patterns.
 const APPLIED_PROPS: FormulaProperty[] = ['x', 'y', 'rotation', 'scaleX', 'scaleY', 'opacity']
 
+// Finds `{<property>:<default>}` for the matching property and returns the
+// default. `{x}` (no default) is allowed too — returns null so the slider
+// inherits whatever value the property already had.
+function extractPlaceholderDefault(formula: string, property: FormulaProperty): number | null {
+  const re = new RegExp(`\\{${property}(?::(-?\\d+(?:\\.\\d+)?))?\\}`)
+  const m = re.exec(formula)
+  if (!m) return null
+  return m[1] !== undefined ? Number.parseFloat(m[1]) : null
+}
+
 function applyEntry(config: LoopConfig, entry: LibraryEntry): LoopConfig {
-  const next: LoopConfig = { ...config, cols: entry.cols, rows: entry.rows, fxMode: true }
+  const next: LoopConfig = {
+    ...config,
+    cols: entry.cols,
+    rows: entry.rows,
+    fxMode: true,
+    showFirst: entry.showFirst ?? true,
+  }
   for (const k of APPLIED_PROPS) {
     const src = entry.formulas[k]
     if (src === undefined) {
@@ -29,15 +45,17 @@ function applyEntry(config: LoopConfig, entry: LibraryEntry): LoopConfig {
       next[k] = { ...next[k], unlocked: false, formula: null }
       continue
     }
-    // If the formula ends with `* <number>`, surface that as the slider value
-    // so dragging the slider rewrites it (see TransformSection).
-    const scale = extractTrailingScale(src)
-    next[k] = {
-      ...next[k],
-      unlocked: true,
-      formula: src,
-      value: scale ? scale.value : next[k].value,
+    // Seed the slider value: prefer a `{x:200}` placeholder default, fall
+    // back to a trailing `* <number>` literal, else keep the existing value.
+    let value = next[k].value
+    const placeholderDefault = extractPlaceholderDefault(src, k)
+    if (placeholderDefault != null) {
+      value = placeholderDefault
+    } else {
+      const scale = extractTrailingScale(src)
+      if (scale) value = scale.value
     }
+    next[k] = { ...next[k], unlocked: true, formula: src, value }
   }
   return next
 }

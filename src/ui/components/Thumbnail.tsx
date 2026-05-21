@@ -1,5 +1,6 @@
 // src/ui/components/Thumbnail.tsx
 import { useMemo } from 'preact/hooks'
+import { expandPlaceholders } from '../../plugin/engine/compile'
 import { compileFormula } from '../../plugin/engine/evaluate'
 import { buildScope } from '../../plugin/engine/scope'
 import type { FormulaProperty } from '../../shared/types'
@@ -23,7 +24,9 @@ function evaluateEntry(entry: LibraryEntry): CellPoint[] {
   const compiled = {} as Record<FormulaProperty, ReturnType<typeof compileFormula> | null>
   for (const k of FORMULA_PROPS) {
     const src = entry.formulas[k]
-    compiled[k] = src ? compileFormula(src, k) : null
+    // Library JSON may use `{x:200}` placeholders — expand with the embedded
+    // default so the thumbnail renders without a live slider value.
+    compiled[k] = src ? compileFormula(expandPlaceholders(src, k, null), k) : null
   }
   const points: CellPoint[] = []
   for (let r = 0; r < entry.rows; r++) {

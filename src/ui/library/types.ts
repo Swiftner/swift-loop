@@ -9,5 +9,6 @@ export interface LibraryEntry {
   author?: string
   cols: number
   rows: number
+  showFirst?: boolean
   formulas: Partial<Record<FormulaProperty, string>>
 }

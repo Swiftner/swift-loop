@@ -61,6 +61,7 @@ export interface LoopConfig {
   // Modes
   fxMode: boolean // global formula UI mode
   seed: number // PRNG seed
+  showFirst?: boolean // preview-only: render a clone at i=0 (grid-like) or hide it (radial). Undefined = show.
 }
 
 export type FormulaProperty = 'x' | 'y' | 'rotation' | 'scaleX' | 'scaleY' | 'opacity'

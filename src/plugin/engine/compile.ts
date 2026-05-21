@@ -58,10 +58,30 @@ function randomLayerFor(property: FormulaProperty, config: LoopConfig): string |
   return `(rand() - 0.5) * 2 * ${p.random}`
 }
 
+// `{x}` / `{x:200}` placeholders in a formula are replaced with the property's
+// own slider value at compile time. This lets library patterns expose a
+// non-trailing scalar (e.g. spiral's `cos(t * TAU * 4) * (t * {x:200})`) to
+// the slider without baking a literal value into the formula text.
+const PLACEHOLDER_RE = /\{([a-zA-Z]+)(?::(-?\d+(?:\.\d+)?))?\}/g
+
+// Substitutes `{<property>}` and `{<property>:<default>}` with `value`. If
+// `value` is null, falls back to the embedded default (or 0 if none).
+export function expandPlaceholders(
+  formula: string,
+  property: FormulaProperty,
+  value: number | null,
+): string {
+  return formula.replace(PLACEHOLDER_RE, (match, name: string, defaultRaw?: string) => {
+    if (name !== property) return match
+    if (value != null) return String(value)
+    return defaultRaw !== undefined ? defaultRaw : '0'
+  })
+}
+
 export function formulaForProperty(config: LoopConfig, property: FormulaProperty): string {
   const p = config[property] as NumericProperty
   if (p.unlocked && p.formula !== null) {
-    return p.formula
+    return expandPlaceholders(p.formula, property, p.value)
   }
   const parts: string[] = [baseSugarFor(property, config)]
   const sin = sinusoidalLayerFor(property, config)

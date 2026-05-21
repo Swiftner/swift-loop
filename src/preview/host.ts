@@ -20,13 +20,18 @@ const statusEl = document.getElementById('preview-status') as HTMLElement
 const uploadInput = document.getElementById('shape-upload') as HTMLInputElement | null
 const shapeLabel = document.getElementById('shape-label') as HTMLElement | null
 const shapeClearBtn = document.getElementById('shape-clear') as HTMLButtonElement | null
+const keepColorsInput = document.getElementById('keep-colors') as HTMLInputElement | null
+const keepColorsWrap = document.getElementById('keep-colors-wrap') as HTMLElement | null
 
 let currentConfig: LoopConfig = DEFAULT_CONFIG
 let reverted = false
 
 interface UploadedShape {
   kind: 'svg' | 'image'
-  inner: string // SVG inner markup or data: URL for raster
+  inner: string // SVG inner markup with paint rewritten to CSS vars, or data: URL for raster
+  innerOriginal?: string // original SVG inner markup, used when keeping uploaded colors
+  rootFill?: string | null // value of the root <svg fill="…"> attribute, or null if absent
+  rootStroke?: string | null // value of the root <svg stroke="…"> attribute, or null if absent
   w: number
   h: number
   name: string
@@ -88,7 +93,9 @@ function render(): void {
   while (layer.firstChild) layer.removeChild(layer.firstChild)
 
   const sz = sourceSize()
-  // always draw the source outline so you can see the origin
+
+  // Dashed source marker — useful for patterns where no clone lands at the
+  // origin (e.g. radial). For grid patterns the i=0 clone covers it.
   layer.appendChild(makeSource(SOURCE.x, SOURCE.y, sz.w, sz.h))
 
   if (reverted) {
@@ -101,7 +108,11 @@ function render(): void {
   const factors = compileFactors(cfg)
   const n = Math.max(1, cfg.cols * cfg.rows)
 
-  for (let i = 1; i < n; i++) {
+  // Grid-like patterns evaluate to (0,0) at i=0, so rendering i=0 fills the
+  // top-left cell. Radial patterns place i=0 off-origin and look better with
+  // the center left to the dashed source marker — hence the per-pattern flag.
+  const start = cfg.showFirst === false ? 1 : 0
+  for (let i = start; i < n; i++) {
     const c = i % cfg.cols
     const r = Math.floor(i / cfg.cols)
     const scope = buildScope(
@@ -137,7 +148,10 @@ function render(): void {
       ? factors.strokeWeight.evaluate(scope, 'strokeWeightFactor')
       : baseEased
 
-    const fill = colorAt(cfg.fill, fillFactor) ?? '#7280ff'
+    // `fill` is null when the user hasn't set a fill in the UI; uploaded SVGs
+    // use that to fall back to their own colors. The ellipse fallback still
+    // gets a default so the preview isn't invisible.
+    const fill = colorAt(cfg.fill, fillFactor)
     const stroke = colorAt(cfg.stroke, strokeFactor)
     const sw =
       cfg.stroke.color != null
@@ -206,7 +220,7 @@ function makeClone(
   h: number,
   rot: number,
   opacity: number,
-  fill: string,
+  fill: string | null,
   stroke: string | null,
   strokeWeight: number,
 ): SVGElement {
@@ -223,7 +237,30 @@ function makeClone(
     g.setAttribute('transform', t.join(' '))
     g.setAttribute('opacity', String(opacity))
     if (shape.kind === 'svg') {
-      g.innerHTML = shape.inner
+      const keep = keepColorsInput?.checked && shape.innerOriginal != null
+      g.innerHTML = keep ? (shape.innerOriginal as string) : shape.inner
+
+      // Wrapper paint for children that don't carry their own fill/stroke.
+      // Priority: loop colors > root SVG's own colors (e.g. `fill="none"`).
+      // Without this the host SVG's default black fill leaks in.
+      const effectiveFill = !keep && fill ? fill : shape.rootFill
+      const effectiveStroke = !keep && stroke ? stroke : shape.rootStroke
+      if (effectiveFill != null) g.setAttribute('fill', effectiveFill)
+      if (effectiveStroke != null) g.setAttribute('stroke', effectiveStroke)
+
+      if (!keep) {
+        // Override rewritten child paint via CSS vars so children that kept
+        // their own fill/stroke (rewritten to `var(--swl-f, <original>)`)
+        // also pick up the loop's colors.
+        if (fill) g.style.setProperty('--swl-f', fill)
+        if (stroke) {
+          g.style.setProperty('--swl-s', stroke)
+          // compensate for scale() so the slider's stroke-width is in source
+          // units, not output pixels
+          const s = Math.max(w / shape.w, h / shape.h) || 1
+          g.style.setProperty('--swl-sw', String(strokeWeight / s))
+        }
+      }
     } else {
       const img = document.createElementNS(SVG_NS, 'image')
       img.setAttribute('href', shape.inner)
@@ -240,7 +277,7 @@ function makeClone(
   el.setAttribute('cy', String(cy))
   el.setAttribute('rx', String(w / 2))
   el.setAttribute('ry', String(h / 2))
-  el.setAttribute('fill', fill)
+  el.setAttribute('fill', fill ?? '#7280ff')
   el.setAttribute('opacity', String(opacity))
   if (stroke) {
     el.setAttribute('stroke', stroke)
@@ -253,9 +290,60 @@ function makeClone(
 // ---- Upload / download wiring ---------------------------------------------
 
 function updateShapeLabel(): void {
-  if (!shapeLabel) return
-  shapeLabel.textContent = shape ? shape.name : 'circle (default)'
+  if (shapeLabel) shapeLabel.textContent = shape ? shape.name : 'circle (default)'
   if (shapeClearBtn) shapeClearBtn.hidden = !shape
+  // Only show the toggle for SVGs — raster uploads can't be recolored anyway.
+  if (keepColorsWrap) keepColorsWrap.hidden = !shape || shape.kind !== 'svg'
+}
+
+const PAINT_NONE = /^(none|transparent)$/i
+
+function hasPaint(value: string | null): value is string {
+  return value != null && !PAINT_NONE.test(value.trim())
+}
+
+// Rewrite existing fill/stroke/stroke-width to CSS variables with the original
+// value as fallback: `fill="var(--swl-f, #blue)"`. The loop's color controls
+// set the variables on the wrapper; when unset, the original paint shows
+// through. We only rewrite where the SVG already had paint — elements that
+// were never painted stay invisible, and `fill="none"` is preserved verbatim.
+function rewritePaint(el: Element): void {
+  const fill = el.getAttribute('fill')
+  if (hasPaint(fill)) el.setAttribute('fill', `var(--swl-f, ${fill})`)
+
+  const stroke = el.getAttribute('stroke')
+  if (hasPaint(stroke)) {
+    el.setAttribute('stroke', `var(--swl-s, ${stroke})`)
+    const strokeWidth = el.getAttribute('stroke-width')
+    if (strokeWidth != null) {
+      el.setAttribute('stroke-width', `var(--swl-sw, ${strokeWidth})`)
+    }
+  }
+
+  const style = el.getAttribute('style')
+  if (style) {
+    const out = style
+      .split(';')
+      .map((part) => rewriteStyleDecl(part.trim()))
+      .filter(Boolean)
+      .join('; ')
+    if (out) el.setAttribute('style', out)
+    else el.removeAttribute('style')
+  }
+
+  for (const child of Array.from(el.children)) rewritePaint(child)
+}
+
+function rewriteStyleDecl(decl: string): string {
+  if (!decl) return ''
+  const m = /^(fill|stroke|stroke-width)\s*:\s*(.+)$/i.exec(decl)
+  if (!m) return decl
+  const prop = m[1].toLowerCase()
+  const val = m[2].trim()
+  if (prop === 'stroke-width') return `stroke-width: var(--swl-sw, ${val})`
+  if (prop === 'fill' && !PAINT_NONE.test(val)) return `fill: var(--swl-f, ${val})`
+  if (prop === 'stroke' && !PAINT_NONE.test(val)) return `stroke: var(--swl-s, ${val})`
+  return decl
 }
 
 async function loadShape(file: File): Promise<void> {
@@ -282,7 +370,23 @@ async function loadShape(file: File): Promise<void> {
       if (Number.isFinite(wAttr) && wAttr > 0) w = wAttr
       if (Number.isFinite(hAttr) && hAttr > 0) h = hAttr
     }
-    shape = { kind: 'svg', inner: root.innerHTML, w, h, name: file.name }
+    const innerOriginal = root.innerHTML
+    // Preserve the root <svg>'s own fill/stroke (e.g. `fill="none"` on
+    // stroke-only icons) so the wrapping <g> can re-establish them — without
+    // this, paths with no explicit fill inherit black from the host SVG.
+    const rootFill = root.getAttribute('fill')
+    const rootStroke = root.getAttribute('stroke')
+    rewritePaint(root)
+    shape = {
+      kind: 'svg',
+      inner: root.innerHTML,
+      innerOriginal,
+      rootFill,
+      rootStroke,
+      w,
+      h,
+      name: file.name,
+    }
   } else if (file.type.startsWith('image/')) {
     const dataUrl = await new Promise<string>((resolve, reject) => {
       const reader = new FileReader()
@@ -319,9 +423,12 @@ uploadInput?.addEventListener('change', (e) => {
 shapeClearBtn?.addEventListener('click', () => {
   shape = null
   if (uploadInput) uploadInput.value = ''
+  if (keepColorsInput) keepColorsInput.checked = false
   updateShapeLabel()
   render()
 })
+
+keepColorsInput?.addEventListener('change', render)
 
 // drag a file onto the SVG stage to load it
 const stage = document.querySelector('.preview-stage') as HTMLElement | null

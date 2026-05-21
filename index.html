@@ -272,6 +272,20 @@
         color: #d63a1a;
         background: #fef2ef;
       }
+      .keep-colors {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-family: var(--mono);
+        font-size: 10.5px;
+        color: var(--muted);
+        cursor: pointer;
+        user-select: none;
+      }
+      .keep-colors input {
+        margin: 0;
+        accent-color: #6e5bff;
+      }
 
       /* ---------- Attribution ---------- */
       .attribution {
@@ -361,6 +375,10 @@
               <span class="val"><span id="shape-label">circle (default)</span></span>
               <button id="shape-clear" class="shape-clear" type="button" title="Reset to circle" hidden aria-label="Reset to circle">×</button>
             </span>
+            <label id="keep-colors-wrap" class="keep-colors" hidden title="Use the uploaded SVG's own fill and stroke instead of the loop's color controls">
+              <input id="keep-colors" type="checkbox" />
+              <span>Keep original colors</span>
+            </label>
           </div>
           <div class="ctrl-divider" aria-hidden="true"></div>
           <div class="ctrl-group">

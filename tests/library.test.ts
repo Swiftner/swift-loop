@@ -2,6 +2,7 @@ import { readFileSync, readdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
+import { expandPlaceholders } from '../src/plugin/engine/compile'
 import { compileFormula } from '../src/plugin/engine/evaluate'
 import { buildScope } from '../src/plugin/engine/scope'
 import type { FormulaProperty } from '../src/shared/types'
@@ -39,7 +40,7 @@ describe('library entries', () => {
         for (const k of FORMULA_PROPS) {
           const src = entry.formulas[k]
           if (!src) continue
-          expect(() => compileFormula(src, k)).not.toThrow()
+          expect(() => compileFormula(expandPlaceholders(src, k, null), k)).not.toThrow()
         }
       })
 
@@ -49,7 +50,7 @@ describe('library entries', () => {
         for (const k of FORMULA_PROPS) {
           const src = entry.formulas[k]
           if (!src) continue
-          const compiled = compileFormula(src, k)
+          const compiled = compileFormula(expandPlaceholders(src, k, null), k)
           for (let r = 0; r < rows; r++) {
             for (let c = 0; c < cols; c++) {
               const scope = buildScope(

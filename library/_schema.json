@@ -12,6 +12,10 @@
     "author": { "type": "string" },
     "cols": { "type": "integer", "minimum": 1, "maximum": 100 },
     "rows": { "type": "integer", "minimum": 1, "maximum": 100 },
+    "showFirst": {
+      "type": "boolean",
+      "description": "If true (default), the preview renders a clone at i=0. Set to false for patterns where i=0 naturally lands away from the origin (e.g. radial bursts) and the source should remain visually centered."
+    },
     "formulas": {
       "type": "object",
       "additionalProperties": false,

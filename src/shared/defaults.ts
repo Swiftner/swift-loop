@@ -36,4 +36,5 @@ export const DEFAULT_CONFIG: LoopConfig = {
   easing: 'linear',
   fxMode: false,
   seed: 1,
+  showFirst: true,
 }

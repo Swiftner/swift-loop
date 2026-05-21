@@ -1,5 +1,5 @@
 import { formulaForProperty } from '../../plugin/engine/compile'
-import type { FormulaProperty, LoopConfig } from '../../shared/types'
+import type { FormulaProperty, LoopConfig, NumericProperty } from '../../shared/types'
 import { Section } from '../components/Section'
 import { SliderRow } from '../components/SliderRow'
 import { rewriteTrailingScale } from '../formula-scale'
@@ -7,6 +7,17 @@ import { rewriteTrailingScale } from '../formula-scale'
 interface Props {
   config: LoopConfig
   update: (next: LoopConfig, commit?: boolean) => void
+}
+
+// Drives a slider's value into a NumericProperty without destroying an active
+// library formula. If the formula has a trailing `* <number>`, rewrite that
+// literal; otherwise leave it intact (placeholder-based patterns like spiral
+// read `value` directly at compile time).
+function computeSliderUpdate(cur: NumericProperty, v: number): NumericProperty {
+  if (!cur.unlocked) return { ...cur, value: v, unlocked: false, formula: null }
+  const rewritten = cur.formula ? rewriteTrailingScale(cur.formula, v) : null
+  if (rewritten) return { ...cur, value: v, formula: rewritten }
+  return { ...cur, value: v }
 }
 
 const ROWS: { key: FormulaProperty; label: string; min: number; max: number; step: number }[] = [
@@ -46,21 +57,8 @@ export function TransformSection({ config, update }: Props) {
               )
             }}
             onChange={(v, commit) => {
-              // If the active formula has a trailing `* <number>`, rewrite that
-              // literal so the slider drives the amplitude while keeping the
-              // formula's shape. Otherwise fall back to sugar so the slider
-              // still has an effect.
-              const rewritten =
-                cur.unlocked && cur.formula ? rewriteTrailingScale(cur.formula, v) : null
-              update(
-                {
-                  ...config,
-                  [row.key]: rewritten
-                    ? { ...cur, value: v, formula: rewritten }
-                    : { ...cur, value: v, unlocked: false, formula: null },
-                },
-                commit,
-              )
+              const nextProp = computeSliderUpdate(cur, v)
+              update({ ...config, [row.key]: nextProp }, commit)
             }}
           />
         )
