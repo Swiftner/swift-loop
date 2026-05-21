@@ -28,6 +28,8 @@ jobs:
           mkdir -p _site/build
           cp index.html preview-ui.html favicon.svg _site/
           cp build/ui.js build/preview.js _site/build/
+          # disable Jekyll so the bundled build/ directory ships as-is
+          touch _site/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
