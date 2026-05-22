@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { sampleRamp } from '../src/shared/color'
+import { legacyColorStopToRamp, sampleRamp } from '../src/shared/color'
 import type { ColorRamp } from '../src/shared/types'
 
 const RED = { r: 1, g: 0, b: 0 }
@@ -90,5 +90,46 @@ describe('sampleRamp', () => {
     }
     expect(sampleRamp(ramp, 0)).toEqual(RED)
     expect(sampleRamp(ramp, 1)).toEqual(BLUE)
+  })
+})
+
+describe('legacyColorStopToRamp', () => {
+  it('maps {color:null, end:null} to empty ramp', () => {
+    expect(legacyColorStopToRamp({ color: null, end: null }).stops).toEqual([])
+  })
+
+  it('maps a single color to a one-stop ramp at position 0', () => {
+    const ramp = legacyColorStopToRamp({ color: RED, end: null })
+    expect(ramp.stops).toEqual([{ color: RED, position: 0 }])
+  })
+
+  it('maps {color, end} to a two-stop ramp at 0 and 1', () => {
+    const ramp = legacyColorStopToRamp({ color: RED, end: BLUE })
+    expect(ramp.stops).toEqual([
+      { color: RED, position: 0 },
+      { color: BLUE, position: 1 },
+    ])
+  })
+
+  it('drops null start with non-null end (treats as single end stop at 1)', () => {
+    const ramp = legacyColorStopToRamp({ color: null, end: BLUE })
+    expect(ramp.stops).toEqual([{ color: BLUE, position: 1 }])
+  })
+
+  it('preserves unlocked and formula', () => {
+    const ramp = legacyColorStopToRamp({
+      color: RED,
+      end: BLUE,
+      unlocked: true,
+      formula: 'i / n',
+    })
+    expect(ramp.unlocked).toBe(true)
+    expect(ramp.formula).toBe('i / n')
+  })
+
+  it('passes through an already-migrated ramp unchanged', () => {
+    const input = { stops: [{ color: RED, position: 0.5 }] }
+    const out = legacyColorStopToRamp(input as never)
+    expect(out).toEqual(input)
   })
 })

@@ -1,5 +1,5 @@
 // src/shared/color.ts
-import type { Color, ColorRamp } from './types'
+import type { Color, ColorRamp, ColorStopPoint } from './types'
 
 const HEX_RE = /^([0-9a-f]{6}|[0-9a-f]{3})$/i
 
@@ -112,4 +112,29 @@ export function sampleRamp(ramp: ColorRamp, t: number): Color | null {
     return lerpColorHsl(a.color, b.color, local)
   }
   throw new Error('sampleRamp: unreachable — t outside sorted ramp range')
+}
+
+interface LegacyColorStop {
+  color: Color | null
+  end: Color | null
+  unlocked?: boolean
+  formula?: string | null
+}
+
+/**
+ * Convert a persisted pre-N-stop `ColorStop` shape to a `ColorRamp`.
+ * Idempotent: if the input already has a `stops` array, return it as-is.
+ * Used on `clientStorage` load to migrate saved configs and snapshots.
+ */
+export function legacyColorStopToRamp(input: LegacyColorStop | ColorRamp): ColorRamp {
+  if ('stops' in input && Array.isArray(input.stops)) return input
+  const legacy = input as LegacyColorStop
+  const stops: ColorStopPoint[] = []
+  if (legacy.color) stops.push({ color: legacy.color, position: 0 })
+  if (legacy.end) stops.push({ color: legacy.end, position: 1 })
+  return {
+    stops,
+    unlocked: legacy.unlocked,
+    formula: legacy.formula,
+  }
 }
