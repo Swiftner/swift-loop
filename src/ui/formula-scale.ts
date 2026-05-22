@@ -5,9 +5,7 @@
 
 const TRAILING_SCALE = /^(.*\*\s*)(-?\d+(?:\.\d+)?)\s*$/
 
-export function extractTrailingScale(
-  formula: string,
-): { prefix: string; value: number } | null {
+export function extractTrailingScale(formula: string): { prefix: string; value: number } | null {
   const m = TRAILING_SCALE.exec(formula)
   if (!m) return null
   const value = Number.parseFloat(m[2])

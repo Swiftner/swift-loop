@@ -1,7 +1,7 @@
-import { clearPattern } from '../config-ops'
 import type { LoopConfig } from '../../shared/types'
 import { Section } from '../components/Section'
 import { SliderRow } from '../components/SliderRow'
+import { clearPattern } from '../config-ops'
 
 interface Props {
   config: LoopConfig

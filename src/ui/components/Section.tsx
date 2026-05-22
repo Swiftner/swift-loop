@@ -57,7 +57,9 @@ export function Section({
   }
 
   return (
-    <section class={`section${open ? ' is-open' : ' is-closed'}${alwaysOpen ? ' is-always-open' : ''}`}>
+    <section
+      class={`section${open ? ' is-open' : ' is-closed'}${alwaysOpen ? ' is-always-open' : ''}`}
+    >
       <div
         class="section-head"
         role={alwaysOpen ? undefined : 'button'}
@@ -78,10 +80,7 @@ export function Section({
           </span>
         ) : null}
         {!alwaysOpen && (
-          <span
-            class={`section-disclosure-caret${open ? ' is-open' : ''}`}
-            aria-hidden="true"
-          >
+          <span class={`section-disclosure-caret${open ? ' is-open' : ''}`} aria-hidden="true">
             <svg viewBox="0 0 10 10" width="10" height="10">
               <path
                 d="M3.5 2 L7 5 L3.5 8"

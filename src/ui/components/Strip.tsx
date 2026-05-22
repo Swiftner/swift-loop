@@ -1,6 +1,6 @@
 import type { ComponentChildren } from 'preact'
 import { useState } from 'preact/hooks'
-import { applyEasing, type EasingKind } from '../../plugin/engine/easing'
+import { type EasingKind, applyEasing } from '../../plugin/engine/easing'
 
 interface Props {
   label: string

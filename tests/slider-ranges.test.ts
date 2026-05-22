@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  randomMaxFor,
-  sinusoidalAmplitudeMaxFor,
-  sliderRangeFor,
-} from '../src/ui/slider-ranges'
+import { randomMaxFor, sinusoidalAmplitudeMaxFor, sliderRangeFor } from '../src/ui/slider-ranges'
 
 describe('sliderRangeFor', () => {
   it('falls back to fixed ranges when no source size is known', () => {
