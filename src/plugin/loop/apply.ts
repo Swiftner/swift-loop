@@ -1,14 +1,14 @@
 // src/plugin/loop/apply.ts
-import { lerpColorHsl } from '../../shared/color'
-import type { Color, ColorStop, EvaluatedValues, ScalarProperty } from '../../shared/types'
+import { sampleRamp } from '../../shared/color'
+import type { Color, ColorRamp, EvaluatedValues, ScalarProperty } from '../../shared/types'
 import { rotateAroundCenter } from '../figma/rotate'
 
 export interface ApplyInput {
   clone: SceneNode
   source: SceneNode
   values: EvaluatedValues
-  fill: ColorStop
-  stroke: ColorStop
+  fill: ColorRamp
+  stroke: ColorRamp
   strokeWeight: ScalarProperty
   // Per-property lerp factors in [0, 1] — already eased / formula-resolved upstream.
   fillFactor: number
@@ -73,8 +73,6 @@ export async function applyToClone(input: ApplyInput): Promise<void> {
   }
 }
 
-function fillColorAt(stop: ColorStop, t: number): Color | null {
-  if (!stop.color) return null
-  if (!stop.end) return stop.color
-  return lerpColorHsl(stop.color, stop.end, Math.max(0, Math.min(1, t)))
+function fillColorAt(ramp: ColorRamp, t: number): Color | null {
+  return sampleRamp(ramp, Math.max(0, Math.min(1, t)))
 }

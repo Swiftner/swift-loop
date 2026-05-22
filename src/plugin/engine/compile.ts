@@ -1,6 +1,6 @@
 // src/plugin/engine/compile.ts
 import type {
-  ColorStop,
+  ColorRamp,
   CompiledFormula,
   CompiledFormulas,
   FormulaProperty,
@@ -103,8 +103,8 @@ function defaultFactorFormula(config: LoopConfig): string {
   return lerpTerm(config.easing, interpFactor(config))
 }
 
-export function factorForColorStop(config: LoopConfig, stop: ColorStop): string {
-  if (stop.unlocked && stop.formula != null) return stop.formula
+export function factorForColorStop(config: LoopConfig, ramp: ColorRamp): string {
+  if (ramp.unlocked && ramp.formula != null) return ramp.formula
   return defaultFactorFormula(config)
 }
 
