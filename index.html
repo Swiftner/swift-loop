@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Swift Loop — live preview</title>
+    <title>Swift Loop — playground</title>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -31,17 +31,130 @@
           var(--bg);
         font: 12px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
         color: var(--ink);
+        overflow: hidden;
       }
-      .layout {
+
+      .app {
         display: grid;
-        grid-template-columns: 340px 1fr;
-        gap: 16px;
-        padding: 16px;
+        grid-template-rows: auto 1fr;
+        grid-template-columns: 1fr 340px;
+        grid-template-areas:
+          "topbar topbar"
+          "stage  sidebar";
+        gap: 10px;
+        padding: 10px;
         height: 100vh;
         box-sizing: border-box;
       }
 
-      /* ---------- Panel ---------- */
+      /* ---------- Top bar ---------- */
+      .topbar {
+        grid-area: topbar;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        background: var(--panel);
+        border-radius: 12px;
+        box-shadow:
+          0 1px 0 rgba(255,255,255,.8) inset,
+          0 1px 2px rgba(20, 22, 28, 0.04),
+          0 12px 32px -16px rgba(20, 22, 28, 0.18);
+        border: 1px solid rgba(20, 22, 28, 0.04);
+      }
+      .topbar .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-family: var(--mono);
+        font-weight: 500;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--ink);
+        padding-right: 10px;
+        border-right: 1px solid var(--hair);
+        margin-right: 4px;
+      }
+      .topbar .brand .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-tint);
+      }
+      .topbar .spacer { flex: 1 1 auto; }
+
+      .group {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .divider {
+        width: 1px;
+        height: 18px;
+        background: var(--hair);
+      }
+
+      /* ---------- Stage ---------- */
+      .stage {
+        grid-area: stage;
+        position: relative;
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid rgba(20, 22, 28, 0.04);
+        box-shadow:
+          0 1px 0 rgba(255,255,255,.8) inset,
+          0 1px 2px rgba(20, 22, 28, 0.04),
+          0 12px 32px -16px rgba(20, 22, 28, 0.18);
+      }
+      .stage::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(rgba(20, 22, 28, 0.10) 1px, transparent 1px);
+        background-size: 20px 20px;
+        background-position: 0 0;
+        pointer-events: none;
+        opacity: 0.6;
+      }
+      svg#preview { display: block; width: 100%; height: 100%; }
+      .stage.is-drop {
+        outline: 2px dashed var(--accent);
+        outline-offset: -8px;
+      }
+      .empty-hint {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 6px;
+        pointer-events: none;
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .empty-hint small {
+        font-family: system-ui, sans-serif;
+        font-size: 11px;
+        text-transform: none;
+        letter-spacing: 0;
+        color: var(--muted);
+      }
+
+      /* ---------- Sidebar ---------- */
+      .sidebar {
+        grid-area: sidebar;
+        display: grid;
+        grid-template-rows: 1fr auto;
+        gap: 10px;
+        min-height: 0;
+      }
       .panel {
         background: var(--panel);
         border-radius: 12px;
@@ -53,22 +166,15 @@
         display: flex;
         flex-direction: column;
         border: 1px solid rgba(20, 22, 28, 0.04);
+        min-height: 0;
       }
-      .panel-title {
-        padding: 10px 12px;
+      .panel-header {
+        padding: 8px 12px;
         border-bottom: 1px solid var(--hair);
         display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: 12px;
         background: linear-gradient(180deg, #fbfbfd 0%, #ffffff 100%);
-      }
-
-      /* ---------- Panel tag (replaces "Plugin UI" / "Preview" labels) ---------- */
-      .panel-tag {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
         font-family: var(--mono);
         font-weight: 500;
         font-size: 10px;
@@ -76,124 +182,94 @@
         text-transform: uppercase;
         color: var(--ink);
       }
-      .panel-tag .dot {
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
-        background: var(--accent);
-        box-shadow: 0 0 0 3px var(--accent-tint);
-        animation: dot-pulse 2.4s ease-in-out infinite;
-      }
-      .panel-tag .slash {
-        color: var(--muted);
-        font-weight: 400;
-        margin: 0 -2px;
-      }
-      .panel-tag .sub {
-        color: var(--ink-2);
-        letter-spacing: 0.12em;
-      }
-      .panel-tag .meta {
-        margin-left: 6px;
-        padding-left: 8px;
-        border-left: 1px solid var(--hair);
+      .panel-header .count {
         color: var(--muted);
         font-feature-settings: "tnum";
         letter-spacing: 0.08em;
-        text-transform: none;
-      }
-      @keyframes dot-pulse {
-        0%, 100% { box-shadow: 0 0 0 3px var(--accent-tint); }
-        50% { box-shadow: 0 0 0 5px rgba(110, 91, 255, 0.06); }
       }
 
-      /* ---------- Primary CTA (Get plugin .zip) ---------- */
-      .btn-primary {
-        display: inline-flex;
-        align-items: stretch;
-        padding: 0;
-        background: var(--accent);
-        color: #fff;
-        border-radius: 6px;
-        text-decoration: none;
-        font-weight: 500;
-        font-size: 12px;
-        line-height: 1;
-        letter-spacing: 0;
-        box-shadow: none;
-        transition: background 120ms ease;
-        overflow: hidden;
-      }
-      .btn-primary:hover { background: #5d4afc; }
-      .btn-primary:active { background: #5141e8; }
-      .btn-primary .label {
-        padding: 8px 4px 8px 12px;
-      }
-      .btn-primary .chip {
-        padding: 8px 10px 8px 4px;
-        font-family: var(--mono);
-        font-size: 11px;
-        font-weight: 500;
-        color: rgba(255, 255, 255, 0.7);
-      }
-      .btn-primary .arrow {
-        display: inline-flex;
-        align-items: center;
-        padding: 0 12px;
-        background: rgba(0, 0, 0, 0.14);
-      }
-      .btn-primary .arrow svg {
-        transition: transform 200ms cubic-bezier(.2,.7,.2,1);
-      }
-      .btn-primary:hover .arrow svg { transform: translateY(1px); }
-
-      /* ---------- Iframe & preview stage ---------- */
       iframe#plugin-ui {
         flex: 1 1 auto;
         width: 100%;
         border: 0;
         background: #fff;
+        min-height: 0;
       }
-      .preview-stage {
+      .sidebar-empty {
         flex: 1 1 auto;
-        position: relative;
-        background:
-          linear-gradient(45deg, #f3f4f7 25%, transparent 25%) 0 0 / 16px 16px,
-          linear-gradient(-45deg, #f3f4f7 25%, transparent 25%) 0 8px / 16px 16px,
-          linear-gradient(45deg, transparent 75%, #f3f4f7 75%) 8px -8px / 16px 16px,
-          linear-gradient(-45deg, transparent 75%, #f3f4f7 75%) 8px 0 / 16px 16px,
-          #fff;
-        overflow: hidden;
-        min-height: 480px;
-      }
-      svg#preview { display: block; width: 100%; height: 100%; }
-      .preview-stage.is-drop {
-        outline: 2px dashed var(--accent);
-        outline-offset: -8px;
-      }
-
-      /* ---------- Controls (footer) ---------- */
-      .controls {
-        padding: 10px 12px;
-        border-top: 1px solid var(--hair);
         display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
         align-items: center;
-        background: linear-gradient(180deg, #ffffff 0%, #fbfbfd 100%);
+        justify-content: center;
+        padding: 24px;
+        text-align: center;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.5;
       }
-      .ctrl-group {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-      }
-      .ctrl-divider {
-        width: 1px;
-        height: 18px;
-        background: var(--hair);
+      .sidebar-empty[hidden] { display: none; }
+      .sidebar-empty strong {
+        color: var(--ink);
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 500;
       }
 
-      /* Ghost button — quiet, refined */
+      /* ---------- Layers list ---------- */
+      .layers {
+        max-height: 200px;
+        overflow-y: auto;
+      }
+      .layers-empty {
+        padding: 14px 12px;
+        color: var(--muted);
+        font-size: 11px;
+        text-align: center;
+      }
+      .layer {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        cursor: pointer;
+        border-bottom: 1px solid var(--hair);
+        font-size: 11.5px;
+        transition: background 100ms ease;
+      }
+      .layer:last-child { border-bottom: 0; }
+      .layer:hover { background: #fafafc; }
+      .layer.is-selected {
+        background: var(--accent-tint);
+        color: var(--accent-ink);
+      }
+      .layer .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent);
+        flex: none;
+      }
+      .layer .name {
+        flex: 1 1 auto;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .layer .remove {
+        background: transparent;
+        border: 0;
+        color: var(--muted);
+        cursor: pointer;
+        padding: 2px 6px;
+        font-size: 14px;
+        line-height: 1;
+        border-radius: 4px;
+      }
+      .layer .remove:hover {
+        background: #fef2ef;
+        color: #d63a1a;
+      }
+
+      /* ---------- Buttons ---------- */
       .btn-ghost {
         display: inline-flex;
         align-items: center;
@@ -214,8 +290,6 @@
       }
       .btn-ghost:active { transform: translateY(0.5px); }
       .btn-ghost svg { color: var(--ink-2); }
-
-      /* Accent ghost — used for Download SVG (primary action in footer) */
       .btn-ghost.is-accent {
         background: var(--accent-tint);
         border-color: rgba(110, 91, 255, 0.22);
@@ -226,66 +300,59 @@
         background: rgba(110, 91, 255, 0.16);
         border-color: rgba(110, 91, 255, 0.32);
       }
+      .btn-ghost.is-danger:hover {
+        background: #fef2ef;
+        border-color: #f3c3b6;
+        color: #d63a1a;
+      }
+      .btn-ghost.is-danger:hover svg { color: #d63a1a; }
 
-      /* Shape pill — mono key/value tag */
-      .shape-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 0;
-        padding: 0;
-        background: #f4f5f7;
-        border: 1px solid var(--hair);
-        border-radius: 6px;
-        overflow: hidden;
-        font-family: var(--mono);
-        font-size: 10.5px;
-        line-height: 1;
+      /* ---------- Export menu ---------- */
+      .menu {
+        position: relative;
       }
-      .shape-pill .key {
-        padding: 6px 8px;
-        background: #ecedf0;
-        color: var(--muted);
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-        font-size: 9.5px;
-        font-weight: 500;
-        border-right: 1px solid var(--hair);
+      .menu-list {
+        position: absolute;
+        top: calc(100% + 6px);
+        right: 0;
+        min-width: 140px;
+        background: #fff;
+        border: 1px solid var(--hair-2);
+        border-radius: 8px;
+        box-shadow:
+          0 1px 2px rgba(20, 22, 28, 0.05),
+          0 16px 32px -16px rgba(20, 22, 28, 0.25);
+        padding: 4px;
+        display: none;
+        z-index: 20;
       }
-      .shape-pill .val {
-        padding: 6px 8px;
-        color: var(--ink);
-        font-weight: 500;
-      }
-      .shape-pill .shape-clear {
-        padding: 0 8px;
-        height: 100%;
-        align-self: stretch;
+      .menu.is-open .menu-list { display: block; }
+      .menu-item {
+        display: block;
+        width: 100%;
+        text-align: left;
         background: transparent;
         border: 0;
-        border-left: 1px solid var(--hair);
-        color: var(--muted);
-        font-size: 13px;
-        line-height: 1;
+        padding: 7px 10px;
+        border-radius: 5px;
+        font: 500 12px/1 system-ui, sans-serif;
+        color: var(--ink);
         cursor: pointer;
-        transition: color 120ms ease, background 120ms ease;
       }
-      .shape-pill .shape-clear:hover {
-        color: #d63a1a;
-        background: #fef2ef;
-      }
-      .keep-colors {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
+      .menu-item:hover { background: var(--accent-tint); color: var(--accent-ink); }
+      .menu-item .kbd {
+        float: right;
         font-family: var(--mono);
-        font-size: 10.5px;
+        font-size: 10px;
         color: var(--muted);
-        cursor: pointer;
-        user-select: none;
+        margin-top: 1px;
       }
-      .keep-colors input {
-        margin: 0;
-        accent-color: #6e5bff;
+
+      /* ---------- Zoom label ---------- */
+      #zoom-label {
+        font-variant-numeric: tabular-nums;
+        min-width: 3ch;
+        margin-left: 4px;
       }
 
       /* ---------- Attribution ---------- */
@@ -293,7 +360,6 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        margin-left: auto;
         color: var(--muted);
         font-family: var(--mono);
         font-size: 10px;
@@ -305,7 +371,6 @@
         align-items: center;
         gap: 6px;
         padding: 4px 8px;
-        margin-right: -4px;
         color: inherit;
         text-decoration: none;
         border-radius: 5px;
@@ -320,126 +385,129 @@
         width: auto;
         display: block;
       }
-      .attribution svg {
-        display: block;
-      }
-      .attribution-sep {
-        opacity: 0.5;
-      }
+      .attribution-sep { opacity: 0.5; }
     </style>
   </head>
   <body>
-    <div class="layout">
-      <div class="panel">
-        <div class="panel-title">
-          <span class="panel-tag" aria-label="Plugin UI">
-            <span class="dot" aria-hidden="true"></span>
-            Plugin <span class="slash">/</span> <span class="sub">UI</span>
-          </span>
-          <a
-            class="btn-primary"
-            href="https://github.com/Swiftner/swift-loop/releases/latest/download/swift-loop-latest.zip"
-            title="Download the latest Figma plugin .zip"
-          >
-            <span class="label">Get plugin</span>
-            <span class="chip">.zip</span>
-            <span class="arrow" aria-hidden="true">
-              <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+    <div class="app">
+      <div class="topbar">
+        <span class="brand">
+          <span class="dot" aria-hidden="true"></span>
+          Swift Loop
+        </span>
+
+        <div class="group">
+          <label class="btn-ghost" for="shape-upload" title="Upload one or more SVGs / images. Each becomes its own loop.">
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
+              <path d="M5.5 9.5V2m0 0L2.75 4.75M5.5 2l2.75 2.75" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Upload shape
+          </label>
+          <input id="shape-upload" type="file" accept=".svg,image/svg+xml,image/png,image/jpeg,image/webp" multiple hidden />
+          <button id="add-default" class="btn-ghost" type="button" title="Add a loop using the default circle shape">
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
+              <circle cx="5.5" cy="5.5" r="3.5" stroke="currentColor" stroke-width="1.4" fill="none"/>
+              <path d="M5.5 3.5v4M3.5 5.5h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+            Add circle
+          </button>
+        </div>
+
+        <div class="divider" aria-hidden="true"></div>
+
+        <div class="group" role="group" aria-label="Zoom">
+          <button id="zoom-out" class="btn-ghost" type="button" title="Zoom out" aria-label="Zoom out">
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
+              <path d="M2 5.5h7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+          </button>
+          <button id="zoom-in" class="btn-ghost" type="button" title="Zoom in" aria-label="Zoom in">
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
+              <path d="M5.5 2v7M2 5.5h7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+          </button>
+          <button id="zoom-fit" class="btn-ghost" type="button" title="Fit to content (0)" aria-label="Fit to content">
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
+              <path d="M1.5 4V1.5H4M7 1.5h2.5V4M9.5 7v2.5H7M4 9.5H1.5V7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span id="zoom-label">100%</span>
+          </button>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="group">
+          <div class="menu" id="export-menu">
+            <button id="export-btn" class="btn-ghost is-accent" type="button" title="Export the canvas" aria-haspopup="menu" aria-expanded="false">
+              <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
                 <path d="M5.5 1.5v6.5m0 0L2.75 5.25M5.5 8L8.25 5.25M2 9.5h7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
-            </span>
+              Export
+              <svg width="8" height="8" viewBox="0 0 8 8" fill="none" aria-hidden="true" style="margin-left: 2px;">
+                <path d="M1.5 3L4 5.5 6.5 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <div class="menu-list" role="menu">
+              <button class="menu-item" type="button" data-export="svg" role="menuitem">SVG</button>
+              <button class="menu-item" type="button" data-export="png" role="menuitem">PNG</button>
+              <button class="menu-item" type="button" data-export="jpg" role="menuitem">JPG</button>
+            </div>
+          </div>
+          <button id="clear-all" class="btn-ghost is-danger" type="button" title="Remove all loops from the canvas">
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
+              <path d="M2 3h7M4 3V2h3v1M4 5v3M7 5v3M3 3l.5 6h4L8 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Clear
+          </button>
+        </div>
+
+        <div class="divider" aria-hidden="true"></div>
+
+        <span class="attribution">
+          <a href="https://github.com/Swiftner/swift-loop" target="_blank" rel="noreferrer" title="View source on GitHub">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+              <path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.42 7.42 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/>
+            </svg>
           </a>
-        </div>
-        <!-- No sandbox: allow-scripts + allow-same-origin together effectively
-             removes the sandbox anyway, and we need both for postMessage and
-             localStorage to work. -->
-        <iframe id="plugin-ui" src="./preview-ui.html"></iframe>
+        </span>
       </div>
-      <div class="panel">
-        <div class="panel-title">
-          <span class="panel-tag">
-            <span class="dot" aria-hidden="true"></span>
-            Preview
-            <span class="meta" id="preview-status">—</span>
-          </span>
+
+      <div class="stage" id="stage">
+        <svg id="preview" viewBox="0 0 640 520" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <g id="loops-layer"></g>
+          <g id="overlay-layer"></g>
+        </svg>
+        <div class="empty-hint" id="empty-hint">
+          Drop SVGs to begin
+          <small>or click "Add circle" to start with the default</small>
         </div>
-        <div class="preview-stage">
-          <svg id="preview" viewBox="0 0 640 520" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-            <g id="preview-layer"></g>
-          </svg>
+      </div>
+
+      <div class="sidebar">
+        <div class="panel">
+          <div class="panel-header">
+            <span>Effects</span>
+            <span class="count" id="effects-target">—</span>
+          </div>
+          <iframe id="plugin-ui" src="./preview-ui.html"></iframe>
+          <div class="sidebar-empty" id="sidebar-empty" hidden>
+            <div>
+              <strong>Nothing selected</strong>
+              Drop an SVG on the canvas, or click a loop to edit its effects here.
+            </div>
+          </div>
         </div>
-        <div class="controls">
-          <div class="ctrl-group">
-            <label class="btn-ghost" for="shape-upload" title="Upload an SVG or PNG to replace the circle">
-              <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
-                <path d="M5.5 9.5V2m0 0L2.75 4.75M5.5 2l2.75 2.75" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              Upload shape
-            </label>
-            <input id="shape-upload" type="file" accept=".svg,image/svg+xml,image/png,image/jpeg,image/webp" hidden />
-            <span class="shape-pill" title="Current shape">
-              <span class="key">shape</span>
-              <span class="val"><span id="shape-label">circle (default)</span></span>
-              <button id="shape-clear" class="shape-clear" type="button" title="Reset to circle" hidden aria-label="Reset to circle">×</button>
-            </span>
-            <label id="keep-colors-wrap" class="keep-colors" hidden title="Use the uploaded SVG's own fill and stroke instead of the loop's color controls">
-              <input id="keep-colors" type="checkbox" />
-              <span>Keep original colors</span>
-            </label>
+        <div class="panel">
+          <div class="panel-header">
+            <span>Layers</span>
+            <span class="count" id="layers-count">0</span>
           </div>
-          <div class="ctrl-divider" aria-hidden="true"></div>
-          <div class="ctrl-group" role="group" aria-label="Zoom">
-            <button id="zoom-out" class="btn-ghost" type="button" title="Zoom out (Ctrl+scroll)" aria-label="Zoom out">
-              <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
-                <path d="M2 5.5h7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-              </svg>
-            </button>
-            <button id="zoom-in" class="btn-ghost" type="button" title="Zoom in (Ctrl+scroll)" aria-label="Zoom in">
-              <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
-                <path d="M5.5 2v7M2 5.5h7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-              </svg>
-            </button>
-            <button id="zoom-fit" class="btn-ghost" type="button" title="Fit to content (reset zoom)" aria-label="Fit to content">
-              <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
-                <path d="M1.5 4V1.5H4M7 1.5h2.5V4M9.5 7v2.5H7M4 9.5H1.5V7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <span id="zoom-label" style="font-variant-numeric: tabular-nums; min-width: 3ch; margin-left: 4px;">100%</span>
-            </button>
+          <div class="layers" id="layers">
+            <div class="layers-empty">No loops yet.</div>
           </div>
-          <div class="ctrl-divider" aria-hidden="true"></div>
-          <div class="ctrl-group">
-            <button id="download-svg" class="btn-ghost is-accent" type="button" title="Download the current preview as SVG">
-              <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
-                <path d="M5.5 1.5v6.5m0 0L2.75 5.25M5.5 8L8.25 5.25M2 9.5h7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              Download SVG
-            </button>
-            <button id="reset-btn" class="btn-ghost" type="button" title="Reload the page">
-              <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
-                <path d="M9 5.5a3.5 3.5 0 1 1-1.03-2.47M9 2v2.5H6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              Reload
-            </button>
-          </div>
-          <span class="attribution">
-            <a href="https://github.com/Swiftner/swift-loop" target="_blank" rel="noreferrer" title="View source on GitHub">
-              <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                <path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.42 7.42 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/>
-              </svg>
-              GitHub
-            </a>
-            <span class="attribution-sep" aria-hidden="true">·</span>
-            made by
-            <a href="https://swiftner.com" target="_blank" rel="noreferrer">
-              <img src="./swiftner-logo.png" alt="Swiftner" />
-            </a>
-          </span>
         </div>
       </div>
     </div>
     <script src="./build/preview.js"></script>
-    <script>
-      document.getElementById('reset-btn').addEventListener('click', () => location.reload());
-    </script>
   </body>
 </html>
