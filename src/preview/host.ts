@@ -437,6 +437,56 @@ function viewCenter(): { x: number; y: number } {
   return { x: view.cx, y: view.cy }
 }
 
+// ---- Sidebar divider (resize layers panel) --------------------------------
+
+// The divider sits between the iframe panel and the layers panel. Dragging it
+// changes the max-height of the layers list, which the panel inherits since
+// the list is the only flexible child. We persist the user's choice so the
+// playground remembers their preferred split across sessions.
+const LAYERS_CAP_KEY = 'swift-loop:layers-cap'
+const LAYERS_CAP_MIN = 60
+const sidebarDivider = document.querySelector('.sidebar-divider') as HTMLElement | null
+
+const savedCap = Number.parseInt(localStorage.getItem(LAYERS_CAP_KEY) ?? '', 10)
+if (Number.isFinite(savedCap) && savedCap >= LAYERS_CAP_MIN) {
+  layersList.style.maxHeight = `${savedCap}px`
+}
+
+if (sidebarDivider) {
+  sidebarDivider.addEventListener('pointerdown', (e: PointerEvent) => {
+    if (e.button !== 0) return
+    e.preventDefault()
+    try {
+      sidebarDivider.setPointerCapture(e.pointerId)
+    } catch {}
+    sidebarDivider.classList.add('is-dragging')
+    document.body.style.cursor = 'ns-resize'
+    const startY = e.clientY
+    const startHeight = layersList.getBoundingClientRect().height
+    const capMax = Math.max(LAYERS_CAP_MIN, window.innerHeight - 200)
+    const onMove = (ev: PointerEvent) => {
+      // Dragging up makes the layers panel taller (negative deltaY → bigger).
+      const next = Math.max(LAYERS_CAP_MIN, Math.min(capMax, startHeight + (startY - ev.clientY)))
+      layersList.style.maxHeight = `${next}px`
+    }
+    const onUp = (ev: PointerEvent) => {
+      sidebarDivider.removeEventListener('pointermove', onMove)
+      sidebarDivider.removeEventListener('pointerup', onUp)
+      sidebarDivider.removeEventListener('pointercancel', onUp)
+      try {
+        sidebarDivider.releasePointerCapture(ev.pointerId)
+      } catch {}
+      sidebarDivider.classList.remove('is-dragging')
+      document.body.style.cursor = ''
+      const final = Number.parseFloat(layersList.style.maxHeight)
+      if (Number.isFinite(final)) localStorage.setItem(LAYERS_CAP_KEY, String(Math.round(final)))
+    }
+    sidebarDivider.addEventListener('pointermove', onMove)
+    sidebarDivider.addEventListener('pointerup', onUp)
+    sidebarDivider.addEventListener('pointercancel', onUp)
+  })
+}
+
 // ---- Layers list ----------------------------------------------------------
 
 function updateLayersList(): void {
