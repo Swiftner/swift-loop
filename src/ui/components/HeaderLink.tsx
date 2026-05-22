@@ -1,15 +1,31 @@
-import { useState } from 'preact/hooks'
+import { useEffect, useState } from 'preact/hooks'
 import { VERSION } from '../../shared/version'
 
 export function HeaderLink() {
   const [open, setOpen] = useState(false)
+
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open])
+
   return (
-    <div class="header-link-wrap">
+    <div class={`header-link-wrap${open ? ' is-open' : ''}`}>
       <button
         class="header-link-info"
         type="button"
-        onClick={() => setOpen((o) => !o)}
+        onClick={(e) => {
+          // Stop the click from also hitting the overlay underneath, which
+          // would re-fire setOpen(false) and turn the toggle into "close-only".
+          e.stopPropagation()
+          setOpen((o) => !o)
+        }}
         aria-label="About Swift Loop"
+        aria-expanded={open}
         title="About Swift Loop"
       >
         i

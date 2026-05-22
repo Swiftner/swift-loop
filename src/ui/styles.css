@@ -355,6 +355,9 @@ body,
 .header-link-wrap {
   position: relative;
 }
+.header-link-wrap.is-open {
+  z-index: 101;
+}
 .header-link-info {
   font-family: "Times New Roman", serif;
   font-style: italic;
