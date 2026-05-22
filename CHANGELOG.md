@@ -2,6 +2,14 @@
 
 All notable changes to Swift Loop. Versions follow SemVer; the [v0.x.y] anchor links to the GitHub release.
 
+## [v0.2.0] — 2026-05-22
+
+### Added
+- **Multi-stop color ramps for Fill and Stroke.** Click anywhere on the gradient strip to drop a stop at that position with the color sampled from the existing ramp (so the gradient doesn't jump). Drag horizontally to slide a stop — neighbors clamp the range so stops can't cross. Drag a stop straight down off the strip to delete it. Click a stop to pick its color. The interaction mirrors Figma's gradient editor. Stops are interpolated in HSL along the shortest hue arc per segment; `t` outside the outermost stops clamps to the nearest stop's color.
+
+### Changed
+- **Fill and Stroke schema.** `ColorStop { color, end }` becomes `ColorRamp { stops: [{ color, position }, …] }`. Empty ramp = no fill (was `color: null`); one stop = solid; two or more = a gradient. Persisted configs and snapshots auto-migrate on load — nothing to do on Mia's side.
+
 ## [v0.1.24] — 2026-05-22
 
 ### Changed
