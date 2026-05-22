@@ -6,8 +6,8 @@ import { applyAngleToOffset } from '../plugin/engine/angle'
 import { compileConfig, compileFactors } from '../plugin/engine/compile'
 import { applyEasing } from '../plugin/engine/easing'
 import { buildScope } from '../plugin/engine/scope'
-import { lerpColorHsl } from '../shared/color'
-import type { Color, ColorStop, LoopConfig } from '../shared/types'
+import { sampleRamp } from '../shared/color'
+import type { Color, ColorRamp, LoopConfig } from '../shared/types'
 import { makeSourceRect, type UploadedShape } from './shape'
 
 const SVG_NS = 'http://www.w3.org/2000/svg'
@@ -78,7 +78,7 @@ export function renderLoop(opts: RenderLoopOptions): SVGGElement {
     const fill = colorAt(config.fill, fillFactor)
     const stroke = colorAt(config.stroke, strokeFactor)
     const sw =
-      config.stroke.color != null
+      stroke != null
         ? config.strokeWeight.value +
           strokeWeightFactor *
             ((config.strokeWeight.end ?? config.strokeWeight.value) - config.strokeWeight.value)
@@ -95,10 +95,9 @@ function computeInterp(cfg: LoopConfig, tx: number, ty: number): number {
   return tx
 }
 
-function colorAt(stop: ColorStop, t: number): string | null {
-  if (!stop.color) return null
-  if (!stop.end) return rgbToCss(stop.color)
-  return rgbToCss(lerpColorHsl(stop.color, stop.end, Math.max(0, Math.min(1, t))))
+function colorAt(ramp: ColorRamp, t: number): string | null {
+  const c = sampleRamp(ramp, Math.max(0, Math.min(1, t)))
+  return c ? rgbToCss(c) : null
 }
 
 function rgbToCss(c: Color): string {

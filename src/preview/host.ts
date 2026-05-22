@@ -458,7 +458,7 @@ function updateLayersList(): void {
 
     const dot = document.createElement('span')
     dot.className = 'dot'
-    const c = loop.config.fill.color
+    const c = loop.config.fill.stops[0]?.color
     if (c) {
       dot.style.background = `rgb(${Math.round(c.r * 255)}, ${Math.round(c.g * 255)}, ${Math.round(c.b * 255)})`
     }
