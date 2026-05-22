@@ -890,10 +890,14 @@ body,
   flex: 1;
   height: 24px;
   border-radius: 4px;
-  background: var(--strip-bg, transparent), linear-gradient(45deg, #eee 25%, transparent 25%),
-    linear-gradient(-45deg, #eee 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, #eee 75%),
-    linear-gradient(-45deg, transparent 75%, #eee 75%);
+  /* `background-image` (not the `background` shorthand) — only the last layer
+     of `background` may specify a color, so stacking `transparent` first
+     dropped the entire declaration. */
+  background-image: var(--strip-bg, none), linear-gradient(45deg, #ddd 25%, transparent 25%),
+    linear-gradient(-45deg, #ddd 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #ddd 75%),
+    linear-gradient(-45deg, transparent 75%, #ddd 75%);
+  background-color: #fff;
   background-size: auto, 8px 8px, 8px 8px, 8px 8px, 8px 8px;
   background-position: 0 0, 0 0, 0 4px, 4px -4px, -4px 0;
   cursor: copy;

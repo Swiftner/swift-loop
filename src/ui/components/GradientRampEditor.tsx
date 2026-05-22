@@ -1,4 +1,4 @@
-import { useRef } from 'preact/hooks'
+import { useRef, useState } from 'preact/hooks'
 import { hexToRgb, rgbToHex, sampleRamp } from '../../shared/color'
 import type { Color, ColorRamp } from '../../shared/types'
 
@@ -20,11 +20,17 @@ export function GradientRampEditor({
   onFormulaChange,
 }: Props) {
   const stripRef = useRef<HTMLDivElement>(null)
+  const [expanded, setExpanded] = useState(false)
   const sorted = [...ramp.stops].sort((a, b) => a.position - b.position)
   const background = stripBackground(sorted)
+  const showFormula = expanded || formulaActive
 
   return (
-    <article class={`appearance-strip gradient-ramp${formulaActive ? ' is-fx' : ''}`}>
+    <article
+      class={`appearance-strip gradient-ramp${formulaActive ? ' is-fx' : ''}${
+        showFormula ? ' is-expanded' : ''
+      }`}
+    >
       <div class="appearance-strip-head">
         <span class="appearance-strip-label">{label}</span>
         <span class="appearance-strip-readout gradient-ramp-readout">
@@ -35,6 +41,15 @@ export function GradientRampEditor({
             </span>
           ))}
         </span>
+        <button
+          class="appearance-strip-fx"
+          type="button"
+          onClick={() => setExpanded((x) => !x)}
+          aria-label={showFormula ? 'Hide formula' : 'Show formula'}
+          aria-expanded={showFormula}
+        >
+          fx
+        </button>
       </div>
       <div class="gradient-ramp-row">
         <div
@@ -56,7 +71,7 @@ export function GradientRampEditor({
           ))}
         </div>
       </div>
-      {formulaActive && (
+      {showFormula && (
         <textarea
           class="appearance-strip-formula"
           rows={1}
@@ -70,9 +85,14 @@ export function GradientRampEditor({
   )
 }
 
+// Returns a `<background-image>` value (never a plain color) so it can stack with
+// the checker pattern in CSS. Empty ramp uses `none` to let the checker show through.
 function stripBackground(stops: { color: Color; position: number }[]): string {
-  if (stops.length === 0) return 'transparent'
-  if (stops.length === 1) return `#${rgbToHex(stops[0].color)}`
+  if (stops.length === 0) return 'none'
+  if (stops.length === 1) {
+    const hex = `#${rgbToHex(stops[0].color)}`
+    return `linear-gradient(to right, ${hex}, ${hex})`
+  }
   const segs = stops
     .map((s) => `#${rgbToHex(s.color)} ${(s.position * 100).toFixed(1)}%`)
     .join(', ')
