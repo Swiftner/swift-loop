@@ -9,7 +9,6 @@ interface Props {
   seed: number
   onSelect: (s: Snapshot) => void
   onSeedChange: (v: number, commit: boolean) => void
-  onReroll: () => void
   onReset: () => void
   onDownload: () => void
 }
@@ -20,7 +19,6 @@ export function SnapshotsBar({
   seed,
   onSelect,
   onSeedChange,
-  onReroll,
   onReset,
   onDownload,
 }: Props) {
@@ -52,7 +50,7 @@ export function SnapshotsBar({
           />
         </svg>
       </button>
-      <SeedControl value={seed} onChange={onSeedChange} onReroll={onReroll} />
+      <SeedControl value={seed} onChange={onSeedChange} />
       {hasSnapshots && (
         <div class="snapshots-history" title="Recent seeds — click to restore">
           <span class="snapshots-label">history</span>

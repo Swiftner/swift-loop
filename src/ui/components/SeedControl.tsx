@@ -4,10 +4,9 @@ import { useScrub } from '../hooks/useScrub'
 interface Props {
   value: number
   onChange: (v: number, commit: boolean) => void
-  onReroll: () => void
 }
 
-export function SeedControl({ value, onChange, onReroll }: Props) {
+export function SeedControl({ value, onChange }: Props) {
   const [draft, setDraft] = useState(String(value))
   const [editing, setEditing] = useState(false)
 
@@ -56,9 +55,6 @@ export function SeedControl({ value, onChange, onReroll }: Props) {
           {value}
         </button>
       )}
-      <button class="seed-control-reroll" type="button" onClick={onReroll} aria-label="Reroll seed">
-        ↻
-      </button>
     </div>
   )
 }

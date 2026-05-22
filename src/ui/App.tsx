@@ -123,13 +123,6 @@ export function App() {
     update(s.config, true)
   }
 
-  const onReroll = () => {
-    const seed = Math.floor(Math.random() * 10000)
-    const next = { ...config, seed }
-    update(next, true)
-    recordSnapshot(next)
-  }
-
   const onSeedChange = (v: number, commit: boolean) => {
     const next = { ...config, seed: Math.round(v) }
     update(next, commit)
@@ -177,7 +170,6 @@ export function App() {
         seed={config.seed}
         onSelect={onSelectSnapshot}
         onSeedChange={onSeedChange}
-        onReroll={onReroll}
         onReset={onReset}
         onDownload={onDownload}
       />

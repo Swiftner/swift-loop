@@ -483,28 +483,6 @@ body,
   border-radius: 3px;
   text-align: center;
 }
-.seed-control-reroll {
-  background: none;
-  border: 1px solid var(--hairline);
-  border-radius: 50%;
-  width: 18px;
-  height: 18px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--muted);
-  cursor: pointer;
-  font-size: 11px;
-  line-height: 1;
-  padding: 0;
-  transition: color 120ms ease, border-color 120ms ease, transform 200ms ease;
-}
-.seed-control-reroll:hover {
-  color: var(--fg);
-  border-color: var(--fg);
-  transform: rotate(45deg);
-}
-
 /* SnapshotsBar — inline strip under the header */
 .snapshots-bar {
   display: flex;
