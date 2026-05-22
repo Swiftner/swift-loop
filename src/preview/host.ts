@@ -58,12 +58,17 @@ window.addEventListener('message', (e) => {
   }
 })
 
+function selectionPayload(): { valid: true; width: number; height: number } {
+  const sz = sourceSize()
+  return { valid: true, width: sz.w, height: sz.h }
+}
+
 iframe.addEventListener('load', () => {
   // Give Preact a tick to mount and subscribe its event handlers before we
   // start emitting messages into it.
   setTimeout(() => {
     sendToUI('loop:initial-config', { config: null })
-    sendToUI('loop:selection-change', { valid: true })
+    sendToUI('loop:selection-change', selectionPayload())
     render()
   }, 80)
 })
@@ -412,6 +417,7 @@ async function loadShape(file: File): Promise<void> {
     return
   }
   updateShapeLabel()
+  sendToUI('loop:selection-change', selectionPayload())
   render()
 }
 
@@ -425,6 +431,7 @@ shapeClearBtn?.addEventListener('click', () => {
   if (uploadInput) uploadInput.value = ''
   if (keepColorsInput) keepColorsInput.checked = false
   updateShapeLabel()
+  sendToUI('loop:selection-change', selectionPayload())
   render()
 })
 

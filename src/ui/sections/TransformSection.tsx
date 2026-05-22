@@ -3,10 +3,12 @@ import type { FormulaProperty, LoopConfig, NumericProperty } from '../../shared/
 import { Section } from '../components/Section'
 import { SliderRow } from '../components/SliderRow'
 import { rewriteTrailingScale } from '../formula-scale'
+import { sliderRangeFor } from '../slider-ranges'
 
 interface Props {
   config: LoopConfig
   update: (next: LoopConfig, commit?: boolean) => void
+  sourceSize: { width: number; height: number } | null
 }
 
 // Drives a slider's value into a NumericProperty without destroying an active
@@ -20,27 +22,28 @@ function computeSliderUpdate(cur: NumericProperty, v: number): NumericProperty {
   return { ...cur, value: v }
 }
 
-const ROWS: { key: FormulaProperty; label: string; min: number; max: number; step: number }[] = [
-  { key: 'x', label: 'X step', min: -200, max: 200, step: 1 },
-  { key: 'y', label: 'Y step', min: -200, max: 200, step: 1 },
-  { key: 'rotation', label: 'Rotation', min: -180, max: 180, step: 1 },
-  { key: 'scaleX', label: 'Scale X', min: -50, max: 50, step: 0.5 },
-  { key: 'scaleY', label: 'Scale Y', min: -50, max: 50, step: 0.5 },
+const ROWS: { key: FormulaProperty; label: string }[] = [
+  { key: 'x', label: 'X step' },
+  { key: 'y', label: 'Y step' },
+  { key: 'rotation', label: 'Rotation' },
+  { key: 'scaleX', label: 'Scale X' },
+  { key: 'scaleY', label: 'Scale Y' },
 ]
 
-export function TransformSection({ config, update }: Props) {
+export function TransformSection({ config, update, sourceSize }: Props) {
   return (
     <Section id="transform" title="Transform">
       {ROWS.map((row) => {
         const cur = config[row.key]
+        const range = sliderRangeFor(row.key, sourceSize)
         return (
           <SliderRow
             key={row.key}
             label={row.label}
             value={cur.value}
-            min={row.min}
-            max={row.max}
-            step={row.step}
+            min={range.min}
+            max={range.max}
+            step={range.step}
             formulaIndicator={cur.unlocked}
             formula={formulaForProperty(config, row.key)}
             onFormulaChange={(text) => {

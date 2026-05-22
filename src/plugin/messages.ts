@@ -4,12 +4,18 @@ import type { LoopConfig } from '../shared/types'
 import { ensurePagesLoaded } from './figma/async'
 import { generate, revert } from './loop/orchestrator'
 import { LastRunStore } from './loop/state'
-import { getSelected, isValidSelection } from './selection'
+import { getSelected } from './selection'
 
 const STORAGE_KEY = 'swift-loop:last-config'
 const SIZE_KEY = 'swift-loop:ui-size'
 const store = new LastRunStore()
 let previousConfig: LoopConfig | null = null
+
+function selectionPayload(): { valid: boolean; width?: number; height?: number } {
+  const sel = getSelected()
+  if (!sel) return { valid: false }
+  return { valid: true, width: sel.width, height: sel.height }
+}
 
 export async function bootstrap(): Promise<void> {
   await ensurePagesLoaded()
@@ -20,10 +26,10 @@ export async function bootstrap(): Promise<void> {
 
   const saved = (await figma.clientStorage.getAsync(STORAGE_KEY)) as LoopConfig | undefined
   emit('loop:initial-config', { config: saved ?? null })
-  emit('loop:selection-change', { valid: isValidSelection() })
+  emit('loop:selection-change', selectionPayload())
 
   figma.on('selectionchange', () => {
-    emit('loop:selection-change', { valid: isValidSelection() })
+    emit('loop:selection-change', selectionPayload())
   })
 
   on('loop:update', async (payload: { config: LoopConfig; commit: boolean }) => {

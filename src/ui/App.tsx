@@ -22,11 +22,22 @@ export function App() {
   const { config, update, undo, redo } = useLooperConfig()
   const [snapshots, setSnapshots] = useState<Snapshot[]>([])
   const [selectionValid, setSelectionValid] = useState(true)
+  const [sourceSize, setSourceSize] = useState<{ width: number; height: number } | null>(null)
   const [libraryOpen, setLibraryOpen] = useState(false)
   const [appliedName, setAppliedName] = useState<string | null>(null)
 
   useEffect(() => {
-    return on('loop:selection-change', (p: { valid: boolean }) => setSelectionValid(p.valid))
+    return on(
+      'loop:selection-change',
+      (p: { valid: boolean; width?: number; height?: number }) => {
+        setSelectionValid(p.valid)
+        setSourceSize(
+          p.valid && p.width != null && p.height != null
+            ? { width: p.width, height: p.height }
+            : null,
+        )
+      },
+    )
   }, [])
 
   useEffect(() => {
@@ -146,7 +157,7 @@ export function App() {
           appliedName={appliedName}
           onOpenLibrary={() => setLibraryOpen(true)}
         />
-        <TransformSection config={config} update={update} />
+        <TransformSection config={config} update={update} sourceSize={sourceSize} />
         <ModulationSection config={config} update={update} />
         <AppearanceSection config={config} update={update} />
         <PresetsSection
