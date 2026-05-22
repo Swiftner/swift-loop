@@ -63,10 +63,12 @@ const HISTORY_LIMIT = 50
 const undoStack: ConfigCommit[] = []
 const redoStack: ConfigCommit[] = []
 
-// Canvas view (viewBox-driven).
+// Canvas view (viewBox-driven). The initial view is wide enough for a default
+// 10×10 loop plus some breathing room — picked once at boot and only changed
+// by user input (pan / zoom / Fit). New loops never reframe the view.
 const ZOOM_MIN = 0.1
 const ZOOM_MAX = 16
-const view = { cx: 0, cy: 0, zoom: 1, w: 640, h: 520 }
+const view = { cx: 320, cy: 300, zoom: 1, w: 800, h: 700 }
 
 function genId(): string {
   return `loop-${nextId++}`
@@ -165,33 +167,33 @@ function renderScene(): void {
     wrapper.setAttribute('class', 'loop-wrapper')
     wrapper.setAttribute('data-id', loop.id)
     wrapper.setAttribute('transform', loopTransform(loop))
-    const inner = renderLoop({
-      config: loop.config,
-      shape: loop.shape,
-      keepColors: loop.keepColors,
-      showSource: true,
+    wrapper.style.cursor = 'pointer'
+    // Any pointer-down on a clone, the source rect, or the dashed marker
+    // bubbles up to the wrapper — so clicking any visible part of the loop
+    // selects it and starts a move drag.
+    wrapper.addEventListener('pointerdown', (e: Event) => {
+      const pe = e as PointerEvent
+      if (pe.button !== 0 || spaceHeld) return
+      pe.stopPropagation()
+      selectLoop(loop.id)
+      startMoveDrag(loop, pe)
     })
-    // Make the source rect the click target for selection.
-    const sourceRect = inner.firstChild as SVGElement | null
-    if (sourceRect) {
-      sourceRect.style.cursor = 'pointer'
-      sourceRect.setAttribute('pointer-events', 'all')
-      sourceRect.addEventListener('pointerdown', (e: Event) => {
-        const pe = e as PointerEvent
-        if (pe.button !== 0 || spaceHeld) return
-        pe.stopPropagation()
-        selectLoop(loop.id)
-        startMoveDrag(loop, pe)
-      })
-    }
-    wrapper.appendChild(inner)
+    wrapper.appendChild(
+      renderLoop({
+        config: loop.config,
+        shape: loop.shape,
+        keepColors: loop.keepColors,
+        showSource: true,
+      }),
+    )
     loopsLayer.appendChild(wrapper)
   }
 
   drawSelectionOverlay()
   updateEmptyHint()
   updateLayersList()
-  fitViewportIfNeeded()
+  // No auto-fit: the view is user-controlled. Pan/zoom/Fit are the only
+  // ways the viewBox changes after the initial render.
 }
 
 function drawSelectionOverlay(): void {
@@ -314,6 +316,7 @@ function clientToSvg(clientX: number, clientY: number): { x: number; y: number }
 // ---- Loop transforms (move / rotate / scale) ------------------------------
 
 function startMoveDrag(loop: LoopInstance, e: PointerEvent): void {
+  e.preventDefault()
   const start = clientToSvg(e.clientX, e.clientY)
   const startX = loop.x
   const startY = loop.y
@@ -341,11 +344,16 @@ function startMoveDrag(loop: LoopInstance, e: PointerEvent): void {
 }
 
 function startRotateDrag(loop: LoopInstance, e: PointerEvent): void {
+  e.preventDefault()
   const sz = sourceSize(loop.shape)
   const centerCanvas = { x: loop.x + sz.w / 2, y: loop.y + sz.h / 2 }
   const start = clientToSvg(e.clientX, e.clientY)
   const startAngle = Math.atan2(start.y - centerCanvas.y, start.x - centerCanvas.x)
   const startRot = loop.rotation
+  const pointerId = e.pointerId
+  try {
+    stage.setPointerCapture(pointerId)
+  } catch {}
   const onMove = (ev: PointerEvent) => {
     const p = clientToSvg(ev.clientX, ev.clientY)
     const a = Math.atan2(p.y - centerCanvas.y, p.x - centerCanvas.x)
@@ -358,6 +366,9 @@ function startRotateDrag(loop: LoopInstance, e: PointerEvent): void {
     window.removeEventListener('pointermove', onMove)
     window.removeEventListener('pointerup', onUp)
     window.removeEventListener('pointercancel', onUp)
+    try {
+      stage.releasePointerCapture(pointerId)
+    } catch {}
   }
   window.addEventListener('pointermove', onMove)
   window.addEventListener('pointerup', onUp)
@@ -365,6 +376,7 @@ function startRotateDrag(loop: LoopInstance, e: PointerEvent): void {
 }
 
 function startScaleDrag(loop: LoopInstance, e: PointerEvent): void {
+  e.preventDefault()
   const sz = sourceSize(loop.shape)
   const centerCanvas = { x: loop.x + sz.w / 2, y: loop.y + sz.h / 2 }
   const start = clientToSvg(e.clientX, e.clientY)
@@ -456,6 +468,21 @@ function updateLayersList(): void {
     name.className = 'name'
     name.textContent = loop.shape?.name ?? `Loop ${i + 1} (circle)`
     row.appendChild(name)
+
+    const downloadBtn = document.createElement('button')
+    downloadBtn.className = 'download'
+    downloadBtn.type = 'button'
+    downloadBtn.title = 'Download as SVG'
+    // Same download-arrow glyph used by the toolbar Export button.
+    downloadBtn.innerHTML =
+      '<svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">' +
+      '<path d="M5.5 1.5v6.5m0 0L2.75 5.25M5.5 8L8.25 5.25M2 9.5h7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '</svg>'
+    downloadBtn.addEventListener('click', (e) => {
+      e.stopPropagation()
+      exportLoopAsSvg(loop)
+    })
+    row.appendChild(downloadBtn)
 
     const remove = document.createElement('button')
     remove.className = 'remove'
@@ -561,7 +588,9 @@ uploadInput.addEventListener('change', async (e) => {
 })
 
 document.getElementById('add-default')?.addEventListener('click', () => {
-  addLoop({})
+  // Cascade new loops so successive clicks don't pile on the same pixel.
+  const offset = (loops.length % 8) * 20
+  addLoop({ x: view.cx + offset, y: view.cy + offset })
 })
 
 document.getElementById('zoom-in')?.addEventListener('click', () => setZoom(view.zoom * 1.25))
@@ -666,6 +695,56 @@ function buildExportSvg(): { svg: string; width: number; height: number } {
     out.appendChild(wrapper)
   }
   return { svg: out.outerHTML, width: w, height: h }
+}
+
+// Build an export SVG for a single loop, normalised to the artwork's own
+// bounding box at the origin (no canvas position / rotation / scale). Designers
+// pulling one loop back into Figma want the artwork itself, not where it
+// happened to sit on the playground canvas.
+function buildLoopExportSvg(loop: LoopInstance): { svg: string; width: number; height: number } {
+  // Measure the rendered content offscreen so getBBox is in its own local space.
+  const probe = document.createElementNS(SVG_NS, 'svg')
+  probe.setAttribute('xmlns', SVG_NS)
+  probe.style.position = 'absolute'
+  probe.style.visibility = 'hidden'
+  document.body.appendChild(probe)
+  try {
+    const content = renderLoop({
+      config: loop.config,
+      shape: loop.shape,
+      keepColors: loop.keepColors,
+      showSource: false,
+    })
+    probe.appendChild(content)
+    const bb = (content as SVGGraphicsElement).getBBox()
+    const pad = 20
+    const minX = bb.x - pad
+    const minY = bb.y - pad
+    const w = Math.max(1, bb.width + pad * 2)
+    const h = Math.max(1, bb.height + pad * 2)
+
+    const out = document.createElementNS(SVG_NS, 'svg')
+    out.setAttribute('xmlns', SVG_NS)
+    out.setAttribute('viewBox', `${minX} ${minY} ${w} ${h}`)
+    out.setAttribute('width', String(w))
+    out.setAttribute('height', String(h))
+    out.appendChild(content)
+    return { svg: out.outerHTML, width: w, height: h }
+  } finally {
+    probe.remove()
+  }
+}
+
+function exportLoopAsSvg(loop: LoopInstance): void {
+  const { svg: markup } = buildLoopExportSvg(loop)
+  const stamp = new Date().toISOString().replace(/[:T]/g, '-').slice(0, 19)
+  const slug = (loop.shape?.name ?? `loop-${loop.id}`).replace(/[^\w.-]+/g, '-')
+  download(
+    new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n', markup], {
+      type: 'image/svg+xml;charset=utf-8',
+    }),
+    `swift-loop-${slug}-${stamp}.svg`,
+  )
 }
 
 async function exportCanvas(kind: 'svg' | 'png' | 'jpg'): Promise<void> {
@@ -825,6 +904,19 @@ window.addEventListener('keyup', (e: KeyboardEvent) => {
 // Figma, where the canvas owns undo and the plugin UI doesn't see Cmd+Z.
 window.addEventListener('keydown', (e) => {
   if (!(e.ctrlKey || e.metaKey)) return
+  const target = e.target as HTMLElement | null
+  const tag = target?.tagName
+  // Don't hijack Cmd/Ctrl+Z while the user is typing in a host-side input.
+  // The iframe's own Cmd/Ctrl+Z is handled inside the iframe — events here
+  // only fire when the iframe doesn't have focus.
+  if (
+    tag === 'INPUT' ||
+    tag === 'TEXTAREA' ||
+    tag === 'SELECT' ||
+    target?.isContentEditable === true
+  ) {
+    return
+  }
   const key = e.key.toLowerCase()
   if (key === 'z' && !e.shiftKey) {
     e.preventDefault()
@@ -852,3 +944,7 @@ iframe.addEventListener('load', () => {
 
 applyViewBox()
 renderScene()
+
+// Boot with one default loop already on the canvas so designers see something
+// the moment the page loads, instead of having to click "Add circle" first.
+addLoop({})
