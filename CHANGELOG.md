@@ -2,6 +2,11 @@
 
 All notable changes to Swift Loop. Versions follow SemVer; the [v0.x.y] anchor links to the GitHub release.
 
+## [v0.1.20] — 2026-05-22
+
+### Changed
+- Angle slider now steps in 0.1° increments (was 1°). Spiral tightness was too coarse to dial in at 1° per detent; fractional precision feels right for this knob and the value displays with one decimal place.
+
 ## [v0.1.19] — 2026-05-22
 
 ### Fixed

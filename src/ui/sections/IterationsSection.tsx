@@ -60,7 +60,7 @@ export function IterationsSection({ config, update, appliedName, onOpenLibrary }
         value={config.angle}
         min={-180}
         max={180}
-        step={1}
+        step={0.1}
         unit="°"
         onChange={(v, commit) => update({ ...config, angle: v }, commit)}
       />
