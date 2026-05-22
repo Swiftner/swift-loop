@@ -81,6 +81,7 @@ export function Strip({
           rows={1}
           value={formula}
           spellcheck={false}
+          aria-label={`${label} formula`}
           onInput={(e) => onFormulaChange((e.target as HTMLTextAreaElement).value)}
         />
       )}

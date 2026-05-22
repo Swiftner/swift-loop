@@ -245,10 +245,11 @@ interface EasingChipProps {
 }
 function EasingChip({ value, onChange }: EasingChipProps) {
   return (
-    <label class="easing-chip" aria-label="Default easing curve">
+    <label class="easing-chip">
       <EasingGlyph easing={value} />
       <select
         value={value}
+        aria-label="Default easing curve"
         onChange={(e) => onChange((e.target as HTMLSelectElement).value as EasingKind)}
       >
         {EASINGS.map((k) => (

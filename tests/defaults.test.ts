@@ -10,9 +10,16 @@ describe('RESET_CONFIG', () => {
     expect(RESET_CONFIG.scaleY.value).toBe(0)
   })
 
-  it('preserves the iteration grid and opacity from defaults', () => {
-    expect(RESET_CONFIG.cols).toBe(DEFAULT_CONFIG.cols)
-    expect(RESET_CONFIG.rows).toBe(DEFAULT_CONFIG.rows)
+  it('collapses iteration grid to a single cell (source only, no clones)', () => {
+    expect(RESET_CONFIG.cols).toBe(1)
+    expect(RESET_CONFIG.rows).toBe(1)
+  })
+
+  it('zeroes angle so reset never inherits a spiral curl', () => {
+    expect(RESET_CONFIG.angle).toBe(0)
+  })
+
+  it('keeps opacity at 100 so the source remains visible after reset', () => {
     expect(RESET_CONFIG.opacity.value).toBe(100)
   })
 

@@ -2,6 +2,7 @@
 // generated loop into an SVG using the same engine the Figma sandbox uses,
 // so you can drive the controls and watch them work without Figma.
 
+import { applyAngleToOffset } from '../plugin/engine/angle'
 import { compileConfig, compileFactors } from '../plugin/engine/compile'
 import { applyEasing } from '../plugin/engine/easing'
 import { buildScope } from '../plugin/engine/scope'
@@ -132,8 +133,11 @@ function render(): void {
       r,
     )
 
-    const dx = compiled.x.evaluate(scope, 'x')
-    const dy = compiled.y.evaluate(scope, 'y')
+    const rawOffset = {
+      x: compiled.x.evaluate(scope, 'x'),
+      y: compiled.y.evaluate(scope, 'y'),
+    }
+    const { x: dx, y: dy } = applyAngleToOffset(rawOffset, scope.i, cfg.angle)
     const rot = compiled.rotation.evaluate(scope, 'rotation')
     const sx = compiled.scaleX.evaluate(scope, 'scaleX')
     const sy = compiled.scaleY.evaluate(scope, 'scaleY')

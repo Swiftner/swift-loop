@@ -36,6 +36,7 @@ export function SeedControl({ value, onChange, onReroll }: Props) {
           class="seed-control-input"
           type="number"
           value={draft}
+          aria-label="Seed"
           onInput={(e) => setDraft((e.target as HTMLInputElement).value)}
           onBlur={commit}
           onKeyDown={(e) => {
@@ -49,6 +50,7 @@ export function SeedControl({ value, onChange, onReroll }: Props) {
           class="seed-control-value"
           type="button"
           {...scrubHandlers}
+          aria-label={`Seed: ${value}. Drag to scrub, click to type.`}
           title="Drag to scrub, click to type. Shift = fine, Alt = coarse."
         >
           {value}

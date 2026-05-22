@@ -1,5 +1,6 @@
 // src/plugin/loop/orchestrator.ts
 import type { LoopConfig, Scope } from '../../shared/types'
+import { applyAngleToOffset } from '../engine/angle'
 import { type CompiledFactors, compileConfig, compileFactors } from '../engine/compile'
 import { applyEasing } from '../engine/easing'
 import { buildScope } from '../engine/scope'
@@ -104,12 +105,17 @@ async function fullRegen(
     if ('insertChild' in parent) (parent as ChildrenMixin).insertChild(0, clone)
 
     const f = evalFactors(config, factors, scope)
+    const rotated = applyAngleToOffset(
+      { x: compiled.x.evaluate(scope, 'x'), y: compiled.y.evaluate(scope, 'y') },
+      scope.i,
+      config.angle,
+    )
     await applyToClone({
       clone,
       source,
       values: {
-        x: compiled.x.evaluate(scope, 'x'),
-        y: compiled.y.evaluate(scope, 'y'),
+        x: rotated.x,
+        y: rotated.y,
         rotation: compiled.rotation.evaluate(scope, 'rotation'),
         scaleX: compiled.scaleX.evaluate(scope, 'scaleX'),
         scaleY: compiled.scaleY.evaluate(scope, 'scaleY'),
@@ -186,12 +192,17 @@ async function inPlaceMutation(
       r,
     )
     const f = evalFactors(config, factors, scope)
+    const rotated = applyAngleToOffset(
+      { x: compiled.x.evaluate(scope, 'x'), y: compiled.y.evaluate(scope, 'y') },
+      scope.i,
+      config.angle,
+    )
     await applyToClone({
       clone: clone as SceneNode,
       source,
       values: {
-        x: compiled.x.evaluate(scope, 'x'),
-        y: compiled.y.evaluate(scope, 'y'),
+        x: rotated.x,
+        y: rotated.y,
         rotation: compiled.rotation.evaluate(scope, 'rotation'),
         scaleX: compiled.scaleX.evaluate(scope, 'scaleX'),
         scaleY: compiled.scaleY.evaluate(scope, 'scaleY'),

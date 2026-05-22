@@ -17,6 +17,8 @@ export function FormulaRow({ label, formula, error, onChange }: Props) {
         rows={1}
         value={draft}
         spellcheck={false}
+        aria-label={`${label} formula`}
+        aria-invalid={error ? true : undefined}
         onInput={(e) => {
           const v = (e.target as HTMLTextAreaElement).value
           setDraft(v)

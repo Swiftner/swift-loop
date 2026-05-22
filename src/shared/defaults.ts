@@ -22,6 +22,7 @@ const scalar = (value: number): ScalarProperty => ({
 export const DEFAULT_CONFIG: LoopConfig = {
   cols: 10,
   rows: 10,
+  angle: 0,
   x: num(60),
   y: num(60),
   rotation: num(0),
@@ -39,11 +40,14 @@ export const DEFAULT_CONFIG: LoopConfig = {
   showFirst: true,
 }
 
-// Reset clears every dial: transform deltas, modulation, appearance overrides.
-// Iteration grid stays at the default so you don't drop to a single cell and
-// lose the canvas; opacity stays at 100 so clones remain visible.
+// Reset is a true blank slate: 1×1 grid (source only, no clones), every
+// transform dial at zero, no angle. Opacity stays at 100 so the source
+// remains visible.
 export const RESET_CONFIG: LoopConfig = {
   ...DEFAULT_CONFIG,
+  cols: 1,
+  rows: 1,
+  angle: 0,
   x: num(0),
   y: num(0),
   rotation: num(0),

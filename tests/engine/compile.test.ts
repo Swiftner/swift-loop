@@ -6,6 +6,7 @@ import type { LoopConfig } from '../../src/shared/types'
 const baseConfig = (): LoopConfig => ({
   cols: 5,
   rows: 1,
+  angle: 0,
   x: { value: 10, end: null, random: 0, unlocked: false, formula: null },
   y: { value: 0, end: null, random: 0, unlocked: false, formula: null },
   rotation: { value: 5, end: null, random: 0, unlocked: false, formula: null },

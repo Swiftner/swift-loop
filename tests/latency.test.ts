@@ -9,6 +9,7 @@ const PROPERTIES: FormulaProperty[] = ['x', 'y', 'rotation', 'scaleX', 'scaleY',
 const richConfig = (cols: number, rows: number): LoopConfig => ({
   cols,
   rows,
+  angle: 0,
   x: { value: 5, end: null, random: 2, unlocked: false, formula: null },
   y: { value: 5, end: null, random: 2, unlocked: false, formula: null },
   rotation: { value: 3, end: null, random: 1, unlocked: false, formula: null },

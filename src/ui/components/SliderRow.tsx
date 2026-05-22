@@ -98,6 +98,7 @@ export function SliderRow({
             type="number"
             value={draft}
             step={step}
+            aria-label={`${label} value`}
             onInput={(e) => setDraft((e.target as HTMLInputElement).value)}
             onBlur={submitDraft}
             onKeyDown={(e) => {
@@ -111,6 +112,7 @@ export function SliderRow({
             class="slider-row-value"
             {...scrubHandlers}
             type="button"
+            aria-label={`${label}: ${value}${unit ?? ''}. Drag to scrub, click to type.`}
             title="Drag to scrub, click to type. Shift = fine, Alt = coarse."
           >
             {value.toFixed(step < 1 ? 1 : 0)}
@@ -125,6 +127,7 @@ export function SliderRow({
         max={max}
         step={step}
         value={value}
+        aria-label={label}
         onInput={handleInput}
         onChange={handleChange}
         onPointerDown={onPointerDown}
@@ -135,6 +138,7 @@ export function SliderRow({
           rows={1}
           value={formula ?? ''}
           spellcheck={false}
+          aria-label={`${label} formula`}
           onInput={(e) => onFormulaChange?.((e.target as HTMLTextAreaElement).value)}
         />
       )}

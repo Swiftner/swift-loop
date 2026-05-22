@@ -1,5 +1,5 @@
 // src/ui/sections/LibraryOverlay.tsx
-import { useMemo, useState } from 'preact/hooks'
+import { useEffect, useMemo, useState } from 'preact/hooks'
 import type { FormulaProperty, LoopConfig } from '../../shared/types'
 import { Thumbnail } from '../components/Thumbnail'
 import { extractTrailingScale } from '../formula-scale'
@@ -78,20 +78,33 @@ export function LibraryOverlay({ open, config, onClose, onApply }: Props) {
     })
   }, [query, tag])
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: onClose identity is stable per render of the parent; including it would re-bind the listener every keypress.
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open])
+
   if (!open) return null
 
   return (
-    <div class="library-overlay">
+    <div class="library-overlay" role="dialog" aria-modal="true" aria-labelledby="library-title">
       <header class="library-header">
-        <h2 class="library-title">Library</h2>
+        <h2 class="library-title" id="library-title">
+          Library
+        </h2>
         <input
           class="library-search"
           type="search"
           placeholder="Search..."
+          aria-label="Search library"
           value={query}
           onInput={(e) => setQuery((e.target as HTMLInputElement).value)}
         />
-        <button class="library-close" onClick={onClose} type="button" aria-label="Close">
+        <button class="library-close" onClick={onClose} type="button" aria-label="Close library">
           ×
         </button>
       </header>

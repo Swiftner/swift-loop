@@ -6,6 +6,7 @@ import type { FormulaProperty, LoopConfig } from '../../src/shared/types'
 const richConfig = (): LoopConfig => ({
   cols: 50,
   rows: 50, // 2500 cells
+  angle: 0,
   x: { value: 5, end: null, random: 3, unlocked: false, formula: null },
   y: { value: 5, end: null, random: 3, unlocked: false, formula: null },
   rotation: { value: 3, end: null, random: 2, unlocked: false, formula: null },

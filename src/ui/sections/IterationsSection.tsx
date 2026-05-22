@@ -16,7 +16,7 @@ export function IterationsSection({ config, update, appliedName, onOpenLibrary }
       title="Iterations"
       alwaysOpen
       chip={
-        <span class="section-chip" aria-label={`${config.cols * config.rows} cells`}>
+        <output class="section-chip" aria-label={`${config.cols * config.rows} cells`}>
           {config.cols}
           <span class="section-chip-sep">×</span>
           {config.rows}
@@ -36,7 +36,7 @@ export function IterationsSection({ config, update, appliedName, onOpenLibrary }
               </button>
             </>
           )}
-        </span>
+        </output>
       }
     >
       <SliderRow
@@ -54,6 +54,15 @@ export function IterationsSection({ config, update, appliedName, onOpenLibrary }
         max={50}
         step={1}
         onChange={(v, commit) => update({ ...config, rows: Math.max(1, Math.round(v)) }, commit)}
+      />
+      <SliderRow
+        label="Angle"
+        value={config.angle}
+        min={-180}
+        max={180}
+        step={1}
+        unit="°"
+        onChange={(v, commit) => update({ ...config, angle: v }, commit)}
       />
     </Section>
   )

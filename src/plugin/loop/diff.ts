@@ -42,9 +42,12 @@ export function diffConfig(
     return { mode: 'full', dirty: ALL_PROPS }
   }
 
+  // angle re-rotates every cell's grid offset, so x and y must be re-applied.
+  const angleChanged = (prev.angle ?? 0) !== (next.angle ?? 0)
+
   const dirty: DirtyProperty[] = []
-  if (!eqNumericProperty(prev.x, next.x)) dirty.push('x')
-  if (!eqNumericProperty(prev.y, next.y)) dirty.push('y')
+  if (!eqNumericProperty(prev.x, next.x) || angleChanged) dirty.push('x')
+  if (!eqNumericProperty(prev.y, next.y) || angleChanged) dirty.push('y')
   if (!eqNumericProperty(prev.rotation, next.rotation)) dirty.push('rotation')
   if (!eqNumericProperty(prev.scaleX, next.scaleX)) dirty.push('scaleX')
   if (!eqNumericProperty(prev.scaleY, next.scaleY)) dirty.push('scaleY')

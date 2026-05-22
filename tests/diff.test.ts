@@ -5,6 +5,7 @@ import type { LoopConfig } from '../src/shared/types'
 const base = (): LoopConfig => ({
   cols: 5,
   rows: 1,
+  angle: 0,
   x: { value: 5, end: null, random: 0, unlocked: false, formula: null },
   y: { value: 0, end: null, random: 0, unlocked: false, formula: null },
   rotation: { value: 0, end: null, random: 0, unlocked: false, formula: null },
@@ -76,6 +77,16 @@ describe('diffConfig', () => {
     b.fxMode = true
     const d = diffConfig(a, b, null)
     expect(d.mode).toBe('noop')
+  })
+
+  it('angle changed -> in-place, dirty includes both x and y (rotation re-applies)', () => {
+    const a = base()
+    const b = base()
+    b.angle = 15
+    const d = diffConfig(a, b, null)
+    expect(d.mode).toBe('in-place')
+    expect(d.dirty).toContain('x')
+    expect(d.dirty).toContain('y')
   })
 
   it('color changed -> in-place, dirty includes fill', () => {

@@ -37,6 +37,10 @@ export interface LoopConfig {
   // Iteration
   cols: number
   rows: number
+  // Degrees of per-cell rotation around the source center, applied to the
+  // grid offset (values.x, values.y) post-formula. Cell i is rotated by
+  // angle * i degrees, so a 1-row line + nonzero angle traces a spiral.
+  angle: number
 
   // Base transforms (per-step)
   x: NumericProperty

@@ -13,6 +13,25 @@
 * {
   box-sizing: border-box;
 }
+/* Keyboard-only focus ring across every interactive element. Mouse clicks
+   stay clean (no ring), but tabbing always shows where focus is. Components
+   can opt out by setting `outline: none` on their own :focus-visible. */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
 body,
 .app {
   font-family: "Söhne", "Inter", -apple-system, sans-serif;
@@ -863,6 +882,12 @@ body,
 .appearance-swatch:hover {
   transform: translateY(-1px);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4), 0 3px 8px -2px rgba(0, 0, 0, 0.2);
+}
+/* The native color picker input is hidden inside the swatch, so its own focus
+   ring is invisible; reveal it on the swatch instead. */
+.appearance-swatch:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 .appearance-swatch.is-empty {
   background-image: linear-gradient(
