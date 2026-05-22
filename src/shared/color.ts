@@ -1,5 +1,5 @@
 // src/shared/color.ts
-import type { Color } from './types'
+import type { Color, ColorRamp } from './types'
 
 const HEX_RE = /^([0-9a-f]{6}|[0-9a-f]{3})$/i
 
@@ -84,4 +84,34 @@ export function lerpColorHsl(a: Color, b: Color, t: number): Color {
   const s = ha.s + (hb.s - ha.s) * t
   const l = ha.l + (hb.l - ha.l) * t
   return hslToRgb({ h, s, l })
+}
+
+/**
+ * Sample a color ramp at `t ∈ [0,1]`.
+ * - Empty ramp → null (no color set)
+ * - Single stop → that color at any t
+ * - Multiple stops → HSL shortest-arc lerp between the two stops surrounding t,
+ *   clamping to the first/last color outside the outermost stops.
+ */
+export function sampleRamp(ramp: ColorRamp, t: number): Color | null {
+  const stops = ramp.stops
+  if (stops.length === 0) return null
+  if (stops.length === 1) return stops[0].color
+
+  const sorted = [...stops].sort((a, b) => a.position - b.position)
+  if (t <= sorted[0].position) return sorted[0].color
+  if (t >= sorted[sorted.length - 1].position) return sorted[sorted.length - 1].color
+
+  for (let i = 0; i < sorted.length - 1; i++) {
+    const a = sorted[i]
+    const b = sorted[i + 1]
+    if (t >= a.position && t <= b.position) {
+      if (t === a.position) return a.color
+      if (t === b.position) return b.color
+      const span = b.position - a.position
+      const local = span === 0 ? 0 : (t - a.position) / span
+      return lerpColorHsl(a.color, b.color, local)
+    }
+  }
+  return sorted[sorted.length - 1].color // unreachable; defensive
 }

@@ -6,11 +6,15 @@ export interface Color {
   b: number
 }
 
-export interface ColorStop {
-  color: Color | null
-  end: Color | null
+export interface ColorStopPoint {
+  color: Color
+  position: number // 0..1
+}
+
+export interface ColorRamp {
+  stops: ColorStopPoint[] // empty = no color set; 1 = solid; 2+ = gradient. Sorted by position when read.
   unlocked?: boolean // true = use `formula` as the lerp factor (overrides global easing)
-  formula?: string | null // formula returning a number in [0, 1] used as the start→end lerp factor
+  formula?: string | null // formula returning a number in [0, 1] used as the ramp factor
 }
 
 export type EasingKind = 'linear' | 'ease' | 'easeIn' | 'easeOut'
@@ -51,8 +55,8 @@ export interface LoopConfig {
 
   // Appearance
   opacity: NumericProperty
-  fill: ColorStop
-  stroke: ColorStop
+  fill: ColorRamp
+  stroke: ColorRamp
   strokeWeight: ScalarProperty
 
   // Modulation
