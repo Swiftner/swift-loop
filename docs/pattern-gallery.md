@@ -30,6 +30,8 @@ Things that arrange themselves around a point.
 
 **Curl.** A straight line curled into a spiral via per-cell angle. Shows what the Angle slider does on its own. Scrub Angle from 0 upward and watch the line bend.
 
+**Vortex.** Tight inward spiral with shapes shrinking and fading toward the center. The most dramatic of the spiral family.
+
 **Starburst.** Radial rays from the origin. Alternating long and short arms make it look like a sea urchin or a sun icon.
 
 **Polar Grid.** Concentric rings with evenly spaced spokes. `cols` is spokes, `rows` is rings.
@@ -37,6 +39,10 @@ Things that arrange themselves around a point.
 **Spiral.** Expanding logarithmic spiral. Set `cols` higher for tighter coiling.
 
 **Phyllotaxis.** Sunflower seed pattern using the golden angle. The most satisfying pattern in the library to crank up. Try 200 cols.
+
+**Rose.** Five-petal `r = cos(kθ)` curve. Change the `5` in the formula to any odd number for a different petal count (even numbers give twice as many).
+
+**Mandala.** Concentric rings, each rotated by the golden angle from the next. Layered radial symmetry without any tedious by-hand placement.
 
 ## Waves and curves
 

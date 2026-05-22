@@ -2,6 +2,13 @@
 
 All notable changes to Swift Loop. Versions follow SemVer; the [v0.x.y] anchor links to the GitHub release.
 
+## [v0.1.22] — 2026-05-22
+
+### Added
+- **5 new library patterns:** **Rose** (5-petal `r = cos(kθ)` curve), **Heart** (parametric cardioid), **Mandala** (concentric rings with golden-angle twist), **Vortex** (tight inward spiral with shrinking shapes), **Comet** (trail with size + opacity falloff). Library now ships with 25 patterns.
+- **Clear-pattern button** on the iterations chip. After applying a library pattern, click the `×` next to its name to drop the locked formulas and return to plain-slider mode — without losing your cols, rows, angle, or slider values.
+- **Always-on library doorway.** The iterations chip now reads `… · library →` even when no pattern is applied, so the library is one click away from the home state and from a fresh Reset.
+
 ## [v0.1.21] — 2026-05-22
 
 ### Added

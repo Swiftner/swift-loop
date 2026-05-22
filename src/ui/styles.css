@@ -176,6 +176,22 @@ body,
   color: var(--accent);
   text-decoration-color: var(--accent);
 }
+.section-chip-clear {
+  background: transparent;
+  border: 0;
+  padding: 0 4px;
+  margin-left: 2px;
+  color: var(--muted);
+  cursor: pointer;
+  font: inherit;
+  line-height: 1;
+  border-radius: 3px;
+  transition: color 120ms ease, background 120ms ease;
+}
+.section-chip-clear:hover {
+  color: var(--fg);
+  background: var(--hairline);
+}
 .subsection-title {
   font-size: 10px;
   font-weight: 600;

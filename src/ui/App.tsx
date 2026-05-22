@@ -156,6 +156,7 @@ export function App() {
           update={update}
           appliedName={appliedName}
           onOpenLibrary={() => setLibraryOpen(true)}
+          onClearPattern={() => setAppliedName(null)}
         />
         <TransformSection config={config} update={update} sourceSize={sourceSize} />
         <ModulationSection config={config} update={update} sourceSize={sourceSize} />

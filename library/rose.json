@@ -1,0 +1,13 @@
+{
+  "id": "rose",
+  "name": "Rose",
+  "description": "Five-petal rose curve. The classic r = cos(kθ) flower.",
+  "tags": ["polar", "radial", "curve", "organic"],
+  "author": "@swiftner",
+  "cols": 120, "rows": 1,
+  "showFirst": false,
+  "formulas": {
+    "x": "x = cos(t * TAU) * cos(t * TAU * 5) * {x:160}",
+    "y": "y = sin(t * TAU) * cos(t * TAU * 5) * {y:160}"
+  }
+}
