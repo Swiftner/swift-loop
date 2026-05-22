@@ -131,11 +131,22 @@ function StopChip({ stop, index, sorted, stripRef, ramp, onChange }: StopChipPro
     e.stopPropagation()
     const el = stripRef.current
     if (!el) return
+    const chip = e.currentTarget as HTMLElement
     const rect = el.getBoundingClientRect()
     const minPos = index === 0 ? 0 : sorted[index - 1].position
     const maxPos = index === sorted.length - 1 ? 1 : sorted[index + 1].position
     let lastCommitted = stop.position
     let dragged = false
+
+    // Bind the gesture to the chip so it survives pointer leaving the chip,
+    // and so the browser fires pointercancel if focus/touch is interrupted.
+    chip.setPointerCapture(e.pointerId)
+
+    const cleanup = () => {
+      chip.removeEventListener('pointermove', move)
+      chip.removeEventListener('pointerup', up)
+      chip.removeEventListener('pointercancel', cancel)
+    }
 
     const move = (ev: PointerEvent) => {
       const dyAbs = Math.abs(ev.clientY - rect.top - rect.height / 2)
@@ -151,8 +162,7 @@ function StopChip({ stop, index, sorted, stripRef, ramp, onChange }: StopChipPro
     }
 
     const up = (ev: PointerEvent) => {
-      window.removeEventListener('pointermove', move)
-      window.removeEventListener('pointerup', up)
+      cleanup()
       const dyAbs = Math.abs(ev.clientY - rect.top - rect.height / 2)
       if (dyAbs > rect.height * 2.5 && sorted.length > 0) {
         const nextStops = sorted.filter((_, i) => i !== index)
@@ -164,8 +174,18 @@ function StopChip({ stop, index, sorted, stripRef, ramp, onChange }: StopChipPro
       onChange({ ...ramp, stops: nextStops }, true)
     }
 
-    window.addEventListener('pointermove', move)
-    window.addEventListener('pointerup', up)
+    // OS / browser cancelled the gesture (focus lost, touch interrupted).
+    // Revert any uncommitted preview by re-emitting the last committed state.
+    const cancel = () => {
+      cleanup()
+      if (!dragged) return
+      const nextStops = sorted.map((s, i) => (i === index ? { ...s, position: stop.position } : s))
+      onChange({ ...ramp, stops: nextStops }, true)
+    }
+
+    chip.addEventListener('pointermove', move)
+    chip.addEventListener('pointerup', up)
+    chip.addEventListener('pointercancel', cancel)
   }
 
   const onColorInput = (e: Event) => {

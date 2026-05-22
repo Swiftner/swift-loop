@@ -98,18 +98,24 @@ export function sampleRamp(ramp: ColorRamp, t: number): Color | null {
   if (stops.length === 0) return null
   if (stops.length === 1) return stops[0].color
 
+  // User formulas (Math.log(-1), 0/0) can feed NaN/Infinity here. Clamp to 0
+  // so the ramp degrades to the first stop instead of crashing.
+  const safeT = Number.isFinite(t) ? t : 0
   const sorted = [...stops].sort((a, b) => a.position - b.position)
-  if (t <= sorted[0].position) return sorted[0].color
-  if (t >= sorted[sorted.length - 1].position) return sorted[sorted.length - 1].color
+  if (safeT <= sorted[0].position) return sorted[0].color
+  if (safeT >= sorted[sorted.length - 1].position) return sorted[sorted.length - 1].color
 
   for (let i = 0; i < sorted.length - 1; i++) {
     const a = sorted[i]
     const b = sorted[i + 1]
-    if (t < a.position || t > b.position) continue
-    if (t === a.position) return a.color
-    if (t === b.position) return b.color
-    const local = (t - a.position) / (b.position - a.position)
-    return lerpColorHsl(a.color, b.color, local)
+    if (safeT < a.position || safeT > b.position) continue
+    if (safeT === a.position) return a.color
+    if (safeT === b.position) return b.color
+    const span = b.position - a.position
+    // Two stops dropped at the same position are a zero-width segment — pick
+    // the right edge so the ramp is left-continuous at the seam.
+    if (span <= 0) return b.color
+    return lerpColorHsl(a.color, b.color, (safeT - a.position) / span)
   }
   throw new Error('sampleRamp: unreachable — t outside sorted ramp range')
 }

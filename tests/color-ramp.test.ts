@@ -91,6 +91,43 @@ describe('sampleRamp', () => {
     expect(sampleRamp(ramp, 0)).toEqual(RED)
     expect(sampleRamp(ramp, 1)).toEqual(BLUE)
   })
+
+  it('clamps non-finite t to the first stop instead of crashing', () => {
+    const ramp: ColorRamp = {
+      stops: [
+        { color: RED, position: 0 },
+        { color: BLUE, position: 1 },
+      ],
+    }
+    // User formulas can produce NaN (0/0, log(-1)) or Infinity (1/0). The
+    // engine must degrade gracefully — Mia's preview should never go blank
+    // because of a one-character formula typo.
+    expect(sampleRamp(ramp, Number.NaN)).toEqual(RED)
+    expect(sampleRamp(ramp, Number.POSITIVE_INFINITY)).toEqual(RED)
+    expect(sampleRamp(ramp, Number.NEGATIVE_INFINITY)).toEqual(RED)
+  })
+
+  it('handles duplicate stop positions without dividing by zero', () => {
+    // Two stops dropped at exactly the same position used to make the
+    // segment lerp divide by zero → NaN colors → black rendering. Now the
+    // zero-width segment is skipped cleanly.
+    const ramp: ColorRamp = {
+      stops: [
+        { color: RED, position: 0 },
+        { color: GREEN, position: 0.5 },
+        { color: BLUE, position: 0.5 },
+        { color: { r: 0, g: 0, b: 0 }, position: 1 },
+      ],
+    }
+    // At the duplicate position, the earlier short-circuit returns the
+    // first-encountered stop's color (GREEN here, since sort is stable).
+    expect(sampleRamp(ramp, 0.5)).toEqual(GREEN)
+    // Just after: routes into the BLUE → black segment, not a NaN/black hole.
+    const after = sampleRamp(ramp, 0.51) as { r: number; g: number; b: number }
+    expect(after).not.toBeNull()
+    expect(after.b).toBeGreaterThan(0.5)
+    expect(after.r).toBeCloseTo(0, 1)
+  })
 })
 
 describe('legacyColorStopToRamp', () => {

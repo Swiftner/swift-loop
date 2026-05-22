@@ -3,6 +3,7 @@
 // Click a loop to edit its effects in the right sidebar; drag to move;
 // rotate handle above; corner handles to scale.
 
+import { sampleRamp } from '../shared/color'
 import { DEFAULT_CONFIG } from '../shared/defaults'
 import type { LoopConfig } from '../shared/types'
 import { renderLoop, sourceSize } from './render-loop'
@@ -508,7 +509,9 @@ function updateLayersList(): void {
 
     const dot = document.createElement('span')
     dot.className = 'dot'
-    const c = loop.config.fill.stops[0]?.color
+    // Sample at t=0 so the dot reflects the leftmost visible color, matching
+    // how Figma's layer thumbnail shows the start of a gradient.
+    const c = sampleRamp(loop.config.fill, 0)
     if (c) {
       dot.style.background = `rgb(${Math.round(c.r * 255)}, ${Math.round(c.g * 255)}, ${Math.round(c.b * 255)})`
     }
