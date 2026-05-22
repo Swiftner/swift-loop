@@ -158,7 +158,7 @@ export function App() {
           onOpenLibrary={() => setLibraryOpen(true)}
         />
         <TransformSection config={config} update={update} sourceSize={sourceSize} />
-        <ModulationSection config={config} update={update} />
+        <ModulationSection config={config} update={update} sourceSize={sourceSize} />
         <AppearanceSection config={config} update={update} />
         <PresetsSection
           config={config}

@@ -48,3 +48,40 @@ export function sliderRangeFor(
       return FALLBACK[prop]
   }
 }
+
+// Random/noise is a one-sided slider (0..max) where the value sets the
+// magnitude of `(rand() - 0.5) * 2 * value` jitter applied per cell. So the
+// slider's upper end should match the property's natural scale — for x/y/scale
+// that's the source dimension; for rotation 180°; for opacity 100%.
+export function randomMaxFor(
+  prop: FormulaProperty,
+  source: { width: number; height: number } | null,
+): number {
+  switch (prop) {
+    case 'x':
+      return source ? roundMax(source.width) : 100
+    case 'y':
+      return source ? roundMax(source.height) : 100
+    case 'scaleX':
+      return source ? roundMax(source.width) : 100
+    case 'scaleY':
+      return source ? roundMax(source.height) : 100
+    case 'rotation':
+      return 180
+    case 'opacity':
+      return 100
+  }
+}
+
+// Sinusoidal amplitude is in degrees for rotation and px for scale, so the
+// max for the scale wave should track shape size while rotation stays in deg.
+export function sinusoidalAmplitudeMaxFor(
+  kind: 'rotation' | 'scale',
+  source: { width: number; height: number } | null,
+): number {
+  if (kind === 'rotation') return 180
+  // scale amplitude: take the larger dimension so a single slider drives both
+  // axes equally; users who want per-axis can use the formula field.
+  if (!source) return 100
+  return roundMax(Math.max(source.width, source.height))
+}

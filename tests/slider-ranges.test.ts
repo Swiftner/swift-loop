@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { sliderRangeFor } from '../src/ui/slider-ranges'
+import {
+  randomMaxFor,
+  sinusoidalAmplitudeMaxFor,
+  sliderRangeFor,
+} from '../src/ui/slider-ranges'
 
 describe('sliderRangeFor', () => {
   it('falls back to fixed ranges when no source size is known', () => {
@@ -53,7 +57,7 @@ describe('sliderRangeFor', () => {
     expect(r.max).toBeLessThanOrEqual(450)
   })
 
-  it('always returns symmetric ranges around zero', () => {
+  it('always returns symmetric ranges around zero for transform sliders', () => {
     const sizes = [
       { width: 1, height: 1 },
       { width: 17, height: 89 },
@@ -67,5 +71,59 @@ describe('sliderRangeFor', () => {
         expect(r.min, `${prop} @ ${s.width}x${s.height}`).toBe(-r.max)
       }
     }
+  })
+})
+
+describe('randomMaxFor', () => {
+  it('falls back to 100 for px-based properties without a source', () => {
+    expect(randomMaxFor('x', null)).toBe(100)
+    expect(randomMaxFor('y', null)).toBe(100)
+    expect(randomMaxFor('scaleX', null)).toBe(100)
+    expect(randomMaxFor('scaleY', null)).toBe(100)
+  })
+
+  it('always returns 180 for rotation regardless of source', () => {
+    expect(randomMaxFor('rotation', null)).toBe(180)
+    expect(randomMaxFor('rotation', { width: 4, height: 4 })).toBe(180)
+    expect(randomMaxFor('rotation', { width: 9999, height: 9999 })).toBe(180)
+  })
+
+  it('always returns 100 for opacity (percent)', () => {
+    expect(randomMaxFor('opacity', null)).toBe(100)
+    expect(randomMaxFor('opacity', { width: 4, height: 4 })).toBe(100)
+    expect(randomMaxFor('opacity', { width: 9999, height: 9999 })).toBe(100)
+  })
+
+  it('scales x/y/scale random max to 1× source dimension', () => {
+    const s = { width: 100, height: 250 }
+    expect(randomMaxFor('x', s)).toBe(100)
+    expect(randomMaxFor('y', s)).toBe(250)
+    expect(randomMaxFor('scaleX', s)).toBe(100)
+    expect(randomMaxFor('scaleY', s)).toBe(250)
+  })
+
+  it('rounds to clean increments for awkward sizes', () => {
+    const r = randomMaxFor('x', { width: 217, height: 217 })
+    expect(r % 10).toBe(0)
+    expect(r).toBeGreaterThanOrEqual(210)
+    expect(r).toBeLessThanOrEqual(230)
+  })
+})
+
+describe('sinusoidalAmplitudeMaxFor', () => {
+  it('returns 180 for rotation regardless of source', () => {
+    expect(sinusoidalAmplitudeMaxFor('rotation', null)).toBe(180)
+    expect(sinusoidalAmplitudeMaxFor('rotation', { width: 9999, height: 9999 })).toBe(180)
+  })
+
+  it('falls back to 100 for scale without a source', () => {
+    expect(sinusoidalAmplitudeMaxFor('scale', null)).toBe(100)
+  })
+
+  it('scales the scale-wave amplitude to the larger source dimension', () => {
+    // A single slider drives both axes; pick max(w, h) so the upper end always
+    // covers the longer axis.
+    expect(sinusoidalAmplitudeMaxFor('scale', { width: 80, height: 200 })).toBe(200)
+    expect(sinusoidalAmplitudeMaxFor('scale', { width: 500, height: 100 })).toBe(500)
   })
 })

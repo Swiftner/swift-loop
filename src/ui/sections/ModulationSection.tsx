@@ -1,13 +1,17 @@
 import type { LoopConfig } from '../../shared/types'
 import { Section } from '../components/Section'
 import { SliderRow } from '../components/SliderRow'
+import { randomMaxFor, sinusoidalAmplitudeMaxFor } from '../slider-ranges'
 
 interface Props {
   config: LoopConfig
   update: (next: LoopConfig, commit?: boolean) => void
+  sourceSize: { width: number; height: number } | null
 }
 
-export function ModulationSection({ config, update }: Props) {
+export function ModulationSection({ config, update, sourceSize }: Props) {
+  const rotAmpMax = sinusoidalAmplitudeMaxFor('rotation', sourceSize)
+  const scaleAmpMax = sinusoidalAmplitudeMaxFor('scale', sourceSize)
   return (
     <Section id="modulation" title="Modulation" defaultOpen={false}>
       <h3 class="subsection-title">Random ±</h3>
@@ -17,7 +21,7 @@ export function ModulationSection({ config, update }: Props) {
               label={k}
               value={config[k].random}
               min={0}
-              max={100}
+              max={randomMaxFor(k, sourceSize)}
               step={0.5}
               onChange={(v, commit) =>
                 update({ ...config, [k]: { ...config[k], random: v } }, commit)
@@ -29,7 +33,7 @@ export function ModulationSection({ config, update }: Props) {
             label="Amplitude"
             value={config.rotationSinusoidal.amplitude}
             min={0}
-            max={100}
+            max={rotAmpMax}
             step={0.5}
             onChange={(v, commit) =>
               update(
@@ -69,7 +73,7 @@ export function ModulationSection({ config, update }: Props) {
             label="Amplitude"
             value={config.scaleSinusoidal.amplitude}
             min={0}
-            max={100}
+            max={scaleAmpMax}
             step={0.5}
             onChange={(v, commit) =>
               update(
