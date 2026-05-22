@@ -50,7 +50,9 @@ describe('sampleRamp', () => {
     const mid = sampleRamp(ramp, 0.5)
     expect(mid).not.toBeNull()
     const v = mid as { r: number; g: number; b: number }
-    expect(v.r + v.g + v.b).toBeGreaterThan(0.2)
+    expect(v.r).toBeCloseTo(1, 1)
+    expect(v.g).toBeCloseTo(0, 1)
+    expect(v.b).toBeCloseTo(1, 1)
   })
 
   it('picks the correct segment when there are three stops', () => {
@@ -64,6 +66,19 @@ describe('sampleRamp', () => {
     expect(sampleRamp(ramp, 0)).toEqual(RED)
     expect(sampleRamp(ramp, 0.5)).toEqual(GREEN)
     expect(sampleRamp(ramp, 1)).toEqual(BLUE)
+
+    const lo = sampleRamp(ramp, 0.25) // between RED (0) and GREEN (0.5)
+    const hi = sampleRamp(ramp, 0.75) // between GREEN (0.5) and BLUE (1)
+
+    // Verify lo is in the RED→GREEN arc (not BLUE-ish): red channel should still be present, blue near zero
+    expect(lo).not.toBeNull()
+    const loV = lo as { r: number; g: number; b: number }
+    expect(loV.b).toBeCloseTo(0, 1)
+
+    // Verify hi is in the GREEN→BLUE arc (red near zero)
+    expect(hi).not.toBeNull()
+    const hiV = hi as { r: number; g: number; b: number }
+    expect(hiV.r).toBeCloseTo(0, 1)
   })
 
   it('sorts stops by position before sampling (defensive)', () => {

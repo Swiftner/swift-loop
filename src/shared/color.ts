@@ -105,13 +105,11 @@ export function sampleRamp(ramp: ColorRamp, t: number): Color | null {
   for (let i = 0; i < sorted.length - 1; i++) {
     const a = sorted[i]
     const b = sorted[i + 1]
-    if (t >= a.position && t <= b.position) {
-      if (t === a.position) return a.color
-      if (t === b.position) return b.color
-      const span = b.position - a.position
-      const local = span === 0 ? 0 : (t - a.position) / span
-      return lerpColorHsl(a.color, b.color, local)
-    }
+    if (t < a.position || t > b.position) continue
+    if (t === a.position) return a.color
+    if (t === b.position) return b.color
+    const local = (t - a.position) / (b.position - a.position)
+    return lerpColorHsl(a.color, b.color, local)
   }
-  return sorted[sorted.length - 1].color // unreachable; defensive
+  throw new Error('sampleRamp: unreachable — t outside sorted ramp range')
 }
