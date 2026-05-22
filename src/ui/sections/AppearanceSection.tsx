@@ -3,8 +3,8 @@ import {
   factorForScalar,
   formulaForProperty,
 } from '../../plugin/engine/compile'
-import { hexToRgb, rgbToHex } from '../../shared/color'
-import type { Color, ColorStop, EasingKind, LoopConfig } from '../../shared/types'
+import type { EasingKind, LoopConfig } from '../../shared/types'
+import { GradientRampEditor } from '../components/GradientRampEditor'
 import { ScrubNum } from '../components/ScrubNum'
 import { Section } from '../components/Section'
 import { Strip } from '../components/Strip'
@@ -87,30 +87,10 @@ export function AppearanceSection({ config, update }: Props) {
       />
 
       {/* Fill */}
-      <Strip
+      <GradientRampEditor
         label="Fill"
-        readout={
-          <HexReadout
-            start={config.fill.color}
-            end={config.fill.end}
-            onClearStart={() => update({ ...config, fill: { ...config.fill, color: null } }, true)}
-            onClearEnd={() => update({ ...config, fill: { ...config.fill, end: null } }, true)}
-          />
-        }
-        barBackground={colorStopGradient(config.fill)}
-        startCol={
-          <ColorSwatch
-            color={config.fill.color}
-            onChange={(c) => update({ ...config, fill: { ...config.fill, color: c } }, true)}
-          />
-        }
-        endCol={
-          <ColorSwatch
-            color={config.fill.end}
-            onChange={(c) => update({ ...config, fill: { ...config.fill, end: c } }, true)}
-          />
-        }
-        easing={config.easing}
+        ramp={config.fill}
+        onChange={(next, commit) => update({ ...config, fill: next }, commit)}
         formulaActive={fillFormulaActive}
         formula={factorForColorStop(config, config.fill)}
         onFormulaChange={(text) => {
@@ -129,32 +109,10 @@ export function AppearanceSection({ config, update }: Props) {
       />
 
       {/* Stroke */}
-      <Strip
+      <GradientRampEditor
         label="Stroke"
-        readout={
-          <HexReadout
-            start={config.stroke.color}
-            end={config.stroke.end}
-            onClearStart={() =>
-              update({ ...config, stroke: { ...config.stroke, color: null } }, true)
-            }
-            onClearEnd={() => update({ ...config, stroke: { ...config.stroke, end: null } }, true)}
-          />
-        }
-        barBackground={colorStopGradient(config.stroke)}
-        startCol={
-          <ColorSwatch
-            color={config.stroke.color}
-            onChange={(c) => update({ ...config, stroke: { ...config.stroke, color: c } }, true)}
-          />
-        }
-        endCol={
-          <ColorSwatch
-            color={config.stroke.end}
-            onChange={(c) => update({ ...config, stroke: { ...config.stroke, end: c } }, true)}
-          />
-        }
-        easing={config.easing}
+        ramp={config.stroke}
+        onChange={(next, commit) => update({ ...config, stroke: next }, commit)}
         formulaActive={strokeFormulaActive}
         formula={factorForColorStop(config, config.stroke)}
         onFormulaChange={(text) => {
@@ -276,90 +234,7 @@ function EasingGlyph({ easing }: { easing: EasingKind }) {
   )
 }
 
-interface ColorSwatchProps {
-  color: Color | null
-  onChange: (next: Color | null) => void
-}
-function ColorSwatch({ color, onChange }: ColorSwatchProps) {
-  const hex = color ? rgbToHex(color) : ''
-  return (
-    <span class={`appearance-swatch${color ? '' : ' is-empty'}`}>
-      <input
-        type="color"
-        class="appearance-swatch-picker"
-        value={`#${hex || '000000'}`}
-        onInput={(e) => {
-          const v = (e.target as HTMLInputElement).value.replace('#', '')
-          const c = hexToRgb(v)
-          if (c) onChange(c)
-        }}
-        aria-label={color ? `Edit colour ${hex}` : 'Set colour'}
-      />
-      <span
-        class="appearance-swatch-fill"
-        style={color ? `background: #${hex}` : undefined}
-        aria-hidden="true"
-      />
-    </span>
-  )
-}
-
-interface HexReadoutProps {
-  start: Color | null
-  end: Color | null
-  onClearStart: () => void
-  onClearEnd: () => void
-}
-function HexReadout({ start, end, onClearStart, onClearEnd }: HexReadoutProps) {
-  return (
-    <>
-      {start ? (
-        <>
-          <span class="appearance-hex">{rgbToHex(start)}</span>
-          <button
-            class="appearance-hex-clear"
-            type="button"
-            onClick={onClearStart}
-            aria-label="Remove start colour"
-            title="Remove"
-          >
-            ×
-          </button>
-        </>
-      ) : (
-        <span class="appearance-hex is-empty">—</span>
-      )}
-      <span class="appearance-strip-sep">→</span>
-      {end ? (
-        <>
-          <span class="appearance-hex">{rgbToHex(end)}</span>
-          <button
-            class="appearance-hex-clear"
-            type="button"
-            onClick={onClearEnd}
-            aria-label="Remove end colour"
-            title="Remove"
-          >
-            ×
-          </button>
-        </>
-      ) : (
-        <span class="appearance-hex is-empty">—</span>
-      )}
-    </>
-  )
-}
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function colorStopGradient(stop: ColorStop): string {
-  if (!stop.color) return 'transparent'
-  const startHex = rgbToHex(stop.color)
-  if (!stop.end) {
-    return `linear-gradient(to right, #${startHex}, rgba(${stop.color.r * 255},${stop.color.g * 255},${stop.color.b * 255},0))`
-  }
-  return `linear-gradient(to right, #${startHex}, #${rgbToHex(stop.end)})`
-}
 
 function wedgePoints(start: number, end: number): string {
   const sH = Math.min(22, Math.max(1, start * 2))
@@ -370,4 +245,3 @@ function wedgePoints(start: number, end: number): string {
   const eBot = 12 + eH / 2
   return `4,${sTop.toFixed(1)} 96,${eTop.toFixed(1)} 96,${eBot.toFixed(1)} 4,${sBot.toFixed(1)}`
 }
-
