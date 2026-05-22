@@ -39,7 +39,7 @@
         grid-template-rows: auto 1fr;
         grid-template-columns: 1fr 340px;
         grid-template-areas:
-          "topbar topbar"
+          "topbar sidebar"
           "stage  sidebar";
         gap: 10px;
         padding: 10px;
@@ -151,7 +151,7 @@
       .sidebar {
         grid-area: sidebar;
         display: grid;
-        grid-template-rows: 1fr auto;
+        grid-template-rows: 1fr minmax(220px, 1fr);
         gap: 10px;
         min-height: 0;
       }
@@ -187,6 +187,29 @@
         font-feature-settings: "tnum";
         letter-spacing: 0.08em;
       }
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .header-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        padding: 0;
+        background: transparent;
+        border: 1px solid var(--hair-2);
+        border-radius: 4px;
+        color: var(--ink-2);
+        cursor: pointer;
+      }
+      .header-btn:hover {
+        background: #fafafc;
+        color: var(--ink);
+        border-color: #c4c7cd;
+      }
 
       iframe#plugin-ui {
         flex: 1 1 auto;
@@ -216,7 +239,8 @@
 
       /* ---------- Layers list ---------- */
       .layers {
-        max-height: 200px;
+        flex: 1 1 auto;
+        min-height: 0;
         overflow-y: auto;
       }
       .layers-empty {
@@ -254,6 +278,7 @@
         overflow: hidden;
         text-overflow: ellipsis;
       }
+      .layer .download,
       .layer .remove {
         background: transparent;
         border: 0;
@@ -263,6 +288,15 @@
         font-size: 14px;
         line-height: 1;
         border-radius: 4px;
+      }
+      .layer .download {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .layer .download:hover {
+        background: var(--accent-tint);
+        color: var(--accent-ink);
       }
       .layer .remove:hover {
         background: #fef2ef;
@@ -396,24 +430,7 @@
           Swift Loop
         </span>
 
-        <div class="group">
-          <label class="btn-ghost" for="shape-upload" title="Upload one or more SVGs / images. Each becomes its own loop.">
-            <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
-              <path d="M5.5 9.5V2m0 0L2.75 4.75M5.5 2l2.75 2.75" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Upload shape
-          </label>
-          <input id="shape-upload" type="file" accept=".svg,image/svg+xml,image/png,image/jpeg,image/webp" multiple hidden />
-          <button id="add-default" class="btn-ghost" type="button" title="Add a loop using the default circle shape">
-            <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
-              <circle cx="5.5" cy="5.5" r="3.5" stroke="currentColor" stroke-width="1.4" fill="none"/>
-              <path d="M5.5 3.5v4M3.5 5.5h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-            </svg>
-            Add circle
-          </button>
-        </div>
-
-        <div class="divider" aria-hidden="true"></div>
+        <input id="shape-upload" type="file" accept=".svg,image/svg+xml,image/png,image/jpeg,image/webp" multiple hidden />
 
         <div class="group" role="group" aria-label="Zoom">
           <button id="zoom-out" class="btn-ghost" type="button" title="Zoom out" aria-label="Zoom out">
@@ -500,7 +517,20 @@
         <div class="panel">
           <div class="panel-header">
             <span>Layers</span>
-            <span class="count" id="layers-count">0</span>
+            <div class="header-actions">
+              <span class="count" id="layers-count">0</span>
+              <label class="header-btn" for="shape-upload" title="Upload one or more SVGs / images. Each becomes its own loop." aria-label="Upload shape">
+                <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
+                  <path d="M5.5 9.5V2m0 0L2.75 4.75M5.5 2l2.75 2.75" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </label>
+              <button id="add-default" class="header-btn" type="button" title="Add a loop using the default circle shape" aria-label="Add circle">
+                <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
+                  <circle cx="5.5" cy="5.5" r="3.5" stroke="currentColor" stroke-width="1.4" fill="none"/>
+                  <path d="M5.5 3.5v4M3.5 5.5h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                </svg>
+              </button>
+            </div>
           </div>
           <div class="layers" id="layers">
             <div class="layers-empty">No loops yet.</div>
