@@ -31,21 +31,23 @@ export async function applyToClone(input: ApplyInput): Promise<void> {
     dirty,
   } = input
 
-  if (dirty.has('x') || dirty.has('y')) {
-    clone.x = source.x + values.x
-    clone.y = source.y + values.y
-  }
-  if (dirty.has('scaleX') || dirty.has('scaleY')) {
+  // Position, scale, and rotation compose into one transform: if any is dirty,
+  // recompute all three from `source` so the patches don't stack on stale state.
+  const transformDirty =
+    dirty.has('x') ||
+    dirty.has('y') ||
+    dirty.has('scaleX') ||
+    dirty.has('scaleY') ||
+    dirty.has('rotation')
+  if (transformDirty) {
+    if ('rotation' in clone) (clone as LayoutMixin).rotation = 0
     if ('resize' in clone) {
       const newW = Math.max(1, source.width + values.scaleX)
       const newH = Math.max(1, source.height + values.scaleY)
       ;(clone as LayoutMixin & { resize: (w: number, h: number) => void }).resize(newW, newH)
-      // centered growth: adjust position
-      clone.x -= values.scaleX / 2
-      clone.y -= values.scaleY / 2
     }
-  }
-  if (dirty.has('rotation')) {
+    clone.x = source.x + values.x - values.scaleX / 2
+    clone.y = source.y + values.y - values.scaleY / 2
     await rotateAroundCenter(clone, values.rotation)
   }
   if (dirty.has('opacity')) {
