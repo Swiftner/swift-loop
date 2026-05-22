@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { clearPattern, resetKeepingPattern } from '../src/ui/config-ops'
 import { DEFAULT_CONFIG, RESET_CONFIG } from '../src/shared/defaults'
 import type { LoopConfig } from '../src/shared/types'
+import { clearPattern, resetKeepingPattern } from '../src/ui/config-ops'
 
 // Mimic a config after applying a library pattern: every animated property
 // has unlocked=true with a formula; fxMode is on; iteration grid was set.
@@ -23,8 +23,18 @@ function appliedConfig(): LoopConfig {
     },
     scaleX: { value: 0, end: null, random: 0, unlocked: true, formula: 'scaleX = -t * 20' },
     scaleY: { value: 0, end: null, random: 0, unlocked: true, formula: 'scaleY = -t * 20' },
-    opacity: { value: 100, end: null, random: 0, unlocked: true, formula: 'opacity = 100 - t * 50' },
-    fill: { color: { r: 0.5, g: 0.5, b: 1 }, end: null, unlocked: true, formula: 't' },
+    opacity: {
+      value: 100,
+      end: null,
+      random: 0,
+      unlocked: true,
+      formula: 'opacity = 100 - t * 50',
+    },
+    fill: {
+      stops: [{ color: { r: 0.5, g: 0.5, b: 1 }, position: 0 }],
+      unlocked: true,
+      formula: 't',
+    },
   }
 }
 
@@ -61,7 +71,7 @@ describe('clearPattern', () => {
 
   it('preserves the fill color itself (only the formula gets dropped)', () => {
     const cleared = clearPattern(appliedConfig())
-    expect(cleared.fill.color).toEqual({ r: 0.5, g: 0.5, b: 1 })
+    expect(cleared.fill.stops[0].color).toEqual({ r: 0.5, g: 0.5, b: 1 })
   })
 
   it('does not mutate the input', () => {

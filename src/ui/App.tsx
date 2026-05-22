@@ -1,9 +1,10 @@
 import { emit, on } from '@create-figma-plugin/utilities'
 import { useCallback, useEffect, useState } from 'preact/hooks'
+import { legacyColorStopToRamp } from '../shared/color'
 import { RESET_CONFIG } from '../shared/defaults'
-import { resetKeepingPattern } from './config-ops'
 import type { LoopConfig, Snapshot } from '../shared/types'
 import { ResizeHandle } from './components/ResizeHandle'
+import { resetKeepingPattern } from './config-ops'
 import { useLooperConfig } from './hooks/useLooperConfig'
 import { AppearanceSection } from './sections/AppearanceSection'
 import { IterationsSection } from './sections/IterationsSection'
@@ -28,17 +29,14 @@ export function App() {
   const [appliedName, setAppliedName] = useState<string | null>(null)
 
   useEffect(() => {
-    return on(
-      'loop:selection-change',
-      (p: { valid: boolean; width?: number; height?: number }) => {
-        setSelectionValid(p.valid)
-        setSourceSize(
-          p.valid && p.width != null && p.height != null
-            ? { width: p.width, height: p.height }
-            : null,
-        )
-      },
-    )
+    return on('loop:selection-change', (p: { valid: boolean; width?: number; height?: number }) => {
+      setSelectionValid(p.valid)
+      setSourceSize(
+        p.valid && p.width != null && p.height != null
+          ? { width: p.width, height: p.height }
+          : null,
+      )
+    })
   }, [])
 
   useEffect(() => {
@@ -54,9 +52,7 @@ export function App() {
         tag === 'TEXTAREA' ||
         target?.isContentEditable ||
         (tag === 'INPUT' &&
-          /^(text|number|search|email|url|tel|password)$/.test(
-            (target as HTMLInputElement).type,
-          ))
+          /^(text|number|search|email|url|tel|password)$/.test((target as HTMLInputElement).type))
       if (isTextEntry) return
       if (key === 'z' && !e.shiftKey) {
         e.preventDefault()
@@ -91,8 +87,16 @@ export function App() {
     if (stored) {
       try {
         const parsed = JSON.parse(stored) as Snapshot[]
+        const migrated = parsed.map((s) => ({
+          ...s,
+          config: {
+            ...s.config,
+            fill: legacyColorStopToRamp(s.config.fill as never),
+            stroke: legacyColorStopToRamp(s.config.stroke as never),
+          },
+        }))
         const seen = new Set<number>()
-        const deduped = parsed.filter((s) => {
+        const deduped = migrated.filter((s) => {
           if (seen.has(s.config.seed)) return false
           seen.add(s.config.seed)
           return true

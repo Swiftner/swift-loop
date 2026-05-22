@@ -38,12 +38,8 @@ export function resetKeepingPattern(config: LoopConfig, patternApplied: boolean)
     }
   }
   // Color stop formulas (lerp factors) are also part of the pattern.
-  next.fill = { ...config.fill, color: RESET_CONFIG.fill.color, end: RESET_CONFIG.fill.end }
-  next.stroke = {
-    ...config.stroke,
-    color: RESET_CONFIG.stroke.color,
-    end: RESET_CONFIG.stroke.end,
-  }
+  next.fill = { ...config.fill, stops: RESET_CONFIG.fill.stops }
+  next.stroke = { ...config.stroke, stops: RESET_CONFIG.stroke.stops }
   next.strokeWeight = {
     ...RESET_CONFIG.strokeWeight,
     unlocked: config.strokeWeight.unlocked,

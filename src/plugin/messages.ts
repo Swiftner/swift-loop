@@ -1,5 +1,6 @@
 // src/plugin/messages.ts
 import { emit, on, showUI } from '@create-figma-plugin/utilities'
+import { legacyColorStopToRamp } from '../shared/color'
 import type { LoopConfig } from '../shared/types'
 import { ensurePagesLoaded } from './figma/async'
 import { generate, revert } from './loop/orchestrator'
@@ -25,6 +26,10 @@ export async function bootstrap(): Promise<void> {
   showUI({ width: savedSize?.width ?? 320, height: savedSize?.height ?? 720 })
 
   const saved = (await figma.clientStorage.getAsync(STORAGE_KEY)) as LoopConfig | undefined
+  if (saved) {
+    saved.fill = legacyColorStopToRamp(saved.fill as never)
+    saved.stroke = legacyColorStopToRamp(saved.stroke as never)
+  }
   emit('loop:initial-config', { config: saved ?? null })
   emit('loop:selection-change', selectionPayload())
 

@@ -12,8 +12,8 @@ const base = (): LoopConfig => ({
   scaleX: { value: 0, end: null, random: 0, unlocked: false, formula: null },
   scaleY: { value: 0, end: null, random: 0, unlocked: false, formula: null },
   opacity: { value: 100, end: null, random: 0, unlocked: false, formula: null },
-  fill: { color: null, end: null },
-  stroke: { color: null, end: null },
+  fill: { stops: [] },
+  stroke: { stops: [] },
   strokeWeight: { value: 1, end: null, random: 0, unlocked: false, formula: null },
   rotationSinusoidal: { amplitude: 0, frequency: 0, phase: 0 },
   scaleSinusoidal: { amplitude: 0, frequency: 0, phase: 0 },
@@ -92,7 +92,7 @@ describe('diffConfig', () => {
   it('color changed -> in-place, dirty includes fill', () => {
     const a = base()
     const b = base()
-    b.fill = { color: { r: 1, g: 0, b: 0 }, end: null }
+    b.fill = { stops: [{ color: { r: 1, g: 0, b: 0 }, position: 0 }] }
     const d = diffConfig(a, b, null)
     expect(d.mode).toBe('in-place')
     expect(d.dirty).toContain('fill')
