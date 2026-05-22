@@ -38,3 +38,15 @@ export const DEFAULT_CONFIG: LoopConfig = {
   seed: 1,
   showFirst: true,
 }
+
+// Reset clears every dial: transform deltas, modulation, appearance overrides.
+// Iteration grid stays at the default so you don't drop to a single cell and
+// lose the canvas; opacity stays at 100 so clones remain visible.
+export const RESET_CONFIG: LoopConfig = {
+  ...DEFAULT_CONFIG,
+  x: num(0),
+  y: num(0),
+  rotation: num(0),
+  scaleX: num(0),
+  scaleY: num(0),
+}

@@ -1,6 +1,6 @@
 import { on } from '@create-figma-plugin/utilities'
 import { useCallback, useEffect, useState } from 'preact/hooks'
-import { DEFAULT_CONFIG } from '../shared/defaults'
+import { RESET_CONFIG } from '../shared/defaults'
 import type { LoopConfig, Snapshot } from '../shared/types'
 import { ResizeHandle } from './components/ResizeHandle'
 import { useLooperConfig } from './hooks/useLooperConfig'
@@ -121,7 +121,7 @@ export function App() {
   }
 
   const onReset = () => {
-    update(DEFAULT_CONFIG, true)
+    update(RESET_CONFIG, true)
     setAppliedName(null)
   }
 
