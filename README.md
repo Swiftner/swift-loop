@@ -20,6 +20,8 @@ A **live preview** that re-renders as you drag, so you're not stuck in a "Genera
 
 **Grids, not just chains.** Set `cols × rows` and watch your shape tile.
 
+**Spirals without a math degree.** A single **Angle** slider curls a line into a spiral or swirls a grid, no formula required.
+
 **A formula library** with 20 patterns to start from, browsable right in the UI.
 
 **Custom formulas** for when a slider won't cut it. Drop into `fx` mode and write the math yourself.
@@ -53,7 +55,7 @@ Pick something on your canvas. A Vector, a Shape, some Text, a Group, whatever y
 
 Run **Plugins, Development, Swift Loop**.
 
-Set columns and rows. Leave rows at 1 if you want a line. Crank both if you want a grid.
+Set columns and rows. Leave rows at 1 if you want a line. Crank both if you want a grid. Bump the **Angle** slider a few degrees and the line curls into a spiral, the grid swirls.
 
 Drag X, Y, rotation, scale, opacity. The preview updates as you go.
 
@@ -67,7 +69,7 @@ When you're happy, click **Generate** to commit it to the canvas. Undo always wo
 
 20 patterns ship with the plugin:
 
-Brick, Checker, Confetti, Damped Wave, Diamond, Fountain, Grid, Halftone, Hex Tile, Lissajous, Phyllotaxis, Pinwheel, Polar Grid, Radial Burst, Ribbon, Ripple, Spiral, Starburst, Wave.
+Brick, Checker, Confetti, Curl, Damped Wave, Diamond, Fountain, Grid, Halftone, Hex Tile, Lissajous, Phyllotaxis, Pinwheel, Polar Grid, Radial Burst, Ribbon, Ripple, Spiral, Starburst, Wave.
 
 Each one is a tiny JSON file in [`library/`](./library) with the formulas inline. No code, no rebuild, just the math. If you want to add your own, it's one file and one PR. See [CONTRIBUTING.md](./CONTRIBUTING.md) for the schema.
 
@@ -86,6 +88,7 @@ If you want the full tour:
 And one for the robots:
 
 - [Pattern authoring guide for LLMs](./docs/llm-pattern-guide.md). Paste this into Claude or ChatGPT and it'll help you write new library patterns from a plain-English description.
+- [Changelog](./CHANGELOG.md). What landed in each release.
 
 ## Custom formulas
 

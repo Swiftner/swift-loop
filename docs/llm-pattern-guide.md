@@ -23,6 +23,7 @@ You, the LLM reading this, are helping a designer write a new library pattern. Y
   "author": "@username",
   "cols": 24,
   "rows": 1,
+  "angle": 0,
   "showFirst": true,
   "formulas": {
     "x": "x = ...",
@@ -46,6 +47,7 @@ You, the LLM reading this, are helping a designer write a new library pattern. Y
 | `author` | recommended | `@handle` form. |
 | `cols` | yes | Integer 1 to 100. The default column count when the pattern loads. |
 | `rows` | yes | Integer 1 to 100. The default row count. Use `1` for linear or radial patterns. |
+| `angle` | optional | Number, -360 to 360. Per-cell rotation in degrees applied to the grid offset around the source center, *after* the formulas compute `x` and `y`. Cell `i` is rotated by `angle * i`. Lets a pattern declare a spiral or swirl without folding the rotation into every formula. Default `0`. See "Using `angle`" below. |
 | `showFirst` | optional | Defaults to `true`. Set to `false` only for radial or spiral patterns where the `i=0` clone naturally lands away from the origin, and you want the source shape to stay visually centered. See "showFirst" below. |
 | `formulas` | yes | Object. Any subset of `x`, `y`, `rotation`, `scaleX`, `scaleY`, `opacity`. Omit properties that should stay at their default. |
 
@@ -115,6 +117,22 @@ A formula can contain `{x:200}` or `{y:150}` literals. These are **default value
 
 The `200` is the default. The `x:` prefix tells the UI which slider scope it belongs to. Use `{x:N}` for X-axis sizes and `{y:N}` for Y-axis sizes. The number can be any positive integer.
 
+## Using `angle`
+
+`angle` is shorthand for "rotate each cell's offset by `angle * i` degrees around the source center, after the formulas compute it". It's evaluated *outside* the formula language, so you don't need trig in your formulas to make a spiral.
+
+When to use it:
+
+- **A line that should curl into a spiral.** Set `cols` high, `rows: 1`, give `x` a linear formula like `x = c * 14`, then set `angle: 18`. The line bends into a spiral. The math is doing exactly the same thing as `x = cos(c * 18deg) * c * 14` / `y = sin(c * 18deg) * c * 14`, but without the trig and without coupling the two formulas. Easier to read, easier for the user to tweak in the slider.
+- **A rectangular grid that should swirl.** Give `x = c * w` and `y = r * h`, set `angle: 6`. The grid rotates progressively as `i` grows. Looks like a fingerprint.
+
+When *not* to use it:
+
+- The pattern is already polar (`x` and `y` are `cos(...)` and `sin(...)`). Adding `angle` rotates *that* arrangement on top, which usually looks muddled. Leave `angle: 0`.
+- The pattern has formulas that explicitly want to define the geometry. `angle` exists for the cases where you'd otherwise have to write trig you don't want to write.
+
+`angle` composes with everything. Random jitter, sinusoidal layers, scale changes all still apply per cell. The rotation happens last, on the final `(x, y)` offset.
+
 ## `showFirst`
 
 By default, Swift Loop renders a clone at `i=0`, which is the user's source shape sitting at its original position. For most grid-style patterns this is exactly right.
@@ -145,6 +163,28 @@ Quick heuristic: if your formula uses `cos(...)` or `sin(...)` or `atan2(...)` f
 ```
 
 What's going on: the angle sweeps four full turns (`t * TAU * 4`), and the radius grows linearly with `t`. Rotation spins each clone twice over the full loop.
+
+### A spiral via `angle` (no trig needed)
+
+```json
+{
+  "id": "curl",
+  "name": "Curl",
+  "description": "Linear arrangement curled into a spiral via per-cell angle.",
+  "tags": ["spiral", "radial"],
+  "author": "@swiftner",
+  "cols": 40,
+  "rows": 1,
+  "angle": 18,
+  "formulas": {
+    "x": "x = c * {x:14}",
+    "y": "y = 0",
+    "rotation": "rotation = c * {rotation:18}"
+  }
+}
+```
+
+Compare to the trig-based `spiral` pattern: same shape family, but you can keep the formulas linear and the user can scrub Angle directly. Useful when the visual idea is "a straight thing that curls".
 
 ### A sunflower (phyllotaxis)
 
@@ -268,6 +308,13 @@ Evenly distributing N items around a full circle:
 
 ```
 i * TAU / n
+```
+
+Or, equivalently, using the `angle` field instead of trig:
+
+```json
+"cols": <n>, "angle": 360 / <n>,
+"formulas": { "x": "x = <radius>", "y": "y = 0" }
 ```
 
 ## Quality checklist

@@ -36,6 +36,13 @@ describe('library entries', () => {
         expect(typeof entry.formulas).toBe('object')
       })
 
+      it('angle, if present, is a finite number in [-360, 360]', () => {
+        if (entry.angle === undefined) return
+        expect(Number.isFinite(entry.angle)).toBe(true)
+        expect(entry.angle).toBeGreaterThanOrEqual(-360)
+        expect(entry.angle).toBeLessThanOrEqual(360)
+      })
+
       it('every formula parses', () => {
         for (const k of FORMULA_PROPS) {
           const src = entry.formulas[k]

@@ -10,7 +10,7 @@ This is the strip across the top of the plugin window. It's about your loop as a
 
 **Reroll.** A dice icon. Picks a new random seed for you. Useful when you've got a pattern with randomness and just want to keep flipping through variations.
 
-**Reset.** Wipes everything back to the default 10x10 grid. Useful when you've made a mess and want to start over.
+**Reset.** Wipes everything back to a true blank slate: 1x1 grid (just the source, no clones), every transform dial at zero, no angle. Useful when you've made a mess and want to dial in from nothing. The first time you open the plugin you still see the readable 10x10 grid; Reset is what collapses it.
 
 **Snapshots.** Little squares of recent configurations. Swift Loop quietly remembers your last few rerolls. Click any snapshot to jump back to it.
 
@@ -22,11 +22,15 @@ The first section. This is where you set the count.
 
 **Rows.** How many rows. 1 to 100. Leave at 1 for linear and radial patterns.
 
+**Angle.** Degrees of per-cell rotation, applied to each clone's grid offset around the source center. Leave at 0 for straight lines and rectangular grids. Bump it 5 to 30 degrees and a line curls into a spiral, a grid swirls. Crank it past 90 to wrap the pattern back around on itself. Think "how much do successive cells lean".
+
 If you've applied a library pattern, you'll also see a little pill showing its name. Click it to jump back to the library and pick something else.
 
 ## Transform
 
 How each clone gets moved relative to the previous one.
+
+All Transform sliders are scaled to your selection: ±2x the shape's width/height for X/Y, ±1x for Scale. A 16-px icon and a 1200-px illustration get the same slider feel, not the same absolute pixel range.
 
 **X.** Horizontal offset per step. Drag right to spread the loop horizontally.
 

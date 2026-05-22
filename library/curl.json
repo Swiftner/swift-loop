@@ -1,0 +1,14 @@
+{
+  "id": "curl",
+  "name": "Curl",
+  "description": "Linear arrangement curled into a spiral via per-cell angle.",
+  "tags": ["spiral", "radial"],
+  "author": "@swiftner",
+  "cols": 40, "rows": 1,
+  "angle": 18,
+  "formulas": {
+    "x": "x = c * {x:14}",
+    "y": "y = 0",
+    "rotation": "rotation = c * {rotation:18}"
+  }
+}

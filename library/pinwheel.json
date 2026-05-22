@@ -5,10 +5,11 @@
   "tags": ["radial", "rotation"],
   "author": "@swiftner",
   "cols": 12, "rows": 1,
+  "angle": 30,
   "showFirst": false,
   "formulas": {
-    "x": "x = cos(t * TAU) * 120",
-    "y": "y = sin(t * TAU) * 120",
-    "rotation": "rotation = t * 360 + 90"
+    "x": "x = {x:120}",
+    "y": "y = 0",
+    "rotation": "rotation = c * 30 + 90"
   }
 }

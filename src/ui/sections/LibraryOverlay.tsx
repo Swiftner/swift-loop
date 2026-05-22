@@ -34,6 +34,7 @@ function applyEntry(config: LoopConfig, entry: LibraryEntry): LoopConfig {
     ...config,
     cols: entry.cols,
     rows: entry.rows,
+    angle: entry.angle ?? 0,
     fxMode: true,
     showFirst: entry.showFirst ?? true,
   }

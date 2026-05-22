@@ -34,6 +34,20 @@ On the Rotation slider, set the random (`±`) to 30.
 
 Reroll the seed until you find a layout you like. Save snapshots as you go.
 
+## A quick spiral from scratch (no library, no formulas)
+
+You just want a spiral, you don't want to type math.
+
+Cols 40, Rows 1.
+
+Transform: X = 14, all others 0.
+
+In Iterations, drag the **Angle** slider up from 0. At 18 degrees the line curls into a tidy spiral; bigger numbers tighten it, smaller ones loosen it.
+
+Optional: set Rotation start 0, end 360 so each cell also turns as it travels.
+
+That's it. The angle slider is the whole trick.
+
 ## A spiral of shrinking shapes
 
 Vortex effect.
