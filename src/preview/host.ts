@@ -948,3 +948,4 @@ renderScene()
 // Boot with one default loop already on the canvas so designers see something
 // the moment the page loads, instead of having to click "Add circle" first.
 addLoop({})
+fitView()
