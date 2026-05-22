@@ -1,6 +1,7 @@
 import { on } from '@create-figma-plugin/utilities'
 import { useCallback, useEffect, useState } from 'preact/hooks'
 import { RESET_CONFIG } from '../shared/defaults'
+import { resetKeepingPattern } from './config-ops'
 import type { LoopConfig, Snapshot } from '../shared/types'
 import { ResizeHandle } from './components/ResizeHandle'
 import { useLooperConfig } from './hooks/useLooperConfig'
@@ -132,8 +133,15 @@ export function App() {
   }
 
   const onReset = () => {
-    update(RESET_CONFIG, true)
-    setAppliedName(null)
+    // When a library pattern is applied, Reset keeps the pattern (cols, rows,
+    // angle, formulas) and only zeros the slider values — so users can dial
+    // back in from scratch without re-picking the pattern. Without a pattern,
+    // Reset is the full blank slate.
+    if (appliedName) {
+      update(resetKeepingPattern(config, true), true)
+    } else {
+      update(RESET_CONFIG, true)
+    }
   }
 
   return (
