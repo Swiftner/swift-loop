@@ -1,14 +1,14 @@
 {
   "name": "swift-loop",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Turn one shape into a hundred. A Figma plugin for spirals, grids, waves, and anything else you can describe with a little math. Modernized fork of Looper.",
   "license": "ISC",
   "type": "module",
   "scripts": {
-    "prebuild": "node scripts/generate-library-index.mjs",
+    "prebuild": "node scripts/generate-library-index.mjs && node scripts/generate-version.mjs",
     "build": "build-figma-plugin --typecheck",
     "watch": "build-figma-plugin --typecheck --watch",
-    "pretest": "node scripts/generate-library-index.mjs",
+    "pretest": "node scripts/generate-library-index.mjs && node scripts/generate-version.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "biome check src tests",
