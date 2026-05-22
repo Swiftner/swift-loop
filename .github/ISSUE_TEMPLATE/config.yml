@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security report
+    url: https://github.com/Swiftner/swift-loop/security/advisories/new
+    about: Found a security issue? Please report it privately, not as a public issue.
+  - name: Try it in your browser
+    url: https://swiftner.github.io/swift-loop/
+    about: Play with the live preview before filing an issue — it might already do what you want.
