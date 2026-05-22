@@ -24,13 +24,26 @@ const cfg = (cols: number, rows: number): LoopConfig => ({
 })
 
 describe('grid cell layout', () => {
-  it('linear N x 1: x grows, y constant', () => {
+  it('linear N x 1: both x and y grow with column (rows=1 falls back to c for y)', () => {
+    // y normally indexes by r; when rows=1 every r is 0, so the Y step slider
+    // would do nothing. Engine falls back to c so X step + Y step produce a
+    // diagonal line on a single-row layout.
     const c = cfg(5, 1)
     const cf = compileConfig(c)
     for (let i = 0; i < 5; i++) {
       const s = buildScope({ cols: 5, rows: 1, seed: 1, sourceWidth: 0, sourceHeight: 0 }, i, 0)
       expect(cf.x.evaluate(s, 'x')).toBe(i * 10)
-      expect(cf.y.evaluate(s, 'y')).toBe(0)
+      expect(cf.y.evaluate(s, 'y')).toBe(i * 8)
+    }
+  })
+
+  it('linear 1 x N: x falls back to r so both axes spread along the column', () => {
+    const c = cfg(1, 5)
+    const cf = compileConfig(c)
+    for (let i = 0; i < 5; i++) {
+      const s = buildScope({ cols: 1, rows: 5, seed: 1, sourceWidth: 0, sourceHeight: 0 }, 0, i)
+      expect(cf.x.evaluate(s, 'x')).toBe(i * 10)
+      expect(cf.y.evaluate(s, 'y')).toBe(i * 8)
     }
   })
 

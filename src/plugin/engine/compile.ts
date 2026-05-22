@@ -24,11 +24,17 @@ function interpFactor(config: LoopConfig): string {
 
 function baseSugarFor(property: FormulaProperty, config: LoopConfig): string {
   const p = config[property] as NumericProperty
+  // X normally varies with column (`c`) and Y with row (`r`), but when one
+  // dimension is collapsed (cols=1 or rows=1) the corresponding index is
+  // stuck at 0, which would make that slider do nothing. Fall back to the
+  // other axis so a row of cells with both X and Y set produces a diagonal.
+  const xIdx = config.cols > 1 ? 'c' : 'r'
+  const yIdx = config.rows > 1 ? 'r' : 'c'
   switch (property) {
     case 'x':
-      return `c * ${p.value}`
+      return `${xIdx} * ${p.value}`
     case 'y':
-      return `r * ${p.value}`
+      return `${yIdx} * ${p.value}`
     case 'rotation':
       return `(c + r) * ${p.value}`
     case 'scaleX':

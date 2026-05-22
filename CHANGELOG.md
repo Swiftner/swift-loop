@@ -2,6 +2,11 @@
 
 All notable changes to Swift Loop. Versions follow SemVer; the [v0.x.y] anchor links to the GitHub release.
 
+## [v0.1.19] — 2026-05-22
+
+### Fixed
+- **Y step now affects 1-row layouts (and X step affects 1-column layouts).** Y's default sugar was `r * value`, which is always 0 when `rows = 1`, so the Y slider did nothing on a single-row line. Now when the corresponding dimension is collapsed, the sugar falls back to the other axis — so `cols=10, rows=1, X=66, Y=68` produces a diagonal line (and angle still curls it).
+
 ## [v0.1.18] — 2026-05-22
 
 ### Added

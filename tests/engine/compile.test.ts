@@ -29,10 +29,26 @@ describe('formulaForProperty (sugar generation)', () => {
     expect(formulaForProperty(c, 'x')).toBe('x = c * 10')
   })
 
-  it('y step linear', () => {
+  it('y step uses r when rows > 1', () => {
     const c = baseConfig()
+    c.rows = 4
     c.y.value = 7
     expect(formulaForProperty(c, 'y')).toBe('y = r * 7')
+  })
+
+  it('y step falls back to c when rows = 1 so a 1-row line still spreads diagonally', () => {
+    const c = baseConfig()
+    // baseConfig has rows = 1, cols = 5
+    c.y.value = 7
+    expect(formulaForProperty(c, 'y')).toBe('y = c * 7')
+  })
+
+  it('x step falls back to r when cols = 1 so a 1-column line still spreads diagonally', () => {
+    const c = baseConfig()
+    c.cols = 1
+    c.rows = 5
+    c.x.value = 7
+    expect(formulaForProperty(c, 'x')).toBe('x = r * 7')
   })
 
   it('rotation uses (c + r)', () => {
