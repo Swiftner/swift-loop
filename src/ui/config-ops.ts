@@ -13,23 +13,42 @@ import type { FormulaProperty, LoopConfig } from '../shared/types'
 // are reset.
 const ANIMATED: FormulaProperty[] = ['x', 'y', 'rotation', 'scaleX', 'scaleY', 'opacity']
 
-// Reset semantics: when a library pattern is applied, keep its iteration grid
-// (cols/rows/angle) and its formulas — those are "the chosen thing" — but
-// zero every slider value so the user dials back in from nothing. With no
-// pattern applied, fall through to the blank-slate RESET_CONFIG.
+// Reset semantics: when a library pattern is applied, keep only "the chosen
+// thing" — the unlocked formulas + fxMode flag — and reset everything else
+// (cols, rows, angle, slider values, jitter, modulation) to the blank-slate
+// defaults. The user can then dial back in from nothing with the pattern's
+// formulas waiting in the wings, no need to re-pick from the library.
+// Without a pattern, falls through to RESET_CONFIG (same as no-pattern Reset).
 export function resetKeepingPattern(config: LoopConfig, patternApplied: boolean): LoopConfig {
   if (!patternApplied) return RESET_CONFIG
   const next: LoopConfig = {
-    ...config,
-    // Keep cols, rows, angle, fxMode, formulas, unlocked flags, easing, showFirst.
+    ...RESET_CONFIG,
+    fxMode: config.fxMode,
+    easing: config.easing,
+    showFirst: config.showFirst,
     seed: DEFAULT_CONFIG.seed,
-    rotationSinusoidal: { amplitude: 0, frequency: 0, phase: 0 },
-    scaleSinusoidal: { amplitude: 0, frequency: 0, phase: 0 },
   }
+  // Preserve each animated property's `unlocked` flag and `formula` string;
+  // numeric value, end, random fall back to RESET_CONFIG (0 / null / 0).
   for (const k of ANIMATED) {
-    next[k] = { ...config[k], value: k === 'opacity' ? 100 : 0, end: null, random: 0 }
+    next[k] = {
+      ...RESET_CONFIG[k],
+      unlocked: config[k].unlocked,
+      formula: config[k].formula,
+    }
   }
-  next.strokeWeight = { ...config.strokeWeight, value: 1, end: null, random: 0 }
+  // Color stop formulas (lerp factors) are also part of the pattern.
+  next.fill = { ...config.fill, color: RESET_CONFIG.fill.color, end: RESET_CONFIG.fill.end }
+  next.stroke = {
+    ...config.stroke,
+    color: RESET_CONFIG.stroke.color,
+    end: RESET_CONFIG.stroke.end,
+  }
+  next.strokeWeight = {
+    ...RESET_CONFIG.strokeWeight,
+    unlocked: config.strokeWeight.unlocked,
+    formula: config.strokeWeight.formula,
+  }
   return next
 }
 

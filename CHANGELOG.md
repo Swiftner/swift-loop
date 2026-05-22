@@ -2,10 +2,15 @@
 
 All notable changes to Swift Loop. Versions follow SemVer; the [v0.x.y] anchor links to the GitHub release.
 
+## [v0.1.24] — 2026-05-22
+
+### Changed
+- Reset (with a pattern applied) also resets cols, rows, and angle to 1/1/0 — only the unlocked formulas survive. Dial cols up to see the pattern emerge. Tightens the v0.1.23 semantics.
+
 ## [v0.1.23] — 2026-05-22
 
 ### Changed
-- **Reset keeps the applied library pattern.** When a pattern is loaded (e.g. Spin), Reset now preserves cols, rows, angle, and the pattern's formulas while zeroing every slider value — so you dial back in from zero with the pattern's structure intact. Without a pattern, Reset is still the full blank slate.
+- **Reset keeps the applied library pattern.** When a pattern is loaded (e.g. Spin), Reset now preserves the pattern's formulas while resetting everything else — cols, rows, angle, slider values, jitter, modulation. The user dials back in from a blank slate with the pattern's formulas in place. Without a pattern, Reset is the same full blank slate as before.
 
 ## [v0.1.22] — 2026-05-22
 

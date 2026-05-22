@@ -77,12 +77,16 @@ describe('resetKeepingPattern', () => {
     expect(resetKeepingPattern(DEFAULT_CONFIG, false)).toEqual(RESET_CONFIG)
   })
 
-  it('keeps cols, rows, angle, and the unlocked formulas when a pattern is applied', () => {
-    const before = appliedConfig()
-    const after = resetKeepingPattern(before, true)
-    expect(after.cols).toBe(36)
+  it('resets cols, rows, and angle to blank-slate values', () => {
+    const after = resetKeepingPattern(appliedConfig(), true)
+    expect(after.cols).toBe(1)
     expect(after.rows).toBe(1)
     expect(after.angle).toBe(0)
+  })
+
+  it('keeps the unlocked formulas (the pattern itself survives Reset)', () => {
+    const before = appliedConfig()
+    const after = resetKeepingPattern(before, true)
     expect(after.fxMode).toBe(true)
     for (const k of ['x', 'y', 'rotation', 'scaleX', 'scaleY', 'opacity'] as const) {
       expect(after[k].unlocked, k).toBe(true)
