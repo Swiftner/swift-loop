@@ -1,4 +1,4 @@
-import { on } from '@create-figma-plugin/utilities'
+import { emit, on } from '@create-figma-plugin/utilities'
 import { useCallback, useEffect, useState } from 'preact/hooks'
 import { RESET_CONFIG } from '../shared/defaults'
 import { resetKeepingPattern } from './config-ops'
@@ -132,6 +132,27 @@ export function App() {
     if (commit) recordSnapshot(next)
   }
 
+  // One-shot listener per click: subscribe right before requesting bytes so
+  // we don't accidentally trigger a download on a stale earlier reply.
+  const onDownload = () => {
+    const off = on('loop:svg-ready', (payload: { ok: boolean; bytes?: Uint8Array; name?: string; reason?: string }) => {
+      off()
+      if (!payload.ok || !payload.bytes) return
+      const blob = new Blob([payload.bytes as BlobPart], { type: 'image/svg+xml;charset=utf-8' })
+      const stamp = new Date().toISOString().replace(/[:T]/g, '-').slice(0, 19)
+      const slug = (payload.name ?? 'swift-loop').replace(/[^\w.-]+/g, '-')
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${slug}-${stamp}.svg`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+    })
+    emit('loop:download-svg')
+  }
+
   const onReset = () => {
     // When a library pattern is applied, Reset keeps the pattern (cols, rows,
     // angle, formulas) and only zeros the slider values — so users can dial
@@ -154,6 +175,7 @@ export function App() {
         onSeedChange={onSeedChange}
         onReroll={onReroll}
         onReset={onReset}
+        onDownload={onDownload}
       />
       {!selectionValid && (
         <div class="selection-warning">Select a single Vector, Shape, Text, or Group</div>

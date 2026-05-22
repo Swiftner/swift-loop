@@ -59,6 +59,28 @@ export async function bootstrap(): Promise<void> {
     await revert(source, store)
   })
 
+  on('loop:download-svg', async () => {
+    const last = store.get()
+    if (!last) {
+      emit('loop:svg-ready', { ok: false, reason: 'no-loop' })
+      return
+    }
+    const group = await figma.getNodeByIdAsync(last.groupId)
+    if (!group || group.removed || !('exportAsync' in group)) {
+      emit('loop:svg-ready', { ok: false, reason: 'group-missing' })
+      return
+    }
+    try {
+      const bytes = await (group as ExportMixin).exportAsync({ format: 'SVG' })
+      emit('loop:svg-ready', { ok: true, bytes, name: group.name })
+    } catch (err) {
+      emit('loop:svg-ready', {
+        ok: false,
+        reason: err instanceof Error ? err.message : String(err),
+      })
+    }
+  })
+
   on('loop:close', () => {
     figma.closePlugin()
   })
