@@ -15,7 +15,7 @@ export interface SliderRange {
 const FALLBACK: Record<FormulaProperty, SliderRange> = {
   x: { min: -200, max: 200, step: 1 },
   y: { min: -200, max: 200, step: 1 },
-  rotation: { min: -180, max: 180, step: 1 },
+  rotation: { min: -180, max: 180, step: 0.1 },
   scaleX: { min: -50, max: 50, step: 0.5 },
   scaleY: { min: -50, max: 50, step: 0.5 },
   opacity: { min: 0, max: 100, step: 1 },

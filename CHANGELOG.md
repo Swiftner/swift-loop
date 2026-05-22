@@ -2,6 +2,15 @@
 
 All notable changes to Swift Loop. Versions follow SemVer; the [v0.x.y] anchor links to the GitHub release.
 
+## [v0.1.21] — 2026-05-22
+
+### Added
+- **Figma-style canvas navigation on the website preview.** Pan with two-finger scroll, wheel, space-drag, or middle-mouse drag. Zoom with pinch, Ctrl/Cmd+scroll (cursor-centered), the +/− buttons, or the +/− keys. Press `0` or click the Fit button to recenter. The view stays put across slider changes once you've moved — only Fit snaps back. Zoom range: 10%–1600%.
+- **Rotation slider uses 0.1° steps and a `°` suffix**, matching the Angle slider.
+
+### Changed
+- Preview SVG fills the stage panel via CSS `width/height: 100%` and `preserveAspectRatio="xMidYMid meet"`. Auto-fit content fits the stage by default (no more horizontal scrollbars on big grids).
+
 ## [v0.1.20] — 2026-05-22
 
 ### Changed

@@ -22,10 +22,10 @@ function computeSliderUpdate(cur: NumericProperty, v: number): NumericProperty {
   return { ...cur, value: v }
 }
 
-const ROWS: { key: FormulaProperty; label: string }[] = [
+const ROWS: { key: FormulaProperty; label: string; unit?: string }[] = [
   { key: 'x', label: 'X step' },
   { key: 'y', label: 'Y step' },
-  { key: 'rotation', label: 'Rotation' },
+  { key: 'rotation', label: 'Rotation', unit: '°' },
   { key: 'scaleX', label: 'Scale X' },
   { key: 'scaleY', label: 'Scale Y' },
 ]
@@ -44,6 +44,7 @@ export function TransformSection({ config, update, sourceSize }: Props) {
             min={range.min}
             max={range.max}
             step={range.step}
+            unit={row.unit}
             formulaIndicator={cur.unlocked}
             formula={formulaForProperty(config, row.key)}
             onFormulaChange={(text) => {

@@ -175,18 +175,111 @@ function render(): void {
   statusEl.textContent = `${cfg.cols}×${cfg.rows} · ${n} cells · seed ${cfg.seed}`
 }
 
-function fitViewport(): void {
+// Canvas view: where the camera is pointing (cx, cy in SVG coords) and how
+// zoomed it is (1 = fit content). The SVG element fills the stage via CSS;
+// we only manipulate viewBox.
+const ZOOM_MIN = 0.1
+const ZOOM_MAX = 16
+const view = { cx: 0, cy: 0, zoom: 1 }
+let autoFit: { cx: number; cy: number; w: number; h: number } | null = null
+
+function computeAutoFit(): void {
   const bbox = layer.getBBox()
-  // include the source's footprint even if it's the only thing rendered
   const minX = Math.min(bbox.x, SOURCE.x) - PAD
   const minY = Math.min(bbox.y, SOURCE.y) - PAD
   const maxX = Math.max(bbox.x + bbox.width, SOURCE.x + SOURCE.w) + PAD
   const maxY = Math.max(bbox.y + bbox.height, SOURCE.y + SOURCE.h) + PAD
   const w = Math.max(320, maxX - minX)
   const h = Math.max(240, maxY - minY)
-  svg.setAttribute('viewBox', `${minX} ${minY} ${w} ${h}`)
-  svg.setAttribute('width', String(w))
-  svg.setAttribute('height', String(h))
+  autoFit = { cx: minX + w / 2, cy: minY + h / 2, w, h }
+}
+
+function applyViewBox(): void {
+  if (!autoFit) return
+  const w = autoFit.w / view.zoom
+  const h = autoFit.h / view.zoom
+  svg.setAttribute('viewBox', `${view.cx - w / 2} ${view.cy - h / 2} ${w} ${h}`)
+  const el = document.getElementById('zoom-label')
+  if (el) el.textContent = `${Math.round(view.zoom * 100)}%`
+}
+
+// Snap the camera to whatever the auto-fit says (used on Fit and after first
+// render when the user hasn't moved yet).
+function snapToFit(): void {
+  if (!autoFit) return
+  view.cx = autoFit.cx
+  view.cy = autoFit.cy
+  view.zoom = 1
+  applyViewBox()
+}
+
+function fitViewport(): void {
+  // Called after every render(). Recompute the auto-fit bbox; if the user is
+  // still parked at the previous auto-fit (hasn't panned/zoomed), follow the
+  // new content. Otherwise leave their view alone — they've taken control.
+  const wasAtFit =
+    autoFit !== null &&
+    Math.abs(view.zoom - 1) < 0.001 &&
+    Math.abs(view.cx - autoFit.cx) < 0.5 &&
+    Math.abs(view.cy - autoFit.cy) < 0.5
+  computeAutoFit()
+  if (wasAtFit || autoFit !== null && view.cx === 0 && view.cy === 0 && view.zoom === 1) {
+    if (autoFit) {
+      view.cx = autoFit.cx
+      view.cy = autoFit.cy
+    }
+  }
+  applyViewBox()
+}
+
+function clamp(v: number, lo: number, hi: number): number {
+  return Math.max(lo, Math.min(hi, v))
+}
+
+// Convert client (mouse) coords to SVG coords under the current viewBox.
+function clientToSvg(clientX: number, clientY: number): { x: number; y: number } {
+  if (!autoFit) return { x: 0, y: 0 }
+  const rect = svg.getBoundingClientRect()
+  const sx = (clientX - rect.left) / rect.width
+  const sy = (clientY - rect.top) / rect.height
+  const viewW = autoFit.w / view.zoom
+  const viewH = autoFit.h / view.zoom
+  // The viewBox is rendered into the SVG element with preserveAspectRatio
+  // "xMidYMid meet", which letterboxes — but the sx/sy fraction we use
+  // matches that mapping closely enough for cursor-centered zoom to feel
+  // right at common aspect ratios.
+  return {
+    x: view.cx - viewW / 2 + sx * viewW,
+    y: view.cy - viewH / 2 + sy * viewH,
+  }
+}
+
+// Zoom by `factor` keeping the SVG point under (clientX, clientY) fixed.
+function zoomAt(factor: number, clientX: number, clientY: number): void {
+  if (!autoFit) return
+  const before = clientToSvg(clientX, clientY)
+  view.zoom = clamp(view.zoom * factor, ZOOM_MIN, ZOOM_MAX)
+  const after = clientToSvg(clientX, clientY)
+  view.cx += before.x - after.x
+  view.cy += before.y - after.y
+  applyViewBox()
+}
+
+// Pan by a screen-space delta (px).
+function panByScreen(dx: number, dy: number): void {
+  if (!autoFit) return
+  const rect = svg.getBoundingClientRect()
+  const viewW = autoFit.w / view.zoom
+  const viewH = autoFit.h / view.zoom
+  view.cx -= dx * (viewW / rect.width)
+  view.cy -= dy * (viewH / rect.height)
+  applyViewBox()
+}
+
+function setZoom(z: number): void {
+  const rect = svg.getBoundingClientRect()
+  // Center-of-canvas zoom for button clicks.
+  zoomAt(z / view.zoom, rect.left + rect.width / 2, rect.top + rect.height / 2)
 }
 
 function computeInterp(cfg: LoopConfig, tx: number, ty: number): number {
@@ -482,6 +575,94 @@ function downloadSvg(): void {
 }
 
 document.getElementById('download-svg')?.addEventListener('click', downloadSvg)
+
+document.getElementById('zoom-in')?.addEventListener('click', () => setZoom(view.zoom * 1.25))
+document.getElementById('zoom-out')?.addEventListener('click', () => setZoom(view.zoom / 1.25))
+document.getElementById('zoom-fit')?.addEventListener('click', snapToFit)
+
+// Figma-style navigation on the SVG stage. All events listen on the stage
+// container so the cursor stays visible even when wandering off the SVG.
+// Pan/zoom handlers attach to the stage container so the cursor stays
+// reactive even when wandering off the SVG itself.
+const navTarget = (stage ?? (svg as unknown as HTMLElement))
+
+// Wheel: plain = pan, Ctrl/Cmd = zoom around cursor.
+// Browsers report trackpad pinch as wheel with ctrlKey=true, so this also
+// handles pinch naturally.
+navTarget.addEventListener(
+  'wheel',
+  (e: WheelEvent) => {
+    e.preventDefault()
+    if (e.ctrlKey || e.metaKey) {
+      const factor = Math.exp(-e.deltaY * 0.01)
+      zoomAt(factor, e.clientX, e.clientY)
+    } else {
+      panByScreen(-e.deltaX, -e.deltaY)
+    }
+  },
+  { passive: false },
+)
+
+// Pan via space-drag, middle-mouse drag, or any drag when space is held.
+let spaceHeld = false
+let dragging = false
+let lastDragX = 0
+let lastDragY = 0
+
+window.addEventListener('keydown', (e: KeyboardEvent) => {
+  const target = e.target as HTMLElement | null
+  // ignore when typing in inputs / textareas
+  const tag = target?.tagName
+  const inEdit =
+    tag === 'INPUT' ||
+    tag === 'TEXTAREA' ||
+    tag === 'SELECT' ||
+    target?.isContentEditable === true
+  if (inEdit) return
+  if (e.code === 'Space' && !spaceHeld) {
+    spaceHeld = true
+    navTarget.style.cursor = 'grab'
+    e.preventDefault()
+  } else if (e.key === '+' || e.key === '=') {
+    setZoom(view.zoom * 1.25)
+  } else if (e.key === '-' || e.key === '_') {
+    setZoom(view.zoom / 1.25)
+  } else if (e.key === '0') {
+    snapToFit()
+  }
+})
+window.addEventListener('keyup', (e: KeyboardEvent) => {
+  if (e.code === 'Space') {
+    spaceHeld = false
+    if (!dragging) navTarget.style.cursor = ''
+  }
+})
+
+navTarget.addEventListener('pointerdown', (e: PointerEvent) => {
+  // Middle mouse, or any button while space is held → pan drag.
+  if (e.button === 1 || (spaceHeld && e.button === 0)) {
+    dragging = true
+    lastDragX = e.clientX
+    lastDragY = e.clientY
+    navTarget.style.cursor = 'grabbing'
+    navTarget.setPointerCapture(e.pointerId)
+    e.preventDefault()
+  }
+})
+navTarget.addEventListener('pointermove', (e: PointerEvent) => {
+  if (!dragging) return
+  panByScreen(e.clientX - lastDragX, e.clientY - lastDragY)
+  lastDragX = e.clientX
+  lastDragY = e.clientY
+})
+const endDrag = (e: PointerEvent) => {
+  if (!dragging) return
+  dragging = false
+  navTarget.style.cursor = spaceHeld ? 'grab' : ''
+  navTarget.releasePointerCapture(e.pointerId)
+}
+navTarget.addEventListener('pointerup', endDrag)
+navTarget.addEventListener('pointercancel', endDrag)
 
 updateShapeLabel()
 

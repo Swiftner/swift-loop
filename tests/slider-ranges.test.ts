@@ -16,8 +16,8 @@ describe('sliderRangeFor', () => {
   it('keeps rotation and opacity ranges fixed regardless of source size', () => {
     const big = { width: 5000, height: 5000 }
     const tiny = { width: 4, height: 4 }
-    expect(sliderRangeFor('rotation', big)).toEqual({ min: -180, max: 180, step: 1 })
-    expect(sliderRangeFor('rotation', tiny)).toEqual({ min: -180, max: 180, step: 1 })
+    expect(sliderRangeFor('rotation', big)).toEqual({ min: -180, max: 180, step: 0.1 })
+    expect(sliderRangeFor('rotation', tiny)).toEqual({ min: -180, max: 180, step: 0.1 })
     expect(sliderRangeFor('opacity', big)).toEqual({ min: 0, max: 100, step: 1 })
   })
 
