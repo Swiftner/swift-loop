@@ -41,6 +41,13 @@ export interface LoopConfig {
   // Iteration
   cols: number
   rows: number
+  // Number of depth layers (Z axis): the grid becomes a Columns × Rows × Layers
+  // lattice. The engine only emits the cells and exposes each cell's layer index
+  // (`l`) to the formula scope — projection to 2D is done in formulas / library
+  // presets, not by a built-in projection. Defaults to 1 (a flat grid), so
+  // existing patterns are byte-identical. Optional for back-compat with saved
+  // configs that predate it.
+  layers?: number
   // Degrees of per-cell rotation around the source center, applied to the
   // grid offset (values.x, values.y) post-formula. Cell i is rotated by
   // angle * i degrees, so a 1-row line + nonzero angle traces a spiral.
@@ -88,11 +95,14 @@ export interface Scope {
   n: number
   c: number
   r: number
+  l: number // layer index (Z), 0-based
   cols: number
   rows: number
+  layers: number
   t: number
   tx: number
   ty: number
+  tz: number // normalized layer position in [0, 1] (0 when layers === 1)
   w: number
   h: number
   seed: number

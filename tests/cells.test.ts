@@ -99,4 +99,15 @@ describe('evaluateCell', () => {
     expect(cell.strokeFactor).toBeCloseTo(expected, 6)
     expect(cell.strokeWeightFactor).toBeCloseTo(expected, 6)
   })
+
+  it('maps the flat index to a 3D (layer, row, column) address', () => {
+    // cols 2 × rows 2 × layers 3 → perLayer 4; i fills a layer before depth.
+    const config: LoopConfig = { ...DEFAULT_CONFIG, cols: 2, rows: 2, layers: 3 }
+    expect(run(config, 0).scope).toMatchObject({ l: 0, r: 0, c: 0 })
+    expect(run(config, 3).scope).toMatchObject({ l: 0, r: 1, c: 1 })
+    expect(run(config, 4).scope).toMatchObject({ l: 1, r: 0, c: 0 })
+    expect(run(config, 11).scope).toMatchObject({ l: 2, r: 1, c: 1 })
+    expect(run(config, 0).scope.n).toBe(12) // 2 * 2 * 3
+    expect(run(config, 0).scope.layers).toBe(3)
+  })
 })

@@ -12,6 +12,12 @@
     "author": { "type": "string" },
     "cols": { "type": "integer", "minimum": 1, "maximum": 100 },
     "rows": { "type": "integer", "minimum": 1, "maximum": 100 },
+    "layers": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "description": "Number of depth layers (Z). The grid becomes a Columns × Rows × Layers lattice; each cell's layer index `l` (plus `layers` and `tz`) is exposed to formulas, which project it to 2D. Default 1 (flat)."
+    },
     "angle": {
       "type": "number",
       "minimum": -360,

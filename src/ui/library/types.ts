@@ -9,6 +9,10 @@ export interface LibraryEntry {
   author?: string
   cols: number
   rows: number
+  /** Optional number of depth layers (Z). The grid becomes a Columns × Rows ×
+   *  Layers lattice; the cell's layer index `l` (and `layers`, `tz`) is exposed
+   *  to formulas, which project to 2D. Omit (or 1) for a flat 2D pattern. */
+  layers?: number
   /** Optional per-cell rotation around the source center (degrees).
    *  Cell i's grid offset is rotated by `angle * i` post-formula. Lets a
    *  pattern declare a spiral or swirl without folding the rotation into

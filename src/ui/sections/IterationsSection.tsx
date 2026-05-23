@@ -18,16 +18,23 @@ export function IterationsSection({
   onOpenLibrary,
   onClearPattern,
 }: Props) {
+  const layers = config.layers ?? 1
   return (
     <Section
       id="iterations"
       title="Iterations"
       alwaysOpen
       chip={
-        <output class="section-chip" aria-label={`${config.cols * config.rows} cells`}>
+        <output class="section-chip" aria-label={`${config.cols * config.rows * layers} cells`}>
           {config.cols}
           <span class="section-chip-sep">×</span>
           {config.rows}
+          {layers > 1 && (
+            <>
+              <span class="section-chip-sep">×</span>
+              {layers}
+            </>
+          )}
           <span class="section-chip-sep">·</span>
           <button
             type="button"
@@ -73,6 +80,14 @@ export function IterationsSection({
         max={50}
         step={1}
         onChange={(v, commit) => update({ ...config, rows: Math.max(1, Math.round(v)) }, commit)}
+      />
+      <SliderRow
+        label="Layers"
+        value={layers}
+        min={1}
+        max={50}
+        step={1}
+        onChange={(v, commit) => update({ ...config, layers: Math.max(1, Math.round(v)) }, commit)}
       />
       <SliderRow
         label="Angle"

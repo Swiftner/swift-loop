@@ -2,6 +2,11 @@
 
 All notable changes to Swift Loop. Versions follow SemVer; the [v0.x.y] anchor links to the GitHub release.
 
+## [Unreleased]
+
+### Added
+- **Layers (3D lattice).** The Iterations section gains a **Layers** count: the grid becomes a Columns × Rows × Layers cube of clones. Each cell's layer index `l` (plus `layers` and `tz`) is exposed to formulas, which own the projection to 2D — the 3D look lives in formulas and library presets, not a built-in projection. New **Cube** library preset shows it off (oblique projection, near layers larger/brighter). Defaults to 1, so existing patterns are byte-identical.
+
 ## [v0.2.0] — 2026-05-22
 
 ### Added

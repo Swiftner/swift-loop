@@ -33,7 +33,7 @@ export function renderLoop(opts: RenderLoopOptions): SVGGElement {
 
   const compiled = compileConfig(config)
   const factors = compileFactors(config)
-  const n = Math.max(1, config.cols * config.rows)
+  const n = Math.max(1, config.cols * config.rows * (config.layers ?? 1))
   const start = config.showFirst === false ? 1 : 0
   for (let i = start; i < n; i++) {
     const cell = evaluateCell(i, {

@@ -74,3 +74,29 @@ describe('grid cell layout', () => {
     expect(cf.opacity.evaluate(s, 'opacity')).toBe(100)
   })
 })
+
+describe('3D lattice (layers)', () => {
+  it('exposes l/layers/tz and folds the layer into i and n', () => {
+    // cols 3 × rows 3 × layers 4; cell at c=1, r=2, l=3
+    const s = buildScope(
+      { cols: 3, rows: 3, layers: 4, seed: 1, sourceWidth: 0, sourceHeight: 0 },
+      1,
+      2,
+      3,
+    )
+    expect(s.l).toBe(3)
+    expect(s.layers).toBe(4)
+    expect(s.n).toBe(36) // 3 * 3 * 4
+    expect(s.i).toBe(34) // l*9 + r*3 + c = 27 + 6 + 1
+    expect(s.tz).toBeCloseTo(1, 6) // l / (layers - 1) = 3 / 3
+  })
+
+  it('defaults to a flat grid when layers/l are omitted (back-compat)', () => {
+    const s = buildScope({ cols: 3, rows: 3, seed: 1, sourceWidth: 0, sourceHeight: 0 }, 1, 2)
+    expect(s.l).toBe(0)
+    expect(s.layers).toBe(1)
+    expect(s.tz).toBe(0)
+    expect(s.n).toBe(9)
+    expect(s.i).toBe(7) // r*cols + c = 6 + 1
+  })
+})

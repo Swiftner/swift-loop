@@ -38,18 +38,26 @@ export interface EvaluateCellInput {
 
 export function evaluateCell(i: number, input: EvaluateCellInput): CellValues {
   const { config, compiled, factors, sourceWidth, sourceHeight } = input
-  const c = i % config.cols
-  const r = Math.floor(i / config.cols)
+  // Flat index → 3D address. Cells fill a layer (cols × rows) before advancing
+  // to the next layer, so `i` 0..(cols*rows-1) is layer 0, and so on.
+  const layers = config.layers ?? 1
+  const perLayer = config.cols * config.rows
+  const l = Math.floor(i / perLayer)
+  const within = i % perLayer
+  const c = within % config.cols
+  const r = Math.floor(within / config.cols)
   const scope = buildScope(
     {
       cols: config.cols,
       rows: config.rows,
+      layers,
       seed: config.seed,
       sourceWidth,
       sourceHeight,
     },
     c,
     r,
+    l,
   )
   const rotated = applyAngleToOffset(
     { x: compiled.x.evaluate(scope, 'x'), y: compiled.y.evaluate(scope, 'y') },

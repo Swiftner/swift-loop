@@ -47,13 +47,14 @@ You, the LLM reading this, are helping a designer write a new library pattern. Y
 | `author` | recommended | `@handle` form. |
 | `cols` | yes | Integer 1 to 100. The default column count when the pattern loads. |
 | `rows` | yes | Integer 1 to 100. The default row count. Use `1` for linear or radial patterns. |
+| `layers` | optional | Integer 1 to 100. Depth layers (Z) — turns the grid into a Columns × Rows × Layers lattice. Each cell's `l`/`layers`/`tz` are exposed to formulas, which project it to 2D (there is no built-in projection). Default `1` (flat). See the `Cube` preset. |
 | `angle` | optional | Number, -360 to 360. Per-cell rotation in degrees applied to the grid offset around the source center, *after* the formulas compute `x` and `y`. Cell `i` is rotated by `angle * i`. Lets a pattern declare a spiral or swirl without folding the rotation into every formula. Default `0`. See "Using `angle`" below. |
 | `showFirst` | optional | Defaults to `true`. Set to `false` only for radial or spiral patterns where the `i=0` clone naturally lands away from the origin, and you want the source shape to stay visually centered. See "showFirst" below. |
 | `formulas` | yes | Object. Any subset of `x`, `y`, `rotation`, `scaleX`, `scaleY`, `opacity`. Omit properties that should stay at their default. |
 
 ### Existing tags (please reuse)
 
-`radial`, `grid`, `wave`, `curve`, `linear`, `random`, `chaos`, `spiral`, `polar`, `rotation`, `scale`, `tiling`, `organic`, `arc`, `physics`.
+`radial`, `grid`, `wave`, `curve`, `linear`, `random`, `chaos`, `spiral`, `polar`, `rotation`, `scale`, `tiling`, `organic`, `arc`, `physics`, `3d`.
 
 Only invent a new tag when nothing existing fits.
 
@@ -68,14 +69,17 @@ Every formula has access to these:
 | Var | Meaning | Range |
 |---|---|---|
 | `i` | Linear clone index | `0` to `n-1` |
-| `n` | Total clones | `cols * rows` |
+| `n` | Total clones | `cols * rows * layers` |
 | `c` | Column index | `0` to `cols-1` |
 | `r` | Row index | `0` to `rows-1` |
+| `l` | Layer index (depth/Z) | `0` to `layers-1` |
 | `cols` | Column count | from config |
 | `rows` | Row count | from config |
+| `layers` | Layer count | from config |
 | `t` | Normalized index | `i / (n-1)`, so `0` to `1` across the whole loop |
 | `tx` | Normalized column | `c / (cols-1)`, so `0` to `1` across columns |
 | `ty` | Normalized row | `r / (rows-1)`, so `0` to `1` across rows |
+| `tz` | Normalized layer | `l / (layers-1)`, so `0` to `1` from back to front |
 | `w` | Source shape width | px |
 | `h` | Source shape height | px |
 | `seed` | Random seed | integer, user-controllable |

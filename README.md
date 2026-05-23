@@ -114,7 +114,7 @@ rotation = t * 360
 scale    = 0.4 + 0.6 * sin(t * PI)
 ```
 
-You can use: `i` (index), `n` (total), `c` (column), `r` (row), `cols`, `rows`, `t` (0 to 1), `tx`, `ty`, `w`, `h`, `seed`.
+You can use: `i` (index), `n` (total), `c` (column), `r` (row), `l` (layer), `cols`, `rows`, `layers`, `t` (0 to 1), `tx`, `ty`, `tz` (0 to 1 across layers), `w`, `h`, `seed`.
 
 Functions: `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `atan2`, `sqrt`, `pow`, `exp`, `log`, `abs`, `min`, `max`, `floor`, `ceil`, `round`, `mod`, `rand()`.
 

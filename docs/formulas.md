@@ -46,11 +46,13 @@ In every formula, these variables are defined for you:
 
 `r` is the clone's row index.
 
-`cols` and `rows` are the grid dimensions.
+`l` is the clone's layer index — the depth (Z) axis. It's 0 unless you set Layers above 1, which turns the grid into a Columns × Rows × Layers cube. Use it to write your own 3D projection, or start from the **Cube** library preset.
+
+`cols`, `rows`, and `layers` are the grid dimensions (layers is the depth axis).
 
 `t` is the most useful one. It's `i / (n - 1)`, so it goes from 0 to 1 across the whole loop. If you want anything to happen "smoothly across the loop", multiply or scale by `t`.
 
-`tx` and `ty` are the same thing but for columns and rows. Smooth 0-to-1 horizontally and vertically.
+`tx` and `ty` are the same thing but for columns and rows. Smooth 0-to-1 horizontally and vertically. `tz` is the same across layers — 0 at the back, 1 at the front.
 
 `w` and `h` are the source shape's width and height in pixels. Use these for tight tiling.
 

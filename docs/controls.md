@@ -22,6 +22,8 @@ The first section. This is where you set the count.
 
 **Rows.** How many rows. 1 to 100. Leave at 1 for linear and radial patterns.
 
+**Layers.** Depth layers (Z), 1 to 50. The grid becomes a Columns × Rows × Layers cube of clones. On its own it just stacks more copies in place — the 3D look comes from a formula (or a library preset like **Cube**) that reads the layer index `l`. Leave at 1 for a flat 2D pattern.
+
 **Angle.** Degrees of per-cell rotation, applied to each clone's grid offset around the source center. Leave at 0 for straight lines and rectangular grids. Bump it 5 to 30 degrees and a line curls into a spiral, a grid swirls. Crank it past 90 to wrap the pattern back around on itself. Think "how much do successive cells lean".
 
 If you've applied a library pattern, you'll also see a little pill showing its name. Click it to jump back to the library and pick something else.

@@ -91,7 +91,7 @@ async function fullRegen(
   const factors = compileFactors(config)
   if (!parentId) return
 
-  const n = config.cols * config.rows
+  const n = config.cols * config.rows * (config.layers ?? 1)
   const cloneIds: string[] = []
 
   for (let i = 1; i < n; i++) {
@@ -170,7 +170,7 @@ async function inPlaceMutation(
   const compiled = compileConfig(config)
   const factors = compileFactors(config)
   const dirty = new Set<string>(diff.dirty as DirtyProperty[])
-  const n = config.cols * config.rows
+  const n = config.cols * config.rows * (config.layers ?? 1)
 
   for (let i = 1; i < n; i++) {
     const cloneId = prev.cloneIds[i - 1]

@@ -38,7 +38,11 @@ export function diffConfig(
   if (ctx && ctx.previousSourceId !== ctx.currentSourceId) {
     return { mode: 'full', dirty: ALL_PROPS }
   }
-  if (prev.cols !== next.cols || prev.rows !== next.rows) {
+  if (
+    prev.cols !== next.cols ||
+    prev.rows !== next.rows ||
+    (prev.layers ?? 1) !== (next.layers ?? 1)
+  ) {
     return { mode: 'full', dirty: ALL_PROPS }
   }
 

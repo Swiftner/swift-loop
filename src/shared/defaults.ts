@@ -22,6 +22,7 @@ const scalar = (value: number): ScalarProperty => ({
 export const DEFAULT_CONFIG: LoopConfig = {
   cols: 10,
   rows: 10,
+  layers: 1,
   angle: 0,
   x: num(60),
   y: num(60),
