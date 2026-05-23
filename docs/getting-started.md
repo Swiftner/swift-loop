@@ -44,7 +44,7 @@ This is the fastest way to learn what's possible. Click through the presets. Rea
 
 ## Try the Library
 
-Below Presets, you'll find the **Library**. 20 patterns by name. Click **Phyllotaxis** and you should see a sunflower. Click **Halftone** and you'll get a dot pattern that fades from the center.
+Below Presets, you'll find the **Library**. 25 patterns by name. Click **Phyllotaxis** and you should see a sunflower. Click **Halftone** and you'll get a dot pattern that fades from the center.
 
 Library patterns are like presets, but they use formulas under the hood. Which means they can do things sliders can't, like spirals and waves and golden-angle phyllotaxis.
 
