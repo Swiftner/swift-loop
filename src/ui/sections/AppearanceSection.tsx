@@ -3,21 +3,43 @@ import {
   factorForScalar,
   formulaForProperty,
 } from '../../plugin/engine/compile'
-import type { EasingKind, LoopConfig } from '../../shared/types'
+import type { EasingKind, FormulaProperty, LoopConfig, NumericProperty } from '../../shared/types'
 import { GradientRampEditor } from '../components/GradientRampEditor'
 import { ScrubNum } from '../components/ScrubNum'
 import { Section } from '../components/Section'
 import { SliderRow } from '../components/SliderRow'
 import { Strip } from '../components/Strip'
+import { rewriteTrailingScale } from '../formula-scale'
+import { sliderRangeFor } from '../slider-ranges'
 
 interface Props {
   config: LoopConfig
   update: (next: LoopConfig, commit?: boolean) => void
+  sourceSize: { width: number; height: number } | null
 }
 
 const EASINGS: EasingKind[] = ['linear', 'ease', 'easeIn', 'easeOut']
 
-export function AppearanceSection({ config, update }: Props) {
+// The per-clone look: how big each clone is (Size), how it's turned (Rotation),
+// how see-through it is (Opacity), and its Fill / Stroke. These ride underneath
+// the per-axis ramps in Column / Row / Layer. Each numeric row accepts a
+// formula; Easing sets the curve the start→end ramps follow.
+const BASE_ROWS: { key: FormulaProperty; label: string; unit?: string }[] = [
+  { key: 'rotation', label: 'Rotation', unit: '°' },
+  { key: 'scaleX', label: 'Size X', unit: 'px' },
+  { key: 'scaleY', label: 'Size Y', unit: 'px' },
+]
+
+// Drives a slider value into a NumericProperty without destroying an active
+// library formula (mirrors the axis sections).
+function computeSliderUpdate(cur: NumericProperty, v: number): NumericProperty {
+  if (!cur.unlocked) return { ...cur, value: v, unlocked: false, formula: null }
+  const rewritten = cur.formula ? rewriteTrailingScale(cur.formula, v) : null
+  if (rewritten) return { ...cur, value: v, formula: rewritten }
+  return { ...cur, value: v }
+}
+
+export function AppearanceSection({ config, update, sourceSize }: Props) {
   const opacityFormulaActive = !!config.opacity.unlocked
   const fillFormulaActive = !!config.fill.unlocked
   const strokeFormulaActive = !!config.stroke.unlocked
@@ -30,8 +52,8 @@ export function AppearanceSection({ config, update }: Props) {
 
   return (
     <Section
-      id="layer"
-      title="Layer"
+      id="appearance"
+      title="Appearance"
       defaultOpen
       chip={
         <EasingChip
@@ -40,61 +62,40 @@ export function AppearanceSection({ config, update }: Props) {
         />
       }
     >
-      {/* Layer count + per-layer depth transforms */}
-      <SliderRow
-        label="Count"
-        value={config.layers ?? 1}
-        min={1}
-        max={50}
-        step={1}
-        onChange={(v, commit) => update({ ...config, layers: Math.max(1, Math.round(v)) }, commit)}
-      />
-      <SliderRow
-        label="Step"
-        value={config.layerStep ?? 0}
-        min={-120}
-        max={120}
-        step={1}
-        unit="px"
-        onChange={(v, commit) => update({ ...config, layerStep: v }, commit)}
-      />
-      <SliderRow
-        label="Angle"
-        value={config.layerAngle ?? 0}
-        min={-90}
-        max={90}
-        step={0.5}
-        unit="°"
-        onChange={(v, commit) => update({ ...config, layerAngle: v }, commit)}
-      />
-      <SliderRow
-        label="Fade"
-        value={config.layerFade ?? 0}
-        min={0}
-        max={100}
-        step={1}
-        unit="%"
-        onChange={(v, commit) => update({ ...config, layerFade: v }, commit)}
-      />
-      <SliderRow
-        label="Random"
-        value={config.layerRandom ?? 0}
-        min={0}
-        max={120}
-        step={0.5}
-        unit="px"
-        onChange={(v, commit) => update({ ...config, layerRandom: v }, commit)}
-      />
-      <label class="layer-colour-toggle">
-        <input
-          type="checkbox"
-          checked={config.layerColour ?? false}
-          onChange={(e) =>
-            update({ ...config, layerColour: (e.target as HTMLInputElement).checked }, true)
-          }
-        />
-        Colour by depth
-      </label>
+      {/* Base transforms (each formula-capable) */}
+      {BASE_ROWS.map((row) => {
+        const cur = config[row.key]
+        const range = sliderRangeFor(row.key, sourceSize)
+        return (
+          <SliderRow
+            key={row.key}
+            label={row.label}
+            value={cur.value}
+            min={range.min}
+            max={range.max}
+            step={range.step}
+            unit={row.unit}
+            formulaIndicator={cur.unlocked}
+            formula={formulaForProperty(config, row.key)}
+            onFormulaChange={(text) => {
+              const trimmed = text.trim()
+              update(
+                {
+                  ...config,
+                  [row.key]:
+                    trimmed === ''
+                      ? { ...cur, unlocked: false, formula: null }
+                      : { ...cur, unlocked: true, formula: text },
+                },
+                false,
+              )
+            }}
+            onChange={(v, commit) =>
+              update({ ...config, [row.key]: computeSliderUpdate(cur, v) }, commit)
+            }
+          />
+        )
+      })}
 
       {/* Opacity */}
       <Strip

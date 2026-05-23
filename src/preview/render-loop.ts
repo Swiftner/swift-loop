@@ -2,7 +2,7 @@
 // transform — callers (scene host) wrap it in another <g> to position,
 // rotate, and scale the whole loop on the canvas.
 
-import { cellCount, evaluateCell } from '../plugin/engine/cells'
+import { evaluateCell, paintOrder } from '../plugin/engine/cells'
 import { compileConfig, compileFactors } from '../plugin/engine/compile'
 import { sampleRamp } from '../shared/color'
 import type { Color, ColorRamp, LoopConfig } from '../shared/types'
@@ -33,9 +33,9 @@ export function renderLoop(opts: RenderLoopOptions): SVGGElement {
 
   const compiled = compileConfig(config)
   const factors = compileFactors(config)
-  const n = Math.max(1, cellCount(config))
-  const start = config.showFirst === false ? 1 : 0
-  for (let i = start; i < n; i++) {
+  // Append in back-to-front depth order so the near layer lands on top.
+  for (const i of paintOrder(config)) {
+    if (i === 0 && config.showFirst === false) continue
     const cell = evaluateCell(i, {
       config,
       compiled,

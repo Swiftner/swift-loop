@@ -18,9 +18,12 @@ interface Props {
   // step (a NumericProperty, so it keeps its fx + modulation)
   stepKey: FormulaProperty
   stepLabel: string
-  // angle (clone rotation per index) and fade (opacity falloff), plain numbers
+  // angle (clone rotation per index), scale (size ramp), and fade (opacity
+  // falloff) — plain numbers applied along this axis.
   angle: number
   onAngle: (v: number, commit: boolean) => void
+  scale: number
+  onScale: (v: number, commit: boolean) => void
   fade: number
   onFade: (v: number, commit: boolean) => void
   chip?: ComponentChildren
@@ -49,6 +52,8 @@ export function AxisSection({
   stepLabel,
   angle,
   onAngle,
+  scale,
+  onScale,
   fade,
   onFade,
   chip,
@@ -91,13 +96,22 @@ export function AxisSection({
         }
       />
       <SliderRow
-        label="Angle"
+        label="Twist"
         value={angle}
         min={-90}
         max={90}
         step={0.5}
         unit="°"
         onChange={onAngle}
+      />
+      <SliderRow
+        label="Scale"
+        value={scale}
+        min={-100}
+        max={100}
+        step={1}
+        unit="%"
+        onChange={onScale}
       />
       <SliderRow label="Fade" value={fade} min={0} max={100} step={1} unit="%" onChange={onFade} />
       <SliderRow

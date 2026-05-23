@@ -2,10 +2,12 @@ import { describe, expect, it } from 'vitest'
 import { applyAngleToOffset } from '../src/plugin/engine/angle'
 import {
   type CellValues,
+  DEFAULT_DEPTH_DIR,
   MAX_CELLS,
   cellCount,
   computeInterpFactor,
   evaluateCell,
+  paintOrder,
 } from '../src/plugin/engine/cells'
 import { compileConfig, compileFactors } from '../src/plugin/engine/compile'
 import { applyEasing } from '../src/plugin/engine/easing'
@@ -128,6 +130,27 @@ describe('cellCount', () => {
   })
 })
 
+describe('paintOrder', () => {
+  const grid = { cols: 2, rows: 1, layers: 3 } // perLayer 2 → layer0:[0,1] layer1:[2,3] layer2:[4,5]
+
+  it('is natural order for a single layer', () => {
+    expect(paintOrder({ cols: 3, rows: 2 })).toEqual([0, 1, 2, 3, 4, 5])
+  })
+
+  it('near-top paints far layers first (so near layers end on top)', () => {
+    expect(paintOrder({ ...grid, stackOrder: 'near-top' })).toEqual([4, 5, 2, 3, 0, 1])
+  })
+
+  it('far-top keeps natural order (deep layers in front)', () => {
+    expect(paintOrder({ ...grid, stackOrder: 'far-top' })).toEqual([0, 1, 2, 3, 4, 5])
+  })
+
+  it('covers exactly the indices [0, cellCount) as a permutation', () => {
+    const order = paintOrder(grid)
+    expect([...order].sort((a, b) => a - b)).toEqual([0, 1, 2, 3, 4, 5])
+  })
+})
+
 describe('per-axis transforms', () => {
   it('adds each axis angle to rotation, offsets layers, and fades by axis', () => {
     const config: LoopConfig = {
@@ -145,15 +168,46 @@ describe('per-axis transforms', () => {
     expect(cell.scope).toMatchObject({ c: 2, r: 1, l: 1 })
     // rotation = base(0) + c*10 + r*5 + l*20
     expect(cell.rotation).toBeCloseTo(45, 6)
-    // x = base column step (c*60) + oblique layer step (l*50*0.82)
-    expect(cell.x).toBeCloseTo(2 * 60 + 1 * 50 * 0.82, 6)
+    // x = base column step (c*60) + depth step along the default 35° direction
+    expect(cell.x).toBeCloseTo(2 * 60 + 1 * 50 * Math.cos((DEFAULT_DEPTH_DIR * Math.PI) / 180), 6)
     // opacity = base(100) - tx*columnFade, tx = c/(cols-1) = 1
     expect(cell.opacity).toBeCloseTo(50, 6)
   })
 
+  it('pushes layers along layerDirection (0° = +x, 90° = up)', () => {
+    const base: LoopConfig = { ...DEFAULT_CONFIG, cols: 1, rows: 1, layers: 2, layerStep: 40 }
+    // l=1 cell. At 0° the offset is pure +x; at 90° it is pure -y (screen up).
+    const right = run({ ...base, layerDirection: 0 }, 1)
+    const up = run({ ...base, layerDirection: 90 }, 1)
+    expect(right.x - run(base, 0).x).toBeCloseTo(40, 6)
+    expect(right.y - run(base, 0).y).toBeCloseTo(0, 6)
+    expect(up.x - run({ ...base, layerDirection: 90 }, 0).x).toBeCloseTo(0, 6)
+    expect(up.y - run({ ...base, layerDirection: 90 }, 0).y).toBeCloseTo(-40, 6)
+  })
+
+  it('ramps scale along an axis: the far end renders at scaleMul × source size', () => {
+    const sw = 40
+    const sh = 30
+    const base: LoopConfig = { ...DEFAULT_CONFIG, cols: 3, rows: 1 }
+    // c=2 sits at tx=1, so columnScale -50 halves the *rendered* size
+    // (renderedW = sw + scaleX), even though the base size delta is 0.
+    const far = run({ ...base, columnScale: -50 }, 2, sw, sh)
+    expect(sw + far.scaleX).toBeCloseTo((sw + run(base, 2, sw, sh).scaleX) * 0.5, 6)
+    expect(sh + far.scaleY).toBeCloseTo((sh + run(base, 2, sw, sh).scaleY) * 0.5, 6)
+    // c=0 (tx=0) is untouched.
+    expect(run({ ...base, columnScale: -50 }, 0, sw, sh).scaleX).toBeCloseTo(
+      run(base, 0, sw, sh).scaleX,
+      6,
+    )
+  })
+
   it('is a no-op when all per-axis fields are absent (back-compat)', () => {
     const a = run(DEFAULT_CONFIG, 23)
-    const b = run({ ...DEFAULT_CONFIG, columnAngle: 0, layerStep: 0, layerFade: 0 }, 23)
+    const b = run(
+      { ...DEFAULT_CONFIG, columnAngle: 0, layerStep: 0, layerFade: 0, columnScale: 0 },
+      23,
+    )
+    expect(b.scaleX).toBeCloseTo(a.scaleX, 6)
     expect(b.rotation).toBeCloseTo(a.rotation, 6)
     expect(b.x).toBeCloseTo(a.x, 6)
     expect(b.opacity).toBeCloseTo(a.opacity, 6)

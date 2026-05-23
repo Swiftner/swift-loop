@@ -8,6 +8,7 @@ import { resetKeepingPattern } from './config-ops'
 import { useLooperConfig } from './hooks/useLooperConfig'
 import { AppearanceSection } from './sections/AppearanceSection'
 import { AxisSection } from './sections/AxisSection'
+import { LayerSection } from './sections/LayerSection'
 import { LibraryOverlay } from './sections/LibraryOverlay'
 import { ModulationSection } from './sections/ModulationSection'
 import { PresetsSection } from './sections/PresetsSection'
@@ -191,6 +192,8 @@ export function App() {
           stepLabel="X step"
           angle={config.columnAngle ?? 0}
           onAngle={(v, commit) => update({ ...config, columnAngle: v }, commit)}
+          scale={config.columnScale ?? 0}
+          onScale={(v, commit) => update({ ...config, columnScale: v }, commit)}
           fade={config.columnFade ?? 0}
           onFade={(v, commit) => update({ ...config, columnFade: v }, commit)}
           chip={
@@ -219,10 +222,13 @@ export function App() {
           stepLabel="Y step"
           angle={config.rowAngle ?? 0}
           onAngle={(v, commit) => update({ ...config, rowAngle: v }, commit)}
+          scale={config.rowScale ?? 0}
+          onScale={(v, commit) => update({ ...config, rowScale: v }, commit)}
           fade={config.rowFade ?? 0}
           onFade={(v, commit) => update({ ...config, rowFade: v }, commit)}
         />
-        <AppearanceSection config={config} update={update} />
+        <LayerSection config={config} update={update} />
+        <AppearanceSection config={config} update={update} sourceSize={sourceSize} />
         <ModulationSection config={config} update={update} sourceSize={sourceSize} />
         <PresetsSection
           config={config}

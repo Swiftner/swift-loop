@@ -60,11 +60,19 @@ export interface LoopConfig {
   // fill/stroke ramp by depth.
   columnAngle?: number // deg of clone rotation added per column (× c)
   rowAngle?: number // × r
-  layerStep?: number // px oblique depth offset per layer (× l)
+  layerStep?: number // px depth offset per layer (× l), along layerDirection
+  layerDirection?: number // deg, direction of the depth offset (default 35 = up-right)
   layerAngle?: number // deg of clone rotation per layer (× l)
+  // Z-order of overlapping depth layers. 'near-top' (default) keeps the front
+  // layer (l=0) on top — the natural reading of a receding stack. 'far-top'
+  // flips it so deep layers sit in front.
+  stackOrder?: 'near-top' | 'far-top'
   columnFade?: number // % opacity lost across columns (× tx)
   rowFade?: number // × ty
   layerFade?: number // × tz (back-to-front)
+  columnScale?: number // % size change toward the last column (× tx); -100 = vanishes
+  rowScale?: number // × ty
+  layerScale?: number // × tz; negative = perspective falloff (far layers smaller)
   layerColour?: boolean // sweep the fill/stroke ramp by depth (factor = tz)
   layerRandom?: number // px of seeded random position jitter per cell
 

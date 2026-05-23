@@ -45,10 +45,15 @@ export function diffConfig(
     (prev.columnAngle ?? 0) !== (next.columnAngle ?? 0) ||
     (prev.rowAngle ?? 0) !== (next.rowAngle ?? 0) ||
     (prev.layerStep ?? 0) !== (next.layerStep ?? 0) ||
+    (prev.layerDirection ?? 0) !== (next.layerDirection ?? 0) ||
+    (prev.stackOrder ?? 'near-top') !== (next.stackOrder ?? 'near-top') ||
     (prev.layerAngle ?? 0) !== (next.layerAngle ?? 0) ||
     (prev.columnFade ?? 0) !== (next.columnFade ?? 0) ||
     (prev.rowFade ?? 0) !== (next.rowFade ?? 0) ||
     (prev.layerFade ?? 0) !== (next.layerFade ?? 0) ||
+    (prev.columnScale ?? 0) !== (next.columnScale ?? 0) ||
+    (prev.rowScale ?? 0) !== (next.rowScale ?? 0) ||
+    (prev.layerScale ?? 0) !== (next.layerScale ?? 0) ||
     (prev.layerColour ?? false) !== (next.layerColour ?? false) ||
     (prev.layerRandom ?? 0) !== (next.layerRandom ?? 0)
   ) {

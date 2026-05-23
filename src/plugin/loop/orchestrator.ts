@@ -92,9 +92,21 @@ async function fullRegen(
   if (!parentId) return
 
   const n = cellCount(config)
-  const cloneIds: string[] = []
 
-  for (let i = 1; i < n; i++) {
+  // Clone creation order sets z-order: each insertChild(0) shoves earlier clones
+  // toward the front. Default near-top = natural order (front layer ends on top).
+  // far-top creates deep layers first so they finish in front.
+  const order: number[] = []
+  for (let i = 1; i < n; i++) order.push(i)
+  if ((config.layers ?? 1) > 1 && (config.stackOrder ?? 'near-top') === 'far-top') {
+    const perLayer = config.cols * config.rows
+    order.sort((a, b) => Math.floor(b / perLayer) - Math.floor(a / perLayer))
+  }
+
+  // Indexed by cell i so in-place updates (which address cloneIds[i-1]) stay
+  // correct no matter what order we created the clones in.
+  const cloneById: string[] = new Array(n)
+  for (const i of order) {
     const cloneId = await adapter.cloneNode(source.id, {
       parentId,
       index: 0,
@@ -139,8 +151,10 @@ async function fullRegen(
       ]),
     })
 
-    cloneIds.push(cloneId)
+    cloneById[i] = cloneId
   }
+
+  const cloneIds = cloneById.slice(1)
 
   const groupId = await adapter.groupNodes([source.id, ...cloneIds], {
     parentId,

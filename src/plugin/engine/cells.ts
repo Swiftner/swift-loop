@@ -21,6 +21,31 @@ export function cellCount(config: { cols: number; rows: number; layers?: number 
   return Math.min(MAX_CELLS, config.cols * config.rows * (config.layers ?? 1))
 }
 
+// Default depth direction (degrees): up and to the right, the classic
+// isometric-ish reading. cos/sin of 35° ≈ (0.82, 0.57).
+export const DEFAULT_DEPTH_DIR = 35
+
+// Cell indices [0, cellCount) in back-to-front paint order — the order a
+// painter's-algorithm consumer (the SVG preview) should append them so the
+// near layer ends up on top. With one layer this is just natural order.
+// 'near-top' (default) paints far layers (high l) first; 'far-top' keeps
+// natural order so deep layers land in front.
+export function paintOrder(config: {
+  cols: number
+  rows: number
+  layers?: number
+  stackOrder?: 'near-top' | 'far-top'
+}): number[] {
+  const n = cellCount(config)
+  const order = Array.from({ length: n }, (_, i) => i)
+  const layers = config.layers ?? 1
+  if (layers <= 1 || (config.stackOrder ?? 'near-top') === 'far-top') return order
+  const perLayer = config.cols * config.rows
+  // stable sort by descending layer → far layers come first (painted at back)
+  order.sort((a, b) => Math.floor(b / perLayer) - Math.floor(a / perLayer))
+  return order
+}
+
 export interface CellValues {
   i: number
   c: number
@@ -85,8 +110,9 @@ export function evaluateCell(i: number, input: EvaluateCellInput): CellValues {
   let y = rotated.y
   const layerStep = config.layerStep ?? 0
   if (layerStep !== 0) {
-    x += l * layerStep * 0.82 // oblique offset, up-and-to-the-right
-    y -= l * layerStep * 0.57
+    const dir = ((config.layerDirection ?? DEFAULT_DEPTH_DIR) * Math.PI) / 180
+    x += l * layerStep * Math.cos(dir)
+    y -= l * layerStep * Math.sin(dir) // screen y is down, so subtract to go up
   }
   const layerRandom = config.layerRandom ?? 0
   if (layerRandom !== 0) {
@@ -105,6 +131,22 @@ export function evaluateCell(i: number, input: EvaluateCellInput): CellValues {
     scope.tz * (config.layerFade ?? 0)
   const colourFactor = config.layerColour ? scope.tz : baseEased
 
+  // Per-axis Scale: a uniform size change ramping along each axis (like Fade,
+  // but for scale). Factors combine multiplicatively. Clamped at 0 so the far
+  // end can vanish but not flip inside-out.
+  const scaleMul = Math.max(
+    0,
+    (1 + scope.tx * ((config.columnScale ?? 0) / 100)) *
+      (1 + scope.ty * ((config.rowScale ?? 0) / 100)) *
+      (1 + scope.tz * ((config.layerScale ?? 0) / 100)),
+  )
+  // scaleX/scaleY are size *deltas* added to the source size downstream
+  // (renderedW = sourceWidth + scaleX). So fold the per-axis multiplier through
+  // the whole rendered size — this works even when the base delta is 0, and at
+  // mul=1 it collapses back to exactly the base delta (no change to old configs).
+  const baseScaleX = compiled.scaleX.evaluate(scope, 'scaleX')
+  const baseScaleY = compiled.scaleY.evaluate(scope, 'scaleY')
+
   return {
     i,
     c,
@@ -113,8 +155,8 @@ export function evaluateCell(i: number, input: EvaluateCellInput): CellValues {
     x,
     y,
     rotation,
-    scaleX: compiled.scaleX.evaluate(scope, 'scaleX'),
-    scaleY: compiled.scaleY.evaluate(scope, 'scaleY'),
+    scaleX: (sourceWidth + baseScaleX) * scaleMul - sourceWidth,
+    scaleY: (sourceHeight + baseScaleY) * scaleMul - sourceHeight,
     opacity,
     fillFactor: factors.fill ? factors.fill.evaluate(scope, 'fillFactor') : colourFactor,
     strokeFactor: factors.stroke ? factors.stroke.evaluate(scope, 'strokeFactor') : colourFactor,
