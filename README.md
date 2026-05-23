@@ -49,6 +49,19 @@ bun run build
 
 Then do the same Figma import step on the cloned folder's `manifest.json`.
 
+### Penpot (experimental)
+
+Swift Loop also builds as a [Penpot](https://penpot.app) plugin from the same source — the engine, UI, and pattern library are shared; only a thin host adapter differs.
+
+```bash
+bun run build:penpot
+```
+
+This emits `build/penpot/` (`manifest.json`, `plugin.js`, `ui.html`, `ui.js`). Serve that folder over HTTP and load the `manifest.json` URL from Penpot's plugin manager.
+
+> **Heads up:** the Penpot target compiles, type-checks against `@penpot/plugin-types`, and is unit-tested, but it has **not yet been verified inside a running Penpot instance**. Treat it as a preview. Known things to confirm on first run: rotation direction and the UI↔plugin message bridge. See [the port plan](./docs/superpowers/plans/2026-05-23-penpot-port.md) for details.
+
+
 ## Using it
 
 Pick something on your canvas. A Vector, a Shape, some Text, a Group, whatever you've got.
