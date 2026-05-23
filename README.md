@@ -57,9 +57,9 @@ Swift Loop also builds as a [Penpot](https://penpot.app) plugin from the same so
 bun run build:penpot
 ```
 
-This emits `build/penpot/` (`manifest.json`, `plugin.js`, `ui.html`, `ui.js`). Serve that folder over HTTP and load the `manifest.json` URL from Penpot's plugin manager.
+This emits `build/penpot/` (`manifest.json`, `plugin.js`, `ui.html`, `ui.js`). Serve that folder over HTTP and load the `manifest.json` URL from Penpot's plugin manager. A prebuilt `swift-loop-penpot-vX.Y.Z.zip` is also attached to each [release](https://github.com/Swiftner/swift-loop/releases/latest) — unzip, serve, and load the manifest the same way.
 
-> **Heads up:** the Penpot target compiles, type-checks against `@penpot/plugin-types`, and is unit-tested, but it has **not yet been verified inside a running Penpot instance**. Treat it as a preview. Known things to confirm on first run: rotation direction and the UI↔plugin message bridge. See [the port plan](./docs/superpowers/plans/2026-05-23-penpot-port.md) for details.
+> **Heads up:** the Penpot target compiles, type-checks against `@penpot/plugin-types`, and is unit-tested, but it has **not yet been verified inside a running Penpot instance**. Treat it as a preview. Known things to confirm on first run: rotation direction and the UI↔plugin message bridge.
 
 
 ## Using it
