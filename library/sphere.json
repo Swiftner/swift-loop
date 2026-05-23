@@ -1,0 +1,17 @@
+{
+  "id": "sphere",
+  "name": "Sphere",
+  "description": "A ball of dots. Columns wrap around as longitude, Rows as latitude, and Layers nest inward as shells (1 = a hollow shell). The front face reads large and bright, the back recedes.",
+  "tags": ["3d", "radial", "organic"],
+  "author": "@swiftner",
+  "cols": 20,
+  "rows": 12,
+  "layers": 1,
+  "formulas": {
+    "x": "x = sin(ty * PI) * cos(c * TAU / cols) * {x:150} * (1 - 0.55 * tz)",
+    "y": "y = cos(ty * PI) * {y:150} * (1 - 0.55 * tz)",
+    "scaleX": "scaleX = sin(ty * PI) * sin(c * TAU / cols) * 16",
+    "scaleY": "scaleY = sin(ty * PI) * sin(c * TAU / cols) * 16",
+    "opacity": "opacity = 70 + sin(ty * PI) * sin(c * TAU / cols) * 30"
+  }
+}

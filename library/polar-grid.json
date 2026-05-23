@@ -6,7 +6,7 @@
   "author": "@swiftner",
   "cols": 12, "rows": 5,
   "formulas": {
-    "x": "x = cos(c * TAU / cols) * (r + 1) * 20",
-    "y": "y = sin(c * TAU / cols) * (r + 1) * 20"
+    "x": "x = cos(c * TAU / cols) * (r + 1) * {x:20}",
+    "y": "y = sin(c * TAU / cols) * (r + 1) * {y:20}"
   }
 }

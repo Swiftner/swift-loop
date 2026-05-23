@@ -6,7 +6,7 @@
   "author": "@swiftner",
   "cols": 100, "rows": 1,
   "formulas": {
-    "x": "x = cos(i * 2.39996) * sqrt(i) * 18",
-    "y": "y = sin(i * 2.39996) * sqrt(i) * 18"
+    "x": "x = cos(i * 2.39996) * sqrt(i) * {x:18}",
+    "y": "y = sin(i * 2.39996) * sqrt(i) * {y:18}"
   }
 }

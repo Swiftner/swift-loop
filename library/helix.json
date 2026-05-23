@@ -1,0 +1,17 @@
+{
+  "id": "helix",
+  "name": "Helix",
+  "description": "A coil climbing the canvas, the near side of each loop large and bright. Set Layers to the number of strands: 1 is a spring, 2 a double helix (DNA), more a twisted rope.",
+  "tags": ["3d", "spiral", "curve"],
+  "author": "@swiftner",
+  "cols": 60,
+  "rows": 1,
+  "layers": 1,
+  "formulas": {
+    "x": "x = cos(tx * TAU * 3 + l * TAU / layers) * {x:120}",
+    "y": "y = (tx - 0.5) * {y:320}",
+    "scaleX": "scaleX = sin(tx * TAU * 3 + l * TAU / layers) * 12",
+    "scaleY": "scaleY = sin(tx * TAU * 3 + l * TAU / layers) * 12",
+    "opacity": "opacity = 70 + sin(tx * TAU * 3 + l * TAU / layers) * 30"
+  }
+}

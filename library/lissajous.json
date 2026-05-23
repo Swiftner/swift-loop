@@ -6,7 +6,7 @@
   "author": "@swiftner",
   "cols": 80, "rows": 1,
   "formulas": {
-    "x": "x = sin(t * TAU * 3) * 150",
-    "y": "y = sin(t * TAU * 2) * 150"
+    "x": "x = sin(t * TAU * 3) * {x:150}",
+    "y": "y = sin(t * TAU * 2) * {y:150}"
   }
 }

@@ -6,7 +6,7 @@
   "author": "@swiftner",
   "cols": 20, "rows": 6,
   "formulas": {
-    "x": "x = c * 25 + sin(ty * TAU + tx * PI) * 30",
-    "y": "y = r * 30"
+    "x": "x = c * {x:25} + sin(ty * TAU + tx * PI) * 30",
+    "y": "y = r * {y:30}"
   }
 }
