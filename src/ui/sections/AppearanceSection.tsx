@@ -7,6 +7,7 @@ import type { EasingKind, LoopConfig } from '../../shared/types'
 import { GradientRampEditor } from '../components/GradientRampEditor'
 import { ScrubNum } from '../components/ScrubNum'
 import { Section } from '../components/Section'
+import { SliderRow } from '../components/SliderRow'
 import { Strip } from '../components/Strip'
 
 interface Props {
@@ -29,9 +30,9 @@ export function AppearanceSection({ config, update }: Props) {
 
   return (
     <Section
-      id="appearance"
-      title="Appearance"
-      defaultOpen={false}
+      id="layer"
+      title="Layer"
+      defaultOpen
       chip={
         <EasingChip
           value={config.easing}
@@ -39,6 +40,53 @@ export function AppearanceSection({ config, update }: Props) {
         />
       }
     >
+      {/* Layer count + per-layer depth transforms */}
+      <SliderRow
+        label="Count"
+        value={config.layers ?? 1}
+        min={1}
+        max={50}
+        step={1}
+        onChange={(v, commit) => update({ ...config, layers: Math.max(1, Math.round(v)) }, commit)}
+      />
+      <SliderRow
+        label="Step"
+        value={config.layerStep ?? 0}
+        min={-120}
+        max={120}
+        step={1}
+        unit="px"
+        onChange={(v, commit) => update({ ...config, layerStep: v }, commit)}
+      />
+      <SliderRow
+        label="Angle"
+        value={config.layerAngle ?? 0}
+        min={-90}
+        max={90}
+        step={0.5}
+        unit="°"
+        onChange={(v, commit) => update({ ...config, layerAngle: v }, commit)}
+      />
+      <SliderRow
+        label="Fade"
+        value={config.layerFade ?? 0}
+        min={0}
+        max={100}
+        step={1}
+        unit="%"
+        onChange={(v, commit) => update({ ...config, layerFade: v }, commit)}
+      />
+      <label class="layer-colour-toggle">
+        <input
+          type="checkbox"
+          checked={config.layerColour ?? false}
+          onChange={(e) =>
+            update({ ...config, layerColour: (e.target as HTMLInputElement).checked }, true)
+          }
+        />
+        Colour by depth
+      </label>
+
       {/* Opacity */}
       <Strip
         label="Opacity"

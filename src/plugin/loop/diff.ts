@@ -41,7 +41,15 @@ export function diffConfig(
   if (
     prev.cols !== next.cols ||
     prev.rows !== next.rows ||
-    (prev.layers ?? 1) !== (next.layers ?? 1)
+    (prev.layers ?? 1) !== (next.layers ?? 1) ||
+    (prev.columnAngle ?? 0) !== (next.columnAngle ?? 0) ||
+    (prev.rowAngle ?? 0) !== (next.rowAngle ?? 0) ||
+    (prev.layerStep ?? 0) !== (next.layerStep ?? 0) ||
+    (prev.layerAngle ?? 0) !== (next.layerAngle ?? 0) ||
+    (prev.columnFade ?? 0) !== (next.columnFade ?? 0) ||
+    (prev.rowFade ?? 0) !== (next.rowFade ?? 0) ||
+    (prev.layerFade ?? 0) !== (next.layerFade ?? 0) ||
+    (prev.layerColour ?? false) !== (next.layerColour ?? false)
   ) {
     return { mode: 'full', dirty: ALL_PROPS }
   }

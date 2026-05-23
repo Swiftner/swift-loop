@@ -75,19 +75,43 @@ export function evaluateCell(i: number, input: EvaluateCellInput): CellValues {
     config.angle,
   )
   const baseEased = applyEasing(config.easing, computeInterpFactor(config, scope.tx, scope.ty))
+
+  // Per-axis transforms, applied on top of the evaluated cell. Column/Row/Layer
+  // each add a clone rotation; Layer adds an oblique depth offset; each axis can
+  // fade opacity along its run; Layer can sweep the colour ramp by depth (tz).
+  // All default to 0/false, so a config without them is untouched.
+  let x = rotated.x
+  let y = rotated.y
+  const layerStep = config.layerStep ?? 0
+  if (layerStep !== 0) {
+    x += l * layerStep * 0.82 // oblique offset, up-and-to-the-right
+    y -= l * layerStep * 0.57
+  }
+  const rotation =
+    compiled.rotation.evaluate(scope, 'rotation') +
+    c * (config.columnAngle ?? 0) +
+    r * (config.rowAngle ?? 0) +
+    l * (config.layerAngle ?? 0)
+  const opacity =
+    compiled.opacity.evaluate(scope, 'opacity') -
+    scope.tx * (config.columnFade ?? 0) -
+    scope.ty * (config.rowFade ?? 0) -
+    scope.tz * (config.layerFade ?? 0)
+  const colourFactor = config.layerColour ? scope.tz : baseEased
+
   return {
     i,
     c,
     r,
     scope,
-    x: rotated.x,
-    y: rotated.y,
-    rotation: compiled.rotation.evaluate(scope, 'rotation'),
+    x,
+    y,
+    rotation,
     scaleX: compiled.scaleX.evaluate(scope, 'scaleX'),
     scaleY: compiled.scaleY.evaluate(scope, 'scaleY'),
-    opacity: compiled.opacity.evaluate(scope, 'opacity'),
-    fillFactor: factors.fill ? factors.fill.evaluate(scope, 'fillFactor') : baseEased,
-    strokeFactor: factors.stroke ? factors.stroke.evaluate(scope, 'strokeFactor') : baseEased,
+    opacity,
+    fillFactor: factors.fill ? factors.fill.evaluate(scope, 'fillFactor') : colourFactor,
+    strokeFactor: factors.stroke ? factors.stroke.evaluate(scope, 'strokeFactor') : colourFactor,
     strokeWeightFactor: factors.strokeWeight
       ? factors.strokeWeight.evaluate(scope, 'strokeWeightFactor')
       : baseEased,

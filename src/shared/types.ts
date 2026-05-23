@@ -53,6 +53,20 @@ export interface LoopConfig {
   // angle * i degrees, so a 1-row line + nonzero angle traces a spiral.
   angle: number
 
+  // Per-axis transforms (additive post-process; 0/false = no effect, so configs
+  // that predate these render identically). Column step is `x` and Row step is
+  // `y` (the NumericProperties below); Layer has its own oblique step. Each axis
+  // adds a clone rotation and an opacity falloff, and Layer can sweep the
+  // fill/stroke ramp by depth.
+  columnAngle?: number // deg of clone rotation added per column (× c)
+  rowAngle?: number // × r
+  layerStep?: number // px oblique depth offset per layer (× l)
+  layerAngle?: number // deg of clone rotation per layer (× l)
+  columnFade?: number // % opacity lost across columns (× tx)
+  rowFade?: number // × ty
+  layerFade?: number // × tz (back-to-front)
+  layerColour?: boolean // sweep the fill/stroke ramp by depth (factor = tz)
+
   // Base transforms (per-step)
   x: NumericProperty
   y: NumericProperty

@@ -127,3 +127,35 @@ describe('cellCount', () => {
     expect(cellCount({ cols: 10, rows: 10, layers: 3 })).toBe(300)
   })
 })
+
+describe('per-axis transforms', () => {
+  it('adds each axis angle to rotation, offsets layers, and fades by axis', () => {
+    const config: LoopConfig = {
+      ...DEFAULT_CONFIG,
+      cols: 3,
+      rows: 3,
+      layers: 2,
+      columnAngle: 10,
+      rowAngle: 5,
+      layerAngle: 20,
+      layerStep: 50,
+      columnFade: 50,
+    }
+    const cell = run(config, 14) // i=14 → l=1, r=1, c=2
+    expect(cell.scope).toMatchObject({ c: 2, r: 1, l: 1 })
+    // rotation = base(0) + c*10 + r*5 + l*20
+    expect(cell.rotation).toBeCloseTo(45, 6)
+    // x = base column step (c*60) + oblique layer step (l*50*0.82)
+    expect(cell.x).toBeCloseTo(2 * 60 + 1 * 50 * 0.82, 6)
+    // opacity = base(100) - tx*columnFade, tx = c/(cols-1) = 1
+    expect(cell.opacity).toBeCloseTo(50, 6)
+  })
+
+  it('is a no-op when all per-axis fields are absent (back-compat)', () => {
+    const a = run(DEFAULT_CONFIG, 23)
+    const b = run({ ...DEFAULT_CONFIG, columnAngle: 0, layerStep: 0, layerFade: 0 }, 23)
+    expect(b.rotation).toBeCloseTo(a.rotation, 6)
+    expect(b.x).toBeCloseTo(a.x, 6)
+    expect(b.opacity).toBeCloseTo(a.opacity, 6)
+  })
+})

@@ -7,12 +7,11 @@ import { ResizeHandle } from './components/ResizeHandle'
 import { resetKeepingPattern } from './config-ops'
 import { useLooperConfig } from './hooks/useLooperConfig'
 import { AppearanceSection } from './sections/AppearanceSection'
-import { IterationsSection } from './sections/IterationsSection'
+import { AxisSection } from './sections/AxisSection'
 import { LibraryOverlay } from './sections/LibraryOverlay'
 import { ModulationSection } from './sections/ModulationSection'
 import { PresetsSection } from './sections/PresetsSection'
 import { SnapshotsBar } from './sections/SnapshotsBar'
-import { TransformSection } from './sections/TransformSection'
 
 const SNAPSHOTS_KEY = 'swift-loop:snapshots'
 
@@ -180,16 +179,51 @@ export function App() {
         <div class="selection-warning">Select a single Vector, Shape, Text, or Group</div>
       )}
       <main class="app-content">
-        <IterationsSection
+        <AxisSection
+          id="column"
+          title="Column"
           config={config}
           update={update}
-          appliedName={appliedName}
-          onOpenLibrary={() => setLibraryOpen(true)}
-          onClearPattern={() => setAppliedName(null)}
+          sourceSize={sourceSize}
+          count={config.cols}
+          onCount={(v, commit) => update({ ...config, cols: v }, commit)}
+          stepKey="x"
+          stepLabel="X step"
+          angle={config.columnAngle ?? 0}
+          onAngle={(v, commit) => update({ ...config, columnAngle: v }, commit)}
+          fade={config.columnFade ?? 0}
+          onFade={(v, commit) => update({ ...config, columnFade: v }, commit)}
+          chip={
+            <button
+              type="button"
+              class="section-chip-source"
+              onClick={(e) => {
+                e.stopPropagation()
+                setLibraryOpen(true)
+              }}
+              title={appliedName ? 'Pick a different pattern' : 'Browse patterns'}
+            >
+              {appliedName ?? 'library →'}
+            </button>
+          }
         />
-        <TransformSection config={config} update={update} sourceSize={sourceSize} />
-        <ModulationSection config={config} update={update} sourceSize={sourceSize} />
+        <AxisSection
+          id="row"
+          title="Row"
+          config={config}
+          update={update}
+          sourceSize={sourceSize}
+          count={config.rows}
+          onCount={(v, commit) => update({ ...config, rows: v }, commit)}
+          stepKey="y"
+          stepLabel="Y step"
+          angle={config.rowAngle ?? 0}
+          onAngle={(v, commit) => update({ ...config, rowAngle: v }, commit)}
+          fade={config.rowFade ?? 0}
+          onFade={(v, commit) => update({ ...config, rowFade: v }, commit)}
+        />
         <AppearanceSection config={config} update={update} />
+        <ModulationSection config={config} update={update} sourceSize={sourceSize} />
         <PresetsSection
           config={config}
           update={update}
