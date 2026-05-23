@@ -49,7 +49,7 @@ bun run build
 
 Then do the same Figma import step on the cloned folder's `manifest.json`.
 
-### Penpot (experimental)
+### Penpot
 
 Swift Loop also builds as a [Penpot](https://penpot.app) plugin from the same source — the engine, UI, and pattern library are shared; only a thin host adapter differs.
 
@@ -59,7 +59,7 @@ bun run build:penpot
 
 This emits `build/penpot/` (`manifest.json`, `plugin.js`, `ui.html`, `ui.js`). Serve that folder over HTTP and load the `manifest.json` URL from Penpot's plugin manager. A prebuilt `swift-loop-penpot-vX.Y.Z.zip` is also attached to each [release](https://github.com/Swiftner/swift-loop/releases/latest) — unzip, serve, and load the manifest the same way.
 
-> **Heads up:** the Penpot target compiles, type-checks against `@penpot/plugin-types`, and is unit-tested, but it has **not yet been verified inside a running Penpot instance**. Treat it as a preview. Known things to confirm on first run: rotation direction and the UI↔plugin message bridge.
+> **Note:** verified in a self-hosted Penpot 2.15 instance — the UI↔plugin bridge and rotation behave correctly. It's a newer target than the Figma build, so if something looks off on a different Penpot version, please open an issue.
 
 
 ## Using it
