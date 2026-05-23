@@ -1,6 +1,6 @@
 # Pattern gallery
 
-The 20 patterns that ship with Swift Loop , with what they look like and when to reach for them. Patterns are grouped roughly by feel, not by alphabetical order, because that's actually useful.
+The 25 patterns that ship with Swift Loop, with what they look like and when to reach for them. Patterns are grouped roughly by feel, not by alphabetical order, because that's actually useful.
 
 A few of the radial patterns now use the **Angle** field instead of `cos`/`sin` in their formulas — same look, simpler math, and you can scrub the Angle slider after applying them.
 
@@ -44,6 +44,8 @@ Things that arrange themselves around a point.
 
 **Mandala.** Concentric rings, each rotated by the golden angle from the next. Layered radial symmetry without any tedious by-hand placement.
 
+**Heart.** A cardioid traced by the cells, the classic Valentine curve. Crank `cols` for a smooth outline; the highlighted size numbers in `fx` mode stretch it wider or taller.
+
 ## Waves and curves
 
 When you want softness, motion, organicness.
@@ -65,6 +67,8 @@ Patterns where things get smaller, fainter, or sparser toward an edge.
 **Halftone.** Grid where cells shrink and fade with distance from the center. Newsprint dot vibes.
 
 **Fountain.** Parabolic arc, like something tossed in the air with gravity bringing it down. Try this with text characters.
+
+**Comet.** A trail of shapes that shrink and fade behind a bright head. Motion frozen in place. Great for tails, speed lines, and trailing UI states.
 
 ## Chaos
 
