@@ -2,10 +2,8 @@
 // transform — callers (scene host) wrap it in another <g> to position,
 // rotate, and scale the whole loop on the canvas.
 
-import { applyAngleToOffset } from '../plugin/engine/angle'
+import { evaluateCell } from '../plugin/engine/cells'
 import { compileConfig, compileFactors } from '../plugin/engine/compile'
-import { applyEasing } from '../plugin/engine/easing'
-import { buildScope } from '../plugin/engine/scope'
 import { sampleRamp } from '../shared/color'
 import type { Color, ColorRamp, LoopConfig } from '../shared/types'
 import { type UploadedShape, makeSourceRect } from './shape'
@@ -38,59 +36,32 @@ export function renderLoop(opts: RenderLoopOptions): SVGGElement {
   const n = Math.max(1, config.cols * config.rows)
   const start = config.showFirst === false ? 1 : 0
   for (let i = start; i < n; i++) {
-    const c = i % config.cols
-    const r = Math.floor(i / config.cols)
-    const scope = buildScope(
-      {
-        cols: config.cols,
-        rows: config.rows,
-        seed: config.seed,
-        sourceWidth: sz.w,
-        sourceHeight: sz.h,
-      },
-      c,
-      r,
-    )
-    const rawOffset = {
-      x: compiled.x.evaluate(scope, 'x'),
-      y: compiled.y.evaluate(scope, 'y'),
-    }
-    const { x: dx, y: dy } = applyAngleToOffset(rawOffset, scope.i, config.angle)
-    const rot = compiled.rotation.evaluate(scope, 'rotation')
-    const sx = compiled.scaleX.evaluate(scope, 'scaleX')
-    const sy = compiled.scaleY.evaluate(scope, 'scaleY')
-    const op = Math.max(0, Math.min(1, compiled.opacity.evaluate(scope, 'opacity') / 100))
+    const cell = evaluateCell(i, {
+      config,
+      compiled,
+      factors,
+      sourceWidth: sz.w,
+      sourceHeight: sz.h,
+    })
 
-    const w = Math.max(1, sz.w + sx)
-    const h = Math.max(1, sz.h + sy)
-    const x = dx - sx / 2
-    const y = dy - sy / 2
+    const w = Math.max(1, sz.w + cell.scaleX)
+    const h = Math.max(1, sz.h + cell.scaleY)
+    const x = cell.x - cell.scaleX / 2
+    const y = cell.y - cell.scaleY / 2
+    const op = Math.max(0, Math.min(1, cell.opacity / 100))
 
-    const baseEased = applyEasing(config.easing, computeInterp(config, scope.tx, scope.ty))
-    const fillFactor = factors.fill ? factors.fill.evaluate(scope, 'fillFactor') : baseEased
-    const strokeFactor = factors.stroke ? factors.stroke.evaluate(scope, 'strokeFactor') : baseEased
-    const strokeWeightFactor = factors.strokeWeight
-      ? factors.strokeWeight.evaluate(scope, 'strokeWeightFactor')
-      : baseEased
-
-    const fill = colorAt(config.fill, fillFactor)
-    const stroke = colorAt(config.stroke, strokeFactor)
+    const fill = colorAt(config.fill, cell.fillFactor)
+    const stroke = colorAt(config.stroke, cell.strokeFactor)
     const sw =
       stroke != null
         ? config.strokeWeight.value +
-          strokeWeightFactor *
+          cell.strokeWeightFactor *
             ((config.strokeWeight.end ?? config.strokeWeight.value) - config.strokeWeight.value)
         : 0
 
-    g.appendChild(makeClone(x, y, w, h, rot, op, fill, stroke, sw, shape, keepColors))
+    g.appendChild(makeClone(x, y, w, h, cell.rotation, op, fill, stroke, sw, shape, keepColors))
   }
   return g
-}
-
-function computeInterp(cfg: LoopConfig, tx: number, ty: number): number {
-  if (cfg.cols > 1 && cfg.rows > 1) return (tx + ty) / 2
-  if (cfg.rows > 1) return ty
-  return tx
 }
 
 function colorAt(ramp: ColorRamp, t: number): string | null {

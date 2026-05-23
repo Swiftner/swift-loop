@@ -1,9 +1,7 @@
 // src/plugin/loop/orchestrator.ts
-import type { LoopConfig, Scope } from '../../shared/types'
-import { applyAngleToOffset } from '../engine/angle'
-import { type CompiledFactors, compileConfig, compileFactors } from '../engine/compile'
-import { applyEasing } from '../engine/easing'
-import { buildScope } from '../engine/scope'
+import type { LoopConfig } from '../../shared/types'
+import { evaluateCell } from '../engine/cells'
+import { compileConfig, compileFactors } from '../engine/compile'
 import type { HostAdapter, NodeSnapshot } from '../hosts/host'
 import { applyToClone } from './apply'
 import { type DiffResult, type DirtyProperty, diffConfig } from './diff'
@@ -91,49 +89,37 @@ async function fullRegen(
   const cloneIds: string[] = []
 
   for (let i = 1; i < n; i++) {
-    const c = i % config.cols
-    const r = Math.floor(i / config.cols)
-    const scope = buildScope(
-      {
-        cols: config.cols,
-        rows: config.rows,
-        seed: config.seed,
-        sourceWidth: source.width,
-        sourceHeight: source.height,
-      },
-      c,
-      r,
-    )
     const cloneId = await adapter.cloneNode(source.id, {
       parentId,
       index: 0,
       name: `${source.name}_${i}`,
     })
 
-    const f = evalFactors(config, factors, scope)
-    const rotated = applyAngleToOffset(
-      { x: compiled.x.evaluate(scope, 'x'), y: compiled.y.evaluate(scope, 'y') },
-      scope.i,
-      config.angle,
-    )
+    const cell = evaluateCell(i, {
+      config,
+      compiled,
+      factors,
+      sourceWidth: source.width,
+      sourceHeight: source.height,
+    })
     await applyToClone({
       adapter,
       cloneId,
       source,
       values: {
-        x: rotated.x,
-        y: rotated.y,
-        rotation: compiled.rotation.evaluate(scope, 'rotation'),
-        scaleX: compiled.scaleX.evaluate(scope, 'scaleX'),
-        scaleY: compiled.scaleY.evaluate(scope, 'scaleY'),
-        opacity: compiled.opacity.evaluate(scope, 'opacity'),
+        x: cell.x,
+        y: cell.y,
+        rotation: cell.rotation,
+        scaleX: cell.scaleX,
+        scaleY: cell.scaleY,
+        opacity: cell.opacity,
       },
       fill: config.fill,
       stroke: config.stroke,
       strokeWeight: config.strokeWeight,
-      fillFactor: f.fill,
-      strokeFactor: f.stroke,
-      strokeWeightFactor: f.strokeWeight,
+      fillFactor: cell.fillFactor,
+      strokeFactor: cell.strokeFactor,
+      strokeWeightFactor: cell.strokeWeightFactor,
       dirty: new Set<string>([
         'x',
         'y',
@@ -185,67 +171,34 @@ async function inPlaceMutation(
     if (!cloneId) continue
     if (!(await adapter.nodeExists(cloneId))) continue
 
-    const c = i % config.cols
-    const r = Math.floor(i / config.cols)
-    const scope = buildScope(
-      {
-        cols: config.cols,
-        rows: config.rows,
-        seed: config.seed,
-        sourceWidth: source.width,
-        sourceHeight: source.height,
-      },
-      c,
-      r,
-    )
-    const f = evalFactors(config, factors, scope)
-    const rotated = applyAngleToOffset(
-      { x: compiled.x.evaluate(scope, 'x'), y: compiled.y.evaluate(scope, 'y') },
-      scope.i,
-      config.angle,
-    )
+    const cell = evaluateCell(i, {
+      config,
+      compiled,
+      factors,
+      sourceWidth: source.width,
+      sourceHeight: source.height,
+    })
     await applyToClone({
       adapter,
       cloneId,
       source,
       values: {
-        x: rotated.x,
-        y: rotated.y,
-        rotation: compiled.rotation.evaluate(scope, 'rotation'),
-        scaleX: compiled.scaleX.evaluate(scope, 'scaleX'),
-        scaleY: compiled.scaleY.evaluate(scope, 'scaleY'),
-        opacity: compiled.opacity.evaluate(scope, 'opacity'),
+        x: cell.x,
+        y: cell.y,
+        rotation: cell.rotation,
+        scaleX: cell.scaleX,
+        scaleY: cell.scaleY,
+        opacity: cell.opacity,
       },
       fill: config.fill,
       stroke: config.stroke,
       strokeWeight: config.strokeWeight,
-      fillFactor: f.fill,
-      strokeFactor: f.stroke,
-      strokeWeightFactor: f.strokeWeight,
+      fillFactor: cell.fillFactor,
+      strokeFactor: cell.strokeFactor,
+      strokeWeightFactor: cell.strokeWeightFactor,
       dirty,
     })
   }
-}
-
-function evalFactors(
-  config: LoopConfig,
-  factors: CompiledFactors,
-  scope: Scope,
-): { fill: number; stroke: number; strokeWeight: number } {
-  const baseEased = applyEasing(config.easing, computeInterpFactor(config, scope.tx, scope.ty))
-  return {
-    fill: factors.fill ? factors.fill.evaluate(scope, 'fillFactor') : baseEased,
-    stroke: factors.stroke ? factors.stroke.evaluate(scope, 'strokeFactor') : baseEased,
-    strokeWeight: factors.strokeWeight
-      ? factors.strokeWeight.evaluate(scope, 'strokeWeightFactor')
-      : baseEased,
-  }
-}
-
-function computeInterpFactor(config: LoopConfig, tx: number, ty: number): number {
-  if (config.cols > 1 && config.rows > 1) return (tx + ty) / 2
-  if (config.rows > 1) return ty
-  return tx
 }
 
 export async function revert(adapter: HostAdapter, store: LastRunStore): Promise<void> {
