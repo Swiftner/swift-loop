@@ -1,6 +1,6 @@
 // src/plugin/loop/orchestrator.ts
 import type { LoopConfig } from '../../shared/types'
-import { evaluateCell } from '../engine/cells'
+import { cellCount, evaluateCell } from '../engine/cells'
 import { compileConfig, compileFactors } from '../engine/compile'
 import type { HostAdapter, NodeSnapshot } from '../hosts/host'
 import { applyToClone } from './apply'
@@ -91,7 +91,7 @@ async function fullRegen(
   const factors = compileFactors(config)
   if (!parentId) return
 
-  const n = config.cols * config.rows * (config.layers ?? 1)
+  const n = cellCount(config)
   const cloneIds: string[] = []
 
   for (let i = 1; i < n; i++) {
@@ -170,7 +170,7 @@ async function inPlaceMutation(
   const compiled = compileConfig(config)
   const factors = compileFactors(config)
   const dirty = new Set<string>(diff.dirty as DirtyProperty[])
-  const n = config.cols * config.rows * (config.layers ?? 1)
+  const n = cellCount(config)
 
   for (let i = 1; i < n; i++) {
     const cloneId = prev.cloneIds[i - 1]

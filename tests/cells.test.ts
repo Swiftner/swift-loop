@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { applyAngleToOffset } from '../src/plugin/engine/angle'
-import { type CellValues, computeInterpFactor, evaluateCell } from '../src/plugin/engine/cells'
+import {
+  type CellValues,
+  MAX_CELLS,
+  cellCount,
+  computeInterpFactor,
+  evaluateCell,
+} from '../src/plugin/engine/cells'
 import { compileConfig, compileFactors } from '../src/plugin/engine/compile'
 import { applyEasing } from '../src/plugin/engine/easing'
 import { buildScope } from '../src/plugin/engine/scope'
@@ -109,5 +115,15 @@ describe('evaluateCell', () => {
     expect(run(config, 11).scope).toMatchObject({ l: 2, r: 1, c: 1 })
     expect(run(config, 0).scope.n).toBe(12) // 2 * 2 * 3
     expect(run(config, 0).scope.layers).toBe(3)
+  })
+})
+
+describe('cellCount', () => {
+  it('caps the total at MAX_CELLS to prevent runaway clone counts', () => {
+    expect(cellCount({ cols: 50, rows: 50, layers: 50 })).toBe(MAX_CELLS) // 125k → capped
+  })
+  it('is the plain product below the cap, with layers defaulting to 1', () => {
+    expect(cellCount({ cols: 10, rows: 10 })).toBe(100)
+    expect(cellCount({ cols: 10, rows: 10, layers: 3 })).toBe(300)
   })
 })

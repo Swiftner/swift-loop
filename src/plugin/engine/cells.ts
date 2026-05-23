@@ -10,6 +10,16 @@ import type { CompiledFactors } from './compile'
 import { applyEasing } from './easing'
 import { buildScope } from './scope'
 
+// Hard cap on cells rendered/cloned in one loop. cols×rows alone tops out at
+// 2500 (50×50), but the Layers axis multiplies that — an unguarded 50×50×50
+// would be 125k nodes and freeze the host. We clamp the iteration count, so a
+// runaway config renders a (truncated) result instead of hanging.
+export const MAX_CELLS = 10000
+
+export function cellCount(config: { cols: number; rows: number; layers?: number }): number {
+  return Math.min(MAX_CELLS, config.cols * config.rows * (config.layers ?? 1))
+}
+
 export interface CellValues {
   i: number
   c: number

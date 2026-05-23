@@ -2,7 +2,7 @@
 // transform — callers (scene host) wrap it in another <g> to position,
 // rotate, and scale the whole loop on the canvas.
 
-import { evaluateCell } from '../plugin/engine/cells'
+import { cellCount, evaluateCell } from '../plugin/engine/cells'
 import { compileConfig, compileFactors } from '../plugin/engine/compile'
 import { sampleRamp } from '../shared/color'
 import type { Color, ColorRamp, LoopConfig } from '../shared/types'
@@ -33,7 +33,7 @@ export function renderLoop(opts: RenderLoopOptions): SVGGElement {
 
   const compiled = compileConfig(config)
   const factors = compileFactors(config)
-  const n = Math.max(1, config.cols * config.rows * (config.layers ?? 1))
+  const n = Math.max(1, cellCount(config))
   const start = config.showFirst === false ? 1 : 0
   for (let i = start; i < n; i++) {
     const cell = evaluateCell(i, {

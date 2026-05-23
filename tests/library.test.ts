@@ -51,22 +51,27 @@ describe('library entries', () => {
         }
       })
 
-      it('every formula evaluates without throwing at 25 cells', () => {
+      it('every formula evaluates to a finite number across cells and layers', () => {
         const cols = Math.min(entry.cols, 5)
         const rows = Math.min(entry.rows, 5)
+        // Exercise the depth axis for 3D presets (Cube etc.) — not just layer 0.
+        const layers = Math.min(entry.layers ?? 1, 5)
         for (const k of FORMULA_PROPS) {
           const src = entry.formulas[k]
           if (!src) continue
           const compiled = compileFormula(expandPlaceholders(src, k, null), k)
-          for (let r = 0; r < rows; r++) {
-            for (let c = 0; c < cols; c++) {
-              const scope = buildScope(
-                { cols, rows, seed: 1, sourceWidth: 100, sourceHeight: 100 },
-                c,
-                r,
-              )
-              const v = compiled.evaluate(scope, k)
-              expect(Number.isFinite(v)).toBe(true)
+          for (let l = 0; l < layers; l++) {
+            for (let r = 0; r < rows; r++) {
+              for (let c = 0; c < cols; c++) {
+                const scope = buildScope(
+                  { cols, rows, layers, seed: 1, sourceWidth: 100, sourceHeight: 100 },
+                  c,
+                  r,
+                  l,
+                )
+                const v = compiled.evaluate(scope, k)
+                expect(Number.isFinite(v)).toBe(true)
+              }
             }
           }
         }
