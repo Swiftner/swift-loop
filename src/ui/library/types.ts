@@ -18,6 +18,10 @@ export interface LibraryEntry {
    *  orthographically projected back to 2D. Cell i is tilted by `angleZ * i`,
    *  turning a flat spiral into a cone/helix. Omit (or 0) for flat patterns. */
   angleZ?: number
+  /** Optional depth-cue strength (0..100) driven by the `angleZ` tilt: cells
+   *  leaning toward the viewer grow, cells leaning away shrink and fade. No
+   *  effect without a nonzero `angleZ`. Omit (or 0) for no depth shading. */
+  depthShade?: number
   showFirst?: boolean
   formulas: Partial<Record<FormulaProperty, string>>
 }

@@ -15,7 +15,7 @@ function reference(
   i: number,
   sw: number,
   sh: number,
-): Omit<CellValues, 'scope'> {
+): Omit<CellValues, 'scope' | 'depth'> {
   const compiled = compileConfig(config)
   const factors = compileFactors(config)
   const c = i % config.cols
@@ -86,6 +86,67 @@ describe('evaluateCell', () => {
   it('returns raw (un-normalized) opacity so consumers can clamp', () => {
     // Default opacity is num(100) → constant 100, not 1.
     expect(run(DEFAULT_CONFIG, 4).opacity).toBeCloseTo(100, 6)
+  })
+
+  it('depth shading grows toward-viewer cells and keeps their opacity', () => {
+    // angle 90° sends the +x offset onto +y; angleZ 90° tilts that fully toward
+    // the viewer (depth +1). depthShade 50% → sizeFactor 1.5 on a 40×30 source.
+    const config: LoopConfig = {
+      ...DEFAULT_CONFIG,
+      cols: 2,
+      rows: 1,
+      angle: 90,
+      angleZ: 90,
+      depthShade: 50,
+      x: { ...DEFAULT_CONFIG.x, value: 100 },
+      y: { ...DEFAULT_CONFIG.y, value: 0 },
+      scaleX: { ...DEFAULT_CONFIG.scaleX, value: 0 },
+      scaleY: { ...DEFAULT_CONFIG.scaleY, value: 0 },
+    }
+    const cell = run(config, 1, 40, 30)
+    expect(cell.depth).toBeCloseTo(1, 6)
+    expect(cell.scaleX).toBeCloseTo(20, 6) // 40 × 1.5 − 40
+    expect(cell.scaleY).toBeCloseTo(15, 6) // 30 × 1.5 − 30
+    expect(cell.opacity).toBeCloseTo(100, 6) // near side never over-brightens
+  })
+
+  it('depth shading shrinks and fades away-from-viewer cells', () => {
+    const config: LoopConfig = {
+      ...DEFAULT_CONFIG,
+      cols: 2,
+      rows: 1,
+      angle: 90,
+      angleZ: -90, // tilt away → depth −1
+      depthShade: 50,
+      x: { ...DEFAULT_CONFIG.x, value: 100 },
+      y: { ...DEFAULT_CONFIG.y, value: 0 },
+      scaleX: { ...DEFAULT_CONFIG.scaleX, value: 0 },
+      scaleY: { ...DEFAULT_CONFIG.scaleY, value: 0 },
+    }
+    const cell = run(config, 1, 40, 30)
+    expect(cell.depth).toBeCloseTo(-1, 6)
+    expect(cell.scaleX).toBeCloseTo(-20, 6) // 40 × 0.5 − 40
+    expect(cell.scaleY).toBeCloseTo(-15, 6) // 30 × 0.5 − 30
+    expect(cell.opacity).toBeCloseTo(50, 6) // 100 × 0.5
+  })
+
+  it('depth shading is a no-op when depthShade is 0 (pure projection)', () => {
+    const config: LoopConfig = {
+      ...DEFAULT_CONFIG,
+      cols: 2,
+      rows: 1,
+      angle: 90,
+      angleZ: 90,
+      depthShade: 0,
+      x: { ...DEFAULT_CONFIG.x, value: 100 },
+      y: { ...DEFAULT_CONFIG.y, value: 0 },
+      scaleX: { ...DEFAULT_CONFIG.scaleX, value: 7 },
+      scaleY: { ...DEFAULT_CONFIG.scaleY, value: 0 },
+    }
+    const cell = run(config, 1, 40, 30)
+    expect(cell.scaleX).toBeCloseTo(7, 6)
+    expect(cell.scaleY).toBeCloseTo(0, 6)
+    expect(cell.opacity).toBeCloseTo(100, 6)
   })
 
   it('falls back to the eased base factor when a ramp has no formula', () => {

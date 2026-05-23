@@ -53,6 +53,11 @@ export interface LoopConfig {
   // angle alone). Surfaced in the UI as "Angle Z". Optional for back-compat
   // with saved configs and library entries that predate it.
   angleZ?: number
+  // Strength (0..100) of the depth cue driven by the Angle Z tilt: cells
+  // leaning toward the viewer grow, cells leaning away shrink and fade. 0 = off
+  // (pure orthographic projection). No effect without a nonzero angleZ. Surfaced
+  // in the UI as "Depth". Optional for back-compat.
+  depthShade?: number
 
   // Base transforms (per-step)
   x: NumericProperty

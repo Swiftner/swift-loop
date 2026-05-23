@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { applyAngleToOffset } from '../src/plugin/engine/angle'
+import { applyAngleToOffset, rotateOffset } from '../src/plugin/engine/angle'
 
 describe('applyAngleToOffset', () => {
   it('returns the input unchanged when angle is zero', () => {
@@ -86,5 +86,28 @@ describe('applyAngleToOffset', () => {
       expect(r.x).toBeCloseTo(0, 6)
       expect(r.y).toBeCloseTo(0, 6)
     })
+  })
+})
+
+describe('rotateOffset depth', () => {
+  it('reports zero depth when there is no Z tilt', () => {
+    expect(rotateOffset({ x: 30, y: 40 }, 2, 25).depth).toBe(0)
+  })
+
+  it('is ±1 when the offset tilts fully toward / away (angleZ × i = ±90°)', () => {
+    // offset along +y, no XY rotation: the tilt sends it fully into depth.
+    expect(rotateOffset({ x: 0, y: 40 }, 1, 0, 90).depth).toBeCloseTo(1, 6)
+    expect(rotateOffset({ x: 0, y: 40 }, 1, 0, -90).depth).toBeCloseTo(-1, 6)
+  })
+
+  it('normalizes depth to the offset magnitude (scale-independent)', () => {
+    const small = rotateOffset({ x: 0, y: 10 }, 1, 0, 30).depth
+    const big = rotateOffset({ x: 0, y: 1000 }, 1, 0, 30).depth
+    expect(small).toBeCloseTo(big, 6)
+    expect(small).toBeCloseTo(Math.sin((30 * Math.PI) / 180), 6)
+  })
+
+  it('reports zero depth at the origin (no magnitude to normalize against)', () => {
+    expect(rotateOffset({ x: 0, y: 0 }, 3, 40, 45).depth).toBe(0)
   })
 })

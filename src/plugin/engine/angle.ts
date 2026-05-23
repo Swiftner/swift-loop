@@ -16,17 +16,25 @@
 // cos(angleZ * i): a flat disc seen edge-on becomes an ellipse, and a per-cell
 // tilt turns a spiral into a corkscrew. angleZ = 0 reproduces the pure-XY
 // output exactly.
+//
+// `depth` is the discarded component, normalized by the offset's magnitude to
+// [-1, 1]: +1 = leaning fully toward the viewer, -1 = fully away, 0 = in the
+// screen plane. Consumers use it as a depth cue (near = bigger/brighter).
 
 const DEG_TO_RAD = Math.PI / 180
 
-export function applyAngleToOffset(
+export interface RotatedOffset {
+  x: number
+  y: number
+  depth: number // normalized depth toward the viewer in [-1, 1]
+}
+
+export function rotateOffset(
   values: { x: number; y: number },
   i: number,
   angleDegrees: number,
   angleZDegrees = 0,
-): { x: number; y: number } {
-  if (angleDegrees === 0 && angleZDegrees === 0) return values
-
+): RotatedOffset {
   let x = values.x
   let y = values.y
 
@@ -40,10 +48,27 @@ export function applyAngleToOffset(
     y = ry
   }
 
+  let depth = 0
   if (angleZDegrees !== 0) {
     const phi = angleZDegrees * i * DEG_TO_RAD
+    const z = y * Math.sin(phi)
     y = y * Math.cos(phi)
+    // hypot of the pre-rotation offset — magnitude is rotation-invariant, so it
+    // equals the magnitude of the in-plane (x, y) we just rotated.
+    const mag = Math.hypot(values.x, values.y)
+    depth = mag === 0 ? 0 : z / mag
   }
 
-  return { x, y }
+  return { x, y, depth }
+}
+
+export function applyAngleToOffset(
+  values: { x: number; y: number },
+  i: number,
+  angleDegrees: number,
+  angleZDegrees = 0,
+): { x: number; y: number } {
+  if (angleDegrees === 0 && angleZDegrees === 0) return { x: values.x, y: values.y }
+  const r = rotateOffset(values, i, angleDegrees, angleZDegrees)
+  return { x: r.x, y: r.y }
 }

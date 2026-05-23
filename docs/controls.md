@@ -26,6 +26,8 @@ The first section. This is where you set the count.
 
 **Angle Z.** Degrees of per-cell tilt into depth, applied after Angle XY. The tool is flat 2D, so there's no real depth axis — instead each clone's offset is tilted toward/away from you and projected back onto the canvas, which foreshortens it. Leave at 0 to stay flat. Dial it up and a flat spiral leans into a cone or helix, a ring squashes into an ellipse seen at an angle. Because it's a projection, the result is still plain 2D positions, so it exports and round-trips like everything else.
 
+**Depth.** How hard to sell the 3D illusion, 0 to 100%. With Angle Z doing the tilt, this scales and fades each clone by how far it leans toward or away from you: the near side grows and stays bright, the far side shrinks and dims. It does nothing on its own — you need a nonzero Angle Z for there to be any depth to shade. At 0% you get pure projection (shapes keep their size); crank it up and the cone or helix reads as genuinely three-dimensional. Note this rides on top of your Scale and Opacity sliders, so a cell's final size is the slider value times the depth factor.
+
 If you've applied a library pattern, you'll also see a little pill showing its name. Click it to jump back to the library and pick something else.
 
 ## Transform

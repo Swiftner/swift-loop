@@ -24,6 +24,12 @@
       "maximum": 360,
       "description": "Per-cell tilt into depth in degrees, applied after `angle` and orthographically projected to 2D. Cell i is tilted by `angleZ * i`, turning a flat spiral into a cone/helix. 0 = flat."
     },
+    "depthShade": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Depth-cue strength (0..100) driven by the `angleZ` tilt: cells leaning toward the viewer grow, cells leaning away shrink and fade. No effect without a nonzero `angleZ`. 0 = off."
+    },
     "showFirst": {
       "type": "boolean",
       "description": "If true (default), the preview renders a clone at i=0. Set to false for patterns where i=0 naturally lands away from the origin (e.g. radial bursts) and the source should remain visually centered."

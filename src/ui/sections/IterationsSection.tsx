@@ -92,6 +92,15 @@ export function IterationsSection({
         unit="°"
         onChange={(v, commit) => update({ ...config, angleZ: v }, commit)}
       />
+      <SliderRow
+        label="Depth"
+        value={config.depthShade ?? 0}
+        min={0}
+        max={100}
+        step={1}
+        unit="%"
+        onChange={(v, commit) => update({ ...config, depthShade: v }, commit)}
+      />
     </Section>
   )
 }

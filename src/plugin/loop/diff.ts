@@ -46,14 +46,25 @@ export function diffConfig(
   // re-applied when either changes.
   const angleChanged =
     (prev.angle ?? 0) !== (next.angle ?? 0) || (prev.angleZ ?? 0) !== (next.angleZ ?? 0)
+  const xChanged = !eqNumericProperty(prev.x, next.x)
+  const yChanged = !eqNumericProperty(prev.y, next.y)
+
+  // Depth shading derives scale and opacity from each cell's projected depth,
+  // which depends on x/y and the angles. So when shading is active, any change
+  // to those must re-apply scaleX/scaleY/opacity; toggling the dial itself
+  // always does.
+  const depthShadeChanged = (prev.depthShade ?? 0) !== (next.depthShade ?? 0)
+  const depthActive = (prev.depthShade ?? 0) !== 0 || (next.depthShade ?? 0) !== 0
+  const depthDirtiesSize =
+    depthShadeChanged || (depthActive && (angleChanged || xChanged || yChanged))
 
   const dirty: DirtyProperty[] = []
-  if (!eqNumericProperty(prev.x, next.x) || angleChanged) dirty.push('x')
-  if (!eqNumericProperty(prev.y, next.y) || angleChanged) dirty.push('y')
+  if (xChanged || angleChanged) dirty.push('x')
+  if (yChanged || angleChanged) dirty.push('y')
   if (!eqNumericProperty(prev.rotation, next.rotation)) dirty.push('rotation')
-  if (!eqNumericProperty(prev.scaleX, next.scaleX)) dirty.push('scaleX')
-  if (!eqNumericProperty(prev.scaleY, next.scaleY)) dirty.push('scaleY')
-  if (!eqNumericProperty(prev.opacity, next.opacity)) dirty.push('opacity')
+  if (!eqNumericProperty(prev.scaleX, next.scaleX) || depthDirtiesSize) dirty.push('scaleX')
+  if (!eqNumericProperty(prev.scaleY, next.scaleY) || depthDirtiesSize) dirty.push('scaleY')
+  if (!eqNumericProperty(prev.opacity, next.opacity) || depthDirtiesSize) dirty.push('opacity')
   if (JSON.stringify(prev.fill) !== JSON.stringify(next.fill)) dirty.push('fill')
   if (JSON.stringify(prev.stroke) !== JSON.stringify(next.stroke)) dirty.push('stroke')
   if (!eqNumericProperty(prev.strokeWeight, next.strokeWeight)) dirty.push('strokeWeight')
