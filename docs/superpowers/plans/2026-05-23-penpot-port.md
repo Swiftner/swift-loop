@@ -122,23 +122,23 @@ Drawn from the existing call sites (`src/plugin/messages.ts`, `src/plugin/loop/o
 |---|---|---|---|---|
 | Selection (read) | `figma.currentPage.selection` (selection.ts:15) | `selected()` LoopInstance in `preview/host.ts` | `penpot.selection` (Shape[]) | Direct analogs across all three. |
 | Selection (event) | `figma.on('selectionchange', cb)` (messages.ts:36) | `selectLoop()` calls in host.ts (pointer handlers) | `penpot.on('selectionchange', cb)` | **Risk:** Penpot fires rapidly during marquee drag ([community](https://community.penpot.app/t/on-selection-end-event/7305)). Debounce in the adapter. |
-| Get node by id | `figma.getNodeByIdAsync(id)` (8× in orchestrator.ts) | `Map<id, SVGGElement>` lookup | TBD lookup, likely cached `Map<id, Shape>` | **Open Q1.** Confirm Penpot's lookup method or fall back to adapter-cached map (same strategy preview already uses). |
+| Get node by id | `figma.getNodeByIdAsync(id)` (8× in orchestrator.ts) | `Map<id, SVGGElement>` lookup | `getShapeById(id): Shape \| null` (✓ Q1) | Direct, **synchronous** (no Promise, no `loadAllPagesAsync`). Adapter wraps in `Promise.resolve`. |
 | Load pages | `figma.loadAllPagesAsync()` (figma/async.ts:11) | n/a | n/a | Figma-only quirk; adapter no-ops elsewhere. |
 | Clone | `node.clone()` (orchestrator.ts:103) | `el.cloneNode(true)` (or build fresh `<g>`) | `shape.clone()` | Confirmed across all three. |
 | Remove | `node.remove()` | `el.remove()` | `shape.remove()` | Standard. |
 | Position | `node.x`, `node.y` (apply.ts:49–50) | `<g transform="translate(x,y)">` | `shape.x`, `shape.y` | Preview composes into a transform string; adapter hides the difference. |
-| Rotation | `node.rotation` + `rotateAroundCenter` (figma/rotate.ts) | `<g transform="… rotate(deg cx cy)">` | `shape.rotation` | **Open Q2.** Verify Penpot's rotation origin; preview is trivial (we control the transform). |
+| Rotation | `node.rotation` + `rotateAroundCenter` (figma/rotate.ts) | `<g transform="… rotate(deg cx cy)">` | `rotate(angle, center?)` — `rotation` read-only (✓ Q2) | Center passed explicitly → no top-left math. `rotate` is *relative*, so apply `target − current`. Verify sign in Phase 4. |
 | Resize | `node.resize(w, h)` (apply.ts:47) | rebuild `<rect>` with new `width`/`height` attrs | `shape.resize(w, h)` | Confirm Penpot signature. |
 | Opacity | `node.opacity` (apply.ts:55) | `el.setAttribute('opacity', ...)` | `shape.opacity` | Direct. |
 | Solid fill | `node.fills = [{ type: 'SOLID', color }]` | `el.setAttribute('fill', '#rrggbb')` | `shape.fills = [{ fillColor: '#rrggbb' }]` ([starter](https://github.com/penpot/penpot-plugin-starter-template)) | **Shape difference:** Figma uses `{r,g,b}` 0–1 floats; Preview and Penpot use hex strings. Hex conversion in two adapters. |
-| Solid stroke | `node.strokes = [{ type: 'SOLID', color }]` | `el.setAttribute('stroke', '#rrggbb')` | `shape.strokes = [{ strokeColor: '#rrggbb', strokeWidth }]` (verify) | **Open Q3.** Verify Penpot's stroke property names. |
-| Stroke weight | `node.strokeWeight` | `el.setAttribute('stroke-width', ...)` | possibly bundled with stroke object | If bundled, adapter merges set-stroke + set-weight. |
+| Solid stroke | `node.strokes = [{ type: 'SOLID', color }]` | `el.setAttribute('stroke', '#rrggbb')` | `shape.strokes = [{ strokeColor: '#rrggbb', strokeWidth }]` (✓ Q3) | Confirmed field names: `strokeColor`, `strokeWidth`, `strokeStyle`, `strokeAlignment`. |
+| Stroke weight | `node.strokeWeight` | `el.setAttribute('stroke-width', ...)` | `strokes[0].strokeWidth` (✓ Q3) | Lives inside the stroke object → `setStrokeWeight` does read-modify-write on `strokes`. |
 | Group | `figma.group(nodes, parent)` (orchestrator.ts:148) | wrap children in `<g class="loop-wrapper">` | `penpot.group(shapes)` ([API ref](https://penpot-plugins-api-doc.pages.dev/interfaces/Group)) | Preview already groups via `<g>` per loop. |
 | Reparent | `parent.insertChild(0, clone)` / `appendChild` | `parentG.appendChild(childEl)` | `group.appendChild(shape)` | DOM and Penpot use identical method names; Figma uses indexed insert. |
-| Viewport focus | `figma.viewport.scrollAndZoomIntoView([node])` (orchestrator.ts:158) | `viewCenter()` + `view.zoom` in host.ts | not exposed | **Open Q4.** Penpot may only allow setting `penpot.viewport.center`. Preview already has full control. Acceptable degradation on Penpot. |
-| Undo step | `figma.commitUndo()` (orchestrator.ts:54) | `performUndo()` in host.ts (local stack) | not exposed | **Degrade.** Adapter `commitUndoStep()` is a no-op on Penpot. Document the difference. |
+| Viewport focus | `figma.viewport.scrollAndZoomIntoView([node])` (orchestrator.ts:158) | `viewCenter()` + `view.zoom` in host.ts | `penpot.viewport.zoomIntoView([shape])` (✓ Q4) | Exists. Wrap in try/catch for [bug #189](https://github.com/penpot/penpot-plugins/issues/189). |
+| Undo step | `figma.commitUndo()` (orchestrator.ts:54) | `performUndo()` in host.ts (local stack) | `history.undoBlockBegin()` / `undoBlockFinish()` (✓ Q6) | Block-based, not single-commit. Widen interface to `beginUndoBlock`/`endUndoBlock` (see refinements). |
 | Persistent storage | `figma.clientStorage.getAsync/setAsync` (messages.ts:23,52,28,95) | `localStorage.getItem/setItem` (host.ts:451,483) | `localStorage` proxy + `"allow:localstorage"` ([community](https://community.penpot.app/t/persist-data-for-a-plugin/7111)) | All three converge on a key/value pair. Async on Figma, sync on Preview; the adapter interface is async for both. |
-| SVG export | `node.exportAsync({ format: 'SVG' })` (messages.ts:79) | serialize `<g>` via `XMLSerializer` | `shape.export({ type: 'svg' })` ([Export interface](https://penpot-plugins-api-doc.pages.dev/interfaces/Export)) | **Open Q5.** Verify Penpot returns `Uint8Array` for Group export. Manifest needs `"allow:downloads"`. |
+| SVG export | `node.exportAsync({ format: 'SVG' })` (messages.ts:79) | serialize `<g>` via `XMLSerializer` | `shape.export({ type: 'svg' })` → `Promise<Uint8Array>` (✓ Q5) | Same return type as Figma; `skipChildren` defaults false so Group export includes children. Manifest needs `"allow:downloads"`. |
 | UI panel resize | `figma.ui.resize(w, h)` (messages.ts:94) | resize the iframe element directly | `penpot.ui.resize(w, h)` | Direct. |
 | Plugin close | `figma.closePlugin()` (messages.ts:90) | n/a (browser tab) | no analog | Adapter `close()` is a no-op on Preview and Penpot. |
 | UI ↔ code messaging | `@create-figma-plugin/utilities` `emit` / `on` (5 files) | `sendToUI()` + `iframe.contentWindow.postMessage` (host.ts:84) | `penpot.ui.sendMessage` + `penpot.ui.onMessage` ↔ `parent.postMessage` | Three transports, one `HostBridge` interface. Preview already implements this pattern. |
@@ -225,16 +225,35 @@ Each phase ends with every previous host's build still green. The contract test 
 
 ---
 
-## Open questions (resolve in Phase 3 spike)
+## Open questions — RESOLVED (Phase 3 spike, 2026-05-23)
 
-1. **Node lookup by id.** What is Penpot's equivalent of `figma.getNodeByIdAsync(id)`? If the API has no direct lookup, the adapter caches a `Map<id, Shape>` keyed off every node it hands out. Verify against the Penpot plugin runtime source before committing to a strategy.
-2. **Rotation origin.** Does Penpot rotate around the shape's center or its top-left? If center, delete the compensation math; if top-left, port `rotateAroundCenter` as-is into the Penpot adapter.
-3. **Stroke shape.** Confirm the exact property names (`strokeColor` vs `color`, `strokeWidth` vs `strokeWeight`) and whether stroke weight is a property of the stroke object or the shape.
-4. **Viewport scroll.** Is there a Penpot equivalent of `scrollAndZoomIntoView`? If not, accept the degradation and document it.
-5. **Export return type.** Does `shape.export({ type: 'svg' })` return `Uint8Array`, `Blob`, or `string`? Does it bundle a Group's children correctly? Confirm before wiring the existing download flow.
-6. **Bundle size & runtime.** Penpot loads `plugin.js` over HTTPS at runtime. Our current bundle includes the formula parser and 20+ library JSON files. Verify acceptable load time and confirm whether Penpot enforces a size ceiling.
+Answered from the authoritative `@penpot/plugin-types` definitions ([penpot/penpot-plugins `libs/plugin-types/index.d.ts`](https://raw.githubusercontent.com/penpot/penpot-plugins/main/libs/plugin-types/index.d.ts)) plus the [API doc](https://doc.plugins.penpot.app/) and [community](https://community.penpot.app/). A live in-Penpot probe wasn't possible in the headless build env, so two sign/behavior details below are flagged for a quick runtime check during Phase 4 — but every signature is confirmed. **Net: the API is a better fit than the plan assumed.**
 
-Phase 3 is exactly this spike: read the Penpot plugin runtime source ([penpot/penpot-plugins](https://github.com/penpot/penpot-plugins) — `libs/plugins-runtime/`) and build a minimal Penpot plugin that probes each behavior. By the time the spike completes, the `HostAdapter` interface has already absorbed two real implementations (Figma + Preview), so the only changes Phase 3 should require are *additive* — extra methods or optional parameters — not breaking refactors.
+1. **Node lookup by id — RESOLVED, easy.** `getShapeById(id: string): Shape | null` exists directly on the Context (plus `findShapes(criteria?)`). No cached `Map` needed. **Key difference: Penpot's API is synchronous** — `getShapeById` returns `Shape | null`, not a Promise, and there's no `loadAllPagesAsync` equivalent. The async `HostAdapter` methods just wrap sync calls in resolved promises; `ensurePages()` becomes a no-op on Penpot.
+
+2. **Rotation — RESOLVED, simpler than Figma.** `rotation` is **read-only** (`readonly rotation: number`); you rotate via `rotate(angle: number, center?: { x; y } | null): void`, which **takes an explicit center** — so rotation-around-center is built in and the `rotateAroundCenter` top-left compensation math is *not* needed on Penpot. Two caveats for a Phase 4 runtime check: (a) `rotate(angle)` is **relative** (rotates *by* `angle`), so `setTransform` must apply `targetAngle − currentRotation`; (b) confirm the sign convention (Figma is CCW-positive; Penpot unverified).
+
+3. **Stroke — RESOLVED; weight lives inside the stroke.** `Stroke` fields: `strokeColor?: string`, `strokeOpacity?`, `strokeStyle?: 'solid'|'dotted'|'dashed'|'none'|'mixed'|'svg'`, **`strokeWidth?: number`**, `strokeAlignment?: 'center'|'inner'|'outer'`, `strokeCapStart/End`, `strokeColorGradient`. So `strokeWidth` is a property of the *stroke object*, not the shape. **Interface consequence:** the orchestrator calls `setSolidStroke` then `setStrokeWeight` separately; the Penpot adapter implements `setStrokeWeight` as read-modify-write on `strokes[0].strokeWidth`. Colors are **hex strings** (`fillColor: '#rrggbb'`, `strokeColor`), so `ColorRGB → hex` conversion is needed (Fill: `fillColor?`, `fillOpacity?`, `fillColorGradient?`, `fillImage?`).
+
+4. **Viewport — RESOLVED, exists.** `penpot.viewport.zoomIntoView(shapes)` is the analog of `scrollAndZoomIntoView` (plus `viewport.center`, `viewport.zoom`). Note a [known bug #189](https://github.com/penpot/penpot-plugins/issues/189) where it can throw on some inputs — wrap the call in a try/catch (it's non-essential polish). No degradation needed.
+
+5. **Export — RESOLVED, identical shape to Figma.** `export(options: Export): Promise<Uint8Array>` where `Export = { type: 'png'|'jpeg'|'svg'|'pdf'; scale?; suffix?; skipChildren? }`. Returns `Promise<Uint8Array>` — same as Figma's `exportAsync`. `skipChildren` defaults to false, so a Group export **includes its children**. `exportSvg` maps to `shape.export({ type: 'svg' })` with no transformation.
+
+6. **Persistence, undo, bundle — RESOLVED (one interface refinement).**
+   - **Storage:** `penpot.localStorage` (`getItem`/`setItem`/`removeItem`/`getKeys`), gated by the `"allow:localstorage"` permission — the right per-user analog to Figma `clientStorage`. Values are strings, so `storageGet/Set` JSON-encode in the adapter. (There's also document-scoped `getPluginData`/`setPluginData`, but that saves into the file — wrong semantics for UI prefs.)
+   - **Undo:** Penpot uses **undo blocks**, not a single commit: `history.undoBlockBegin(): Symbol` / `history.undoBlockFinish(blockId)`. This doesn't map onto the current single `commitUndoStep()`. **Refinement:** widen `HostAdapter` to `beginUndoBlock()/endUndoBlock()` (Figma can map both to a no-op + `commitUndo()` at end; Penpot wraps the generate loop). Keep `commitUndoStep` as a no-op on Penpot for the Phase 4 "hello loop" and wire blocks in Phase 5.
+   - **Bundle ceiling:** no documented size limit found; the plugin loads `plugin.js` over HTTPS. Current bundles are tiny (~50 KB), so this is almost certainly a non-issue — verify empirically when the Penpot build exists, but don't pre-optimize.
+
+**Residual checks for Phase 4 (cheap, do in the first real Penpot session):** rotation sign convention (#2b), and that `getShapeById` stays valid across our clone/group operations within one synchronous tick.
+
+---
+
+## Interface refinements the spike surfaced (apply before Phase 4)
+
+- **`rotation` is read-only on Penpot.** `setTransform` must compute the rotation delta and call `rotate(delta, center)`. The `TransformPatch` already carries `rotation` + dimensions, so no interface change — just adapter-internal logic. Figma keeps its top-left compensation; Penpot passes the center.
+- **Stroke weight is a stroke sub-field.** No interface change; `PenpotAdapter.setStrokeWeight` does read-modify-write on the strokes array. (If a future shape has no stroke yet when `setStrokeWeight` runs, it no-ops — matches Figma, where strokeWeight on a strokeless node is harmless.)
+- **Undo blocks vs single commit.** Replace `commitUndoStep()` with `beginUndoBlock()` / `endUndoBlock()` on `HostAdapter`. `host-loop.ts` brackets each committed `generate()` between them. Figma: `beginUndoBlock` = no-op, `endUndoBlock` = `figma.commitUndo()`. Penpot: the two map to `history.undoBlock{Begin,Finish}`. This is the one genuinely additive interface change; do it as the first task of Phase 4.
+- **Sync vs async hosts.** Penpot is synchronous. The async `HostAdapter` surface still fits (wrap in `Promise.resolve`); `FigmaAdapter` stays genuinely async. No change.
 
 ---
 
@@ -243,5 +262,4 @@ Phase 3 is exactly this spike: read the Penpot plugin runtime source ([penpot/pe
 - **A shared manifest.** They're different schemas in different files; sharing them is a false economy.
 - **A "Penpot mode" toggle inside the Figma build.** Each build targets exactly one host.
 - **Abstracting node types.** Both hosts have rectangles, ellipses, vectors, text, groups — `SUPPORTED_TYPES` becomes a per-adapter constant rather than a shared enum.
-- **Emulating missing features.** No fake `commitUndo` coalescing on Penpot, no synthetic `scrollAndZoomIntoView`. We degrade and document.
-- **Touching the engine.** If a Phase 3 finding suggests an engine change, that's a separate plan.
+- **Touching the engine.** If a finding suggests an engine change, that's a separate plan. (Phase 2 already extracted the shared cell math into `engine/cells.ts`; nothing else should need it.)
