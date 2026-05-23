@@ -1,0 +1,17 @@
+{
+  "id": "cylinder",
+  "name": "Cylinder",
+  "description": "A tube of dots — Columns wrap around, Rows climb its height, Layers add inner shells. Tilted so the near wall reads larger and brighter.",
+  "tags": ["3d", "radial", "grid"],
+  "author": "@swiftner",
+  "cols": 22,
+  "rows": 12,
+  "layers": 1,
+  "formulas": {
+    "x": "x = cos(c * TAU / cols) * {x:130} * (1 - 0.4 * tz)",
+    "y": "y = (ty - 0.5) * {y:320} - sin(c * TAU / cols) * 24",
+    "scaleX": "scaleX = sin(c * TAU / cols) * 8",
+    "scaleY": "scaleY = sin(c * TAU / cols) * 8",
+    "opacity": "opacity = 74 + sin(c * TAU / cols) * 26"
+  }
+}
