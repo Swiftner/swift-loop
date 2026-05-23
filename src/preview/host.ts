@@ -650,6 +650,19 @@ document.getElementById('zoom-in')?.addEventListener('click', () => setZoom(view
 document.getElementById('zoom-out')?.addEventListener('click', () => setZoom(view.zoom / 1.25))
 document.getElementById('zoom-fit')?.addEventListener('click', fitView)
 
+// Preview-only theme toggle. Real hosts drive the plugin UI's theme (Figma via
+// themeColors, Penpot via themechange); here we flip the iframe's data-theme
+// directly so both themes can be exercised regardless of the OS setting.
+let previewTheme: 'light' | 'dark' = window.matchMedia('(prefers-color-scheme: dark)').matches
+  ? 'dark'
+  : 'light'
+document.getElementById('theme-toggle')?.addEventListener('click', () => {
+  previewTheme = previewTheme === 'light' ? 'dark' : 'light'
+  // Flip the demo page and the plugin UI together so they stay in lockstep.
+  document.documentElement.setAttribute('data-theme', previewTheme)
+  iframe.contentDocument?.documentElement.setAttribute('data-theme', previewTheme)
+})
+
 document.getElementById('clear-all')?.addEventListener('click', () => {
   if (loops.length === 0) return
   loops.length = 0
@@ -677,6 +690,20 @@ exportMenu.addEventListener('click', (e) => {
   exportMenu.classList.remove('is-open')
   exportBtn.setAttribute('aria-expanded', 'false')
   void exportCanvas(kind as 'svg' | 'png' | 'jpg')
+})
+
+// Plugin download dropdown (Figma / Penpot). The items are plain links, so the
+// browser handles the download; we only manage open/close, like the export menu.
+const downloadMenu = document.getElementById('download-menu')
+const downloadBtn = document.getElementById('download-btn')
+downloadBtn?.addEventListener('click', (e) => {
+  e.stopPropagation()
+  const open = downloadMenu?.classList.toggle('is-open')
+  downloadBtn.setAttribute('aria-expanded', open ? 'true' : 'false')
+})
+document.addEventListener('click', () => {
+  downloadMenu?.classList.remove('is-open')
+  downloadBtn?.setAttribute('aria-expanded', 'false')
 })
 
 // ---- Drop-to-add ----------------------------------------------------------

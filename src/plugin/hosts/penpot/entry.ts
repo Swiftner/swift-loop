@@ -17,3 +17,8 @@ penpot.ui.open('Swift Loop', `ui.html?theme=${penpot.theme}`, DEFAULT_SIZE)
 const adapter = new PenpotAdapter(penpot)
 const bridge = new PenpotBridge(penpot)
 startHostLoop(adapter, bridge)
+
+// Keep the UI's theme in sync after the initial `?theme=` above: Penpot fires
+// `themechange` when the user switches light/dark, and the UI applies it via
+// its `theme` channel (see src/ui/theme.ts).
+penpot.on('themechange', (theme) => bridge.send('theme', theme))

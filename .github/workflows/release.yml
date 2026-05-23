@@ -15,12 +15,16 @@ jobs:
       - uses: oven-sh/setup-bun@v1
       - run: bun install
       - run: bun run test
-      - run: bun run build
+      - run: bun run build:penpot # also runs `bun run build` (Figma) as its prerequisite
       - name: Package
         run: |
           mkdir -p dist
-          zip -r "dist/swift-loop-${GITHUB_REF_NAME}.zip" manifest.json build README.md LICENSE
+          # Figma: manifest + build/ (minus the Penpot subfolder, which ships separately)
+          zip -r "dist/swift-loop-${GITHUB_REF_NAME}.zip" manifest.json build README.md LICENSE -x "build/penpot/*"
           cp "dist/swift-loop-${GITHUB_REF_NAME}.zip" dist/swift-loop-latest.zip
+          # Penpot: the self-contained build/penpot/ folder, zipped at its root
+          ( cd build/penpot && zip -r "${GITHUB_WORKSPACE}/dist/swift-loop-penpot-${GITHUB_REF_NAME}.zip" . )
+          cp "dist/swift-loop-penpot-${GITHUB_REF_NAME}.zip" dist/swift-loop-penpot-latest.zip
       - uses: softprops/action-gh-release@v2
         with:
           files: dist/swift-loop-*.zip

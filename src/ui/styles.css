@@ -1,14 +1,90 @@
 /* src/ui/styles.css */
 :root {
-  --bg: #ffffff;
-  --fg: #1a1a1a;
-  --muted: #888;
-  --hairline: #e6e6e6;
-  --accent: #18a0fb;
+  /* Structural tokens prefer the host's native variables — Figma injects
+     figma-color vars (with themeColors:true); Penpot's per-theme vars arrive
+     via penpot plugin-styles under [data-theme] — and fall back to our own
+     palette in the standalone preview. See src/ui/theme.ts. */
+  --bg: var(--figma-color-bg, #ffffff);
+  --fg: var(--figma-color-text, #1a1a1a);
+  --muted: var(--figma-color-text-secondary, #888);
+  --hairline: var(--figma-color-border, #e6e6e6);
+  --accent: var(--figma-color-text-brand, #18a0fb);
   --warn-mid: #f0c050;
   --warn-high: #e67e22;
   --grid: rgba(26, 26, 26, 0.05);
   --mono: "Söhne Mono", ui-monospace, "SFMono-Regular", monospace;
+  /* Appearance-panel visualization inks (light). */
+  --swatch-ink-rgb: 26, 26, 26;
+  --checker-bg: #ffffff;
+  --checker-fg: #dddddd;
+  --curve-ink: rgba(26, 26, 26, 0.4);
+  --stop-ring: #ffffff;
+  --field-bg: #fafafa;
+  --warn-bg: #fff8dc;
+  --warn-fg: #806000;
+  /* Themes native UI the browser draws itself: scrollbars, `title` tooltips,
+     date/number spinners, form controls. */
+  color-scheme: light;
+}
+
+/* Preview/standalone dark via the OS preference. The --figma-color-* fallback
+   keeps Figma on its own variables even when its iframe reports a dark OS. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: var(--figma-color-bg, #2c2c2c);
+    --fg: var(--figma-color-text, #e6e6e6);
+    --muted: var(--figma-color-text-secondary, #9b9b9b);
+    --hairline: var(--figma-color-border, #444444);
+    --accent: var(--figma-color-text-brand, #18a0fb);
+    --grid: rgba(255, 255, 255, 0.06);
+    --swatch-ink-rgb: 230, 230, 230;
+    --checker-bg: #2c2c2c;
+    --checker-fg: #3a3a3a;
+    --curve-ink: rgba(255, 255, 255, 0.45);
+    --stop-ring: #555555;
+    --field-bg: #232427;
+    --warn-bg: #3a3320;
+    --warn-fg: #e6c266;
+    color-scheme: dark;
+  }
+}
+
+/* Explicit theme (Penpot themechange / preview toggle). Penpot's plugin-styles
+   define the per-theme color vars under [data-theme]; in the preview they're
+   absent, so the literal fallbacks drive our own palette. */
+:root[data-theme="light"] {
+  --bg: var(--figma-color-bg, var(--lb-primary, #ffffff));
+  --fg: var(--figma-color-text, var(--lf-primary, #1a1a1a));
+  --muted: var(--figma-color-text-secondary, var(--lf-secondary, #888));
+  --hairline: var(--figma-color-border, var(--lb-secondary, #e6e6e6));
+  --accent: var(--figma-color-text-brand, var(--la-primary, #18a0fb));
+  --grid: rgba(26, 26, 26, 0.05);
+  --swatch-ink-rgb: 26, 26, 26;
+  --checker-bg: #ffffff;
+  --checker-fg: #dddddd;
+  --curve-ink: rgba(26, 26, 26, 0.4);
+  --stop-ring: #ffffff;
+  --field-bg: #fafafa;
+  --warn-bg: #fff8dc;
+  --warn-fg: #806000;
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --bg: var(--figma-color-bg, var(--db-primary, #2c2c2c));
+  --fg: var(--figma-color-text, var(--df-primary, #e6e6e6));
+  --muted: var(--figma-color-text-secondary, var(--df-secondary, #9b9b9b));
+  --hairline: var(--figma-color-border, var(--db-tertiary, #444444));
+  --accent: var(--figma-color-text-brand, var(--da-primary, #18a0fb));
+  --grid: rgba(255, 255, 255, 0.06);
+  --swatch-ink-rgb: 230, 230, 230;
+  --checker-bg: #2c2c2c;
+  --checker-fg: #3a3a3a;
+  --curve-ink: rgba(255, 255, 255, 0.45);
+  --stop-ring: #555555;
+  --field-bg: #232427;
+  --warn-bg: #3a3320;
+  --warn-fg: #e6c266;
+  color-scheme: dark;
 }
 * {
   box-sizing: border-box;
@@ -360,7 +436,7 @@ body,
   padding: 6px 8px;
   border: 1px solid var(--hairline);
   border-radius: 4px;
-  background: #fafafa;
+  background: var(--field-bg);
   resize: vertical;
 }
 .formula-row-error .formula-row-input {
@@ -724,6 +800,36 @@ body,
 .appearance-hex.is-empty {
   color: var(--muted);
 }
+.appearance-hex.is-button {
+  position: relative;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  padding: 0 2px;
+  cursor: pointer;
+  font-feature-settings: "tnum" 1;
+}
+.appearance-hex.is-button:hover {
+  color: var(--accent, var(--fg));
+}
+.appearance-hex.is-button:focus-visible {
+  outline: 1px solid var(--accent, var(--fg));
+  outline-offset: 1px;
+  border-radius: 2px;
+}
+.appearance-hex-picker {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+  border: 0;
+  padding: 0;
+  left: 50%;
+  bottom: 0;
+}
 .appearance-strip-fx {
   font-family: var(--mono);
   font-size: 10px;
@@ -812,9 +918,9 @@ body,
   background-image: var(--strip-bg, none),
     repeating-conic-gradient(
       from 0deg at 0 0,
-      rgba(26, 26, 26, 0.1) 0% 25%,
+      rgba(var(--swatch-ink-rgb), 0.1) 0% 25%,
       transparent 25% 50%,
-      rgba(26, 26, 26, 0.1) 50% 75%,
+      rgba(var(--swatch-ink-rgb), 0.1) 50% 75%,
       transparent 75% 100%
     );
   background-size: 100% 100%, 6px 6px;
@@ -829,7 +935,7 @@ body,
 }
 .appearance-strip-curve path {
   fill: none;
-  stroke: rgba(26, 26, 26, 0.4);
+  stroke: var(--curve-ink);
   stroke-width: 1;
   stroke-dasharray: 2 3;
   vector-effect: non-scaling-stroke;
@@ -871,11 +977,12 @@ body,
   /* `background-image` (not the `background` shorthand) — only the last layer
      of `background` may specify a color, so stacking `transparent` first
      dropped the entire declaration. */
-  background-image: var(--strip-bg, none), linear-gradient(45deg, #ddd 25%, transparent 25%),
-    linear-gradient(-45deg, #ddd 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, #ddd 75%),
-    linear-gradient(-45deg, transparent 75%, #ddd 75%);
-  background-color: #fff;
+  background-image: var(--strip-bg, none),
+    linear-gradient(45deg, var(--checker-fg) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--checker-fg) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--checker-fg) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--checker-fg) 75%);
+  background-color: var(--checker-bg);
   background-size: auto, 8px 8px, 8px 8px, 8px 8px, 8px 8px;
   background-position: 0 0, 0 0, 0 4px, 4px -4px, -4px 0;
   cursor: copy;
@@ -890,9 +997,17 @@ body,
   margin-top: -7px;
   border-radius: 50%;
   background: var(--chip, #000);
-  box-shadow: 0 0 0 2px #fff, 0 0 0 3px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 0 0 2px var(--stop-ring), 0 0 0 3px rgba(0, 0, 0, 0.35);
   cursor: grab;
   touch-action: none;
+}
+
+/* Invisible hit-area extension — visual chip stays 14px, click target is 30px */
+.gradient-ramp-stop::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
 }
 
 .gradient-ramp-stop:active {
@@ -901,10 +1016,39 @@ body,
 
 .gradient-ramp-stop-picker {
   position: absolute;
-  inset: 0;
+  /* 1×1 + pointer-events:none — picker is opened programmatically. Sitting on
+     top of the chip with pointer-events:auto stole drag gestures (the browser
+     implicit-captures pointer for inputs). */
+  width: 1px;
+  height: 1px;
   opacity: 0;
-  pointer-events: auto;
-  cursor: inherit;
+  pointer-events: none;
+  border: 0;
+  padding: 0;
+}
+
+.gradient-ramp-hex-pair {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.gradient-ramp-hex-remove {
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1;
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  padding: 0 2px;
+  cursor: pointer;
+}
+.gradient-ramp-hex-remove:hover {
+  color: var(--fg);
+}
+.gradient-ramp-hex-remove:focus-visible {
+  outline: 1px solid var(--accent, var(--fg));
+  outline-offset: 1px;
+  border-radius: 2px;
 }
 
 .gradient-ramp-readout {
@@ -986,8 +1130,8 @@ input.appearance-num-input::-webkit-inner-spin-button {
 /* Selection warning */
 .selection-warning {
   padding: 8px 16px;
-  background: #fff8dc;
-  color: #806000;
+  background: var(--warn-bg);
+  color: var(--warn-fg);
   font-size: 11px;
   border-bottom: 1px solid var(--hairline);
 }
@@ -1021,12 +1165,23 @@ input.appearance-num-input::-webkit-inner-spin-button {
   font-size: 11px;
   background: var(--bg);
 }
-.library-close {
+.library-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  padding: 0;
   background: none;
   border: 0;
-  font-size: 18px;
+  border-radius: 4px;
   cursor: pointer;
   color: var(--muted);
+}
+.library-back:hover {
+  color: var(--fg);
+  background: var(--hairline);
 }
 .library-tags {
   display: flex;

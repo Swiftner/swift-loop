@@ -43,7 +43,7 @@ export function AppearanceSection({ config, update }: Props) {
       <Strip
         label="Opacity"
         barClass="is-opacity"
-        barBackground={`linear-gradient(to right, rgba(26,26,26,${opacityStart / 100}), rgba(26,26,26,${opacityEnd / 100}))`}
+        barBackground={`linear-gradient(to right, rgba(var(--swatch-ink-rgb), ${opacityStart / 100}), rgba(var(--swatch-ink-rgb), ${opacityEnd / 100}))`}
         startCol={
           <ScrubNum
             value={opacityStart}

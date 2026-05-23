@@ -6,6 +6,11 @@ import type { LoopConfig } from '../../shared/types'
 
 const HISTORY_LIMIT = 50
 
+// Cap uncommitted live-drag emits at ~20fps. Penpot's selection/state machinery
+// throws React #185 ("setState in render") under faster scrubbing, and the host
+// can't repaint that often anyway. Commits (mouseup) bypass the throttle.
+const LIVE_THROTTLE_MS = 50
+
 export function useLooperConfig() {
   const [config, setConfig] = useState<LoopConfig>(DEFAULT_CONFIG)
   // setTimeout instead of rAF: rAF is throttled when the tab/iframe is hidden
@@ -37,13 +42,21 @@ export function useLooperConfig() {
 
   const dispatchUpdate = useCallback((next: LoopConfig, commit: boolean) => {
     pending.current = { config: next, commit }
-    if (flushId.current !== null) return
-    flushId.current = window.setTimeout(() => {
+    const flush = () => {
       flushId.current = null
       const p = pending.current
       pending.current = null
       if (p) emit('loop:update', { config: p.config, commit: p.commit })
-    }, 0)
+    }
+    if (commit) {
+      // Commits (release/keyboard/library/etc.) must reach the host without
+      // delay so undo history is in sync. Drop any pending live-drag flush.
+      if (flushId.current !== null) window.clearTimeout(flushId.current)
+      flushId.current = window.setTimeout(flush, 0)
+      return
+    }
+    if (flushId.current !== null) return
+    flushId.current = window.setTimeout(flush, LIVE_THROTTLE_MS)
   }, [])
 
   const update = useCallback(

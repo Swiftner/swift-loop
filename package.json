@@ -16,6 +16,7 @@
     "build:preview": "bun build src/preview/host.ts --outfile=build/preview.js --target=browser",
     "watch:preview": "bun build src/preview/host.ts --outfile=build/preview.js --target=browser --watch",
     "build:penpot": "bun run build && node scripts/build-penpot.mjs",
+    "build:all": "bun run build:penpot && bun run build:preview",
     "dev": "bun run build && bun run build:preview && bunx --bun serve -l 4173 .",
     "package": "bash scripts/package.sh"
   },
@@ -29,6 +30,7 @@
     "@create-figma-plugin/build": "^4.0.1",
     "@create-figma-plugin/tsconfig": "^4.0.1",
     "@figma/plugin-typings": "^1.103.0",
+    "@penpot/plugin-styles": "^1.4.2",
     "@penpot/plugin-types": "^1.4.2",
     "@types/node": "^22.0.0",
     "typescript": "^5.6.0",

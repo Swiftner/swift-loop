@@ -20,8 +20,60 @@
         --accent-2: #8b7bff;
         --accent-ink: #2a1f8f;
         --accent-tint: rgba(110, 91, 255, 0.10);
+        --dot: rgba(20, 22, 28, 0.10);
+        --edge-hi: rgba(255, 255, 255, 0.8);
+        --hover: #fafafc;
+        --danger: #d63a1a;
+        --danger-bg: #fef2ef;
+        --danger-bd: #f3c3b6;
         --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+        color-scheme: light;
       }
+      /* Dark palette — same logic as the plugin UI: follow the OS preference,
+         but let the toolbar Theme toggle (which sets data-theme) win over it. */
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          --bg: #16181b;
+          --panel: #26282c;
+          --ink: #e8eaee;
+          --ink-2: #b4b7c0;
+          --muted: #8f939d;
+          --hair: #303338;
+          --hair-2: #3c4046;
+          --accent: #8b7bff;
+          --accent-2: #a596ff;
+          --accent-ink: #cbbdff;
+          --accent-tint: rgba(110, 91, 255, 0.18);
+          --dot: rgba(255, 255, 255, 0.10);
+          --edge-hi: rgba(255, 255, 255, 0.04);
+          --hover: #2f3237;
+          --danger: #ff6b4a;
+          --danger-bg: #3a221c;
+          --danger-bd: #5e2f24;
+          color-scheme: dark;
+        }
+      }
+      :root[data-theme="dark"] {
+        --bg: #16181b;
+        --panel: #26282c;
+        --ink: #e8eaee;
+        --ink-2: #b4b7c0;
+        --muted: #8f939d;
+        --hair: #303338;
+        --hair-2: #3c4046;
+        --accent: #8b7bff;
+        --accent-2: #a596ff;
+        --accent-ink: #cbbdff;
+        --accent-tint: rgba(110, 91, 255, 0.18);
+        --dot: rgba(255, 255, 255, 0.10);
+        --edge-hi: rgba(255, 255, 255, 0.04);
+        --hover: #2f3237;
+        --danger: #ff6b4a;
+        --danger-bg: #3a221c;
+        --danger-bd: #5e2f24;
+        color-scheme: dark;
+      }
+      :root[data-theme="light"] { color-scheme: light; }
       html, body {
         margin: 0;
         height: 100%;
@@ -57,7 +109,7 @@
         background: var(--panel);
         border-radius: 12px;
         box-shadow:
-          0 1px 0 rgba(255,255,255,.8) inset,
+          0 1px 0 var(--edge-hi) inset,
           0 1px 2px rgba(20, 22, 28, 0.04),
           0 12px 32px -16px rgba(20, 22, 28, 0.18);
         border: 1px solid rgba(20, 22, 28, 0.04);
@@ -100,12 +152,12 @@
       .stage {
         grid-area: stage;
         position: relative;
-        background: #fff;
+        background: var(--panel);
         border-radius: 12px;
         overflow: hidden;
-        border: 1px solid rgba(20, 22, 28, 0.04);
+        border: 1px solid var(--hair);
         box-shadow:
-          0 1px 0 rgba(255,255,255,.8) inset,
+          0 1px 0 var(--edge-hi) inset,
           0 1px 2px rgba(20, 22, 28, 0.04),
           0 12px 32px -16px rgba(20, 22, 28, 0.18);
       }
@@ -113,7 +165,7 @@
         content: '';
         position: absolute;
         inset: 0;
-        background-image: radial-gradient(rgba(20, 22, 28, 0.10) 1px, transparent 1px);
+        background-image: radial-gradient(var(--dot) 1px, transparent 1px);
         background-size: 20px 20px;
         background-position: 0 0;
         pointer-events: none;
@@ -184,7 +236,7 @@
         background: var(--panel);
         border-radius: 12px;
         box-shadow:
-          0 1px 0 rgba(255,255,255,.8) inset,
+          0 1px 0 var(--edge-hi) inset,
           0 1px 2px rgba(20, 22, 28, 0.04),
           0 12px 32px -16px rgba(20, 22, 28, 0.18);
         overflow: hidden;
@@ -199,7 +251,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        background: linear-gradient(180deg, #fbfbfd 0%, #ffffff 100%);
+        background: var(--panel);
         font-family: var(--mono);
         font-weight: 500;
         font-size: 10px;
@@ -231,16 +283,16 @@
         cursor: pointer;
       }
       .header-btn:hover {
-        background: #fafafc;
+        background: var(--hover);
         color: var(--ink);
-        border-color: #c4c7cd;
+        border-color: var(--hair-2);
       }
 
       iframe#plugin-ui {
         flex: 1 1 auto;
         width: 100%;
         border: 0;
-        background: #fff;
+        background: var(--panel);
         min-height: 0;
       }
       .sidebar-empty {
@@ -324,7 +376,7 @@
       }
       .layer .remove:hover {
         background: #fef2ef;
-        color: #d63a1a;
+        color: var(--danger);
       }
 
       /* ---------- Buttons ---------- */
@@ -333,7 +385,7 @@
         align-items: center;
         gap: 6px;
         padding: 6px 10px;
-        background: #fff;
+        background: var(--panel);
         border: 1px solid var(--hair-2);
         border-radius: 6px;
         color: var(--ink);
@@ -343,8 +395,8 @@
         transition: background 120ms ease, border-color 120ms ease, transform 120ms ease, box-shadow 120ms ease;
       }
       .btn-ghost:hover {
-        background: #fafafc;
-        border-color: #c4c7cd;
+        background: var(--hover);
+        border-color: var(--hair-2);
         box-shadow: 0 1px 2px rgba(20, 22, 28, 0.04);
       }
       .btn-ghost:active { transform: translateY(0.5px); }
@@ -360,11 +412,11 @@
         border-color: rgba(110, 91, 255, 0.32);
       }
       .btn-ghost.is-danger:hover {
-        background: #fef2ef;
-        border-color: #f3c3b6;
-        color: #d63a1a;
+        background: var(--danger-bg);
+        border-color: var(--danger-bd);
+        color: var(--danger);
       }
-      .btn-ghost.is-danger:hover svg { color: #d63a1a; }
+      .btn-ghost.is-danger:hover svg { color: var(--danger); }
 
       /* ---------- Export menu ---------- */
       .menu {
@@ -375,7 +427,7 @@
         top: calc(100% + 6px);
         right: 0;
         min-width: 140px;
-        background: #fff;
+        background: var(--panel);
         border: 1px solid var(--hair-2);
         border-radius: 8px;
         box-shadow:
@@ -399,6 +451,15 @@
         cursor: pointer;
       }
       .menu-item:hover { background: var(--accent-tint); color: var(--accent-ink); }
+      /* Download menu sits at the left of the topbar, so its list opens left-aligned. */
+      #download-menu .menu-list { left: 0; right: auto; }
+      .menu-item-tag {
+        margin-left: 6px;
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+      }
       .menu-item .kbd {
         float: right;
         font-family: var(--mono);
@@ -457,16 +518,21 @@
 
         <input id="shape-upload" type="file" accept=".svg,image/svg+xml,image/png,image/jpeg,image/webp" multiple hidden />
 
-        <a
-          class="btn-ghost is-accent"
-          href="https://github.com/Swiftner/swift-loop/releases/latest/download/swift-loop-latest.zip"
-          title="Download the latest Swift Loop Figma plugin (.zip)"
-        >
-          <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
-            <path d="M5.5 1.5v6.5m0 0L2.75 5.25M5.5 8L8.25 5.25M2 9.5h7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          Get the plugin
-        </a>
+        <div class="menu" id="download-menu">
+          <button id="download-btn" class="btn-ghost is-accent" type="button" aria-haspopup="menu" aria-expanded="false" title="Download the Swift Loop plugin">
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
+              <path d="M5.5 1.5v6.5m0 0L2.75 5.25M5.5 8L8.25 5.25M2 9.5h7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Get the plugin
+            <svg width="8" height="8" viewBox="0 0 8 8" fill="none" aria-hidden="true" style="margin-left: 2px;">
+              <path d="M1.5 3L4 5.5 6.5 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="menu-list" role="menu">
+            <a class="menu-item" role="menuitem" href="https://github.com/Swiftner/swift-loop/releases/latest/download/swift-loop-latest.zip" title="Figma plugin (.zip)">Figma</a>
+            <a class="menu-item" role="menuitem" href="https://github.com/Swiftner/swift-loop/releases/latest/download/swift-loop-penpot-latest.zip" title="Penpot plugin (.zip) — experimental">Penpot <span class="menu-item-tag">beta</span></a>
+          </div>
+        </div>
 
         <div class="group" role="group" aria-label="Zoom">
           <button id="zoom-out" class="btn-ghost" type="button" title="Zoom out" aria-label="Zoom out">
@@ -486,6 +552,13 @@
             <span id="zoom-label">100%</span>
           </button>
         </div>
+
+        <button id="theme-toggle" class="btn-ghost" type="button" title="Toggle the plugin panel between light and dark" aria-label="Toggle plugin theme">
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
+            <path d="M9 6.2A3.6 3.6 0 0 1 4.8 2a3.8 3.8 0 1 0 4.2 4.2Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+          </svg>
+          Theme
+        </button>
 
         <div class="spacer"></div>
 

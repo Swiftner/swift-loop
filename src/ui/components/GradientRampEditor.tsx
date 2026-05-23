@@ -11,6 +11,13 @@ interface Props {
   onFormulaChange: (next: string) => void
 }
 
+// Drag must exceed this radius before a press is treated as a move rather
+// than a click — keeps a tap-to-open-picker affordance working alongside drag.
+const DRAG_THRESHOLD = 3
+// Vertical fling past 2.5× the strip height removes the stop on release —
+// mirrors the established interaction in Figma's gradient editor.
+const DELETE_PULL_RATIO = 2.5
+
 export function GradientRampEditor({
   label,
   ramp,
@@ -25,6 +32,15 @@ export function GradientRampEditor({
   const background = stripBackground(sorted)
   const showFormula = expanded || formulaActive
 
+  const setStopColor = (index: number, color: Color) => {
+    const nextStops = sorted.map((s, i) => (i === index ? { ...s, color } : s))
+    onChange({ ...ramp, stops: nextStops }, true)
+  }
+
+  const removeStop = (index: number) => {
+    onChange({ ...ramp, stops: sorted.filter((_, i) => i !== index) }, true)
+  }
+
   return (
     <article
       class={`appearance-strip gradient-ramp${formulaActive ? ' is-fx' : ''}${
@@ -35,9 +51,18 @@ export function GradientRampEditor({
         <span class="appearance-strip-label">{label}</span>
         <span class="appearance-strip-readout gradient-ramp-readout">
           {sorted.length === 0 ? <span class="appearance-hex is-empty">—</span> : null}
-          {sorted.map((s) => (
-            <span key={`${s.position}-${rgbToHex(s.color)}`} class="appearance-hex">
-              {rgbToHex(s.color)}
+          {sorted.map((s, i) => (
+            <span key={`hex-${i}`} class="gradient-ramp-hex-pair">
+              <HexButton color={s.color} onColor={(c) => setStopColor(i, c)} />
+              <button
+                type="button"
+                class="gradient-ramp-hex-remove"
+                onClick={() => removeStop(i)}
+                aria-label={`Remove stop ${i + 1}`}
+                title="Remove stop"
+              >
+                ×
+              </button>
             </span>
           ))}
         </span>
@@ -59,14 +84,17 @@ export function GradientRampEditor({
           onPointerDown={(e) => onStripPointerDown(e, stripRef, ramp, sorted, onChange)}
         >
           {sorted.map((stop, i) => (
+            // Key by index only — including position remounts the chip mid-drag,
+            // which cancels the pointer events and reverts the move.
             <StopChip
-              key={`${i}-${stop.position.toFixed(4)}`}
+              key={`chip-${i}`}
               stop={stop}
               index={i}
               sorted={sorted}
               stripRef={stripRef}
               ramp={ramp}
               onChange={onChange}
+              setColor={(c) => setStopColor(i, c)}
             />
           ))}
         </div>
@@ -124,38 +152,48 @@ interface StopChipProps {
   stripRef: { current: HTMLDivElement | null }
   ramp: ColorRamp
   onChange: (next: ColorRamp, commit: boolean) => void
+  setColor: (color: Color) => void
 }
 
-function StopChip({ stop, index, sorted, stripRef, ramp, onChange }: StopChipProps) {
+function StopChip({ stop, index, sorted, stripRef, ramp, onChange, setColor }: StopChipProps) {
+  const pickerRef = useRef<HTMLInputElement>(null)
+
   const onPointerDown = (e: PointerEvent) => {
+    if (e.button !== 0) return
     e.stopPropagation()
+    // Without this, the browser implicitly captures the pointer for the chip
+    // element. Because the chip lives in a list that re-renders during drag,
+    // that capture gets cancelled on re-mount and the drag dies. preventDefault
+    // also keeps the chip's focus from stealing keyboard scope.
+    e.preventDefault()
     const el = stripRef.current
     if (!el) return
-    const chip = e.currentTarget as HTMLElement
     const rect = el.getBoundingClientRect()
-    const minPos = index === 0 ? 0 : sorted[index - 1].position
-    const maxPos = index === sorted.length - 1 ? 1 : sorted[index + 1].position
+    const startX = e.clientX
+    const startY = e.clientY
+    // Stops are free to slide past their neighbors — the parent re-sorts the
+    // ramp on each onChange so the gradient stays well-defined.
     let lastCommitted = stop.position
     let dragged = false
 
-    // Bind the gesture to the chip so it survives pointer leaving the chip,
-    // and so the browser fires pointercancel if focus/touch is interrupted.
-    chip.setPointerCapture(e.pointerId)
-
     const cleanup = () => {
-      chip.removeEventListener('pointermove', move)
-      chip.removeEventListener('pointerup', up)
-      chip.removeEventListener('pointercancel', cancel)
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+      window.removeEventListener('pointercancel', cancel)
     }
 
     const move = (ev: PointerEvent) => {
-      const dyAbs = Math.abs(ev.clientY - rect.top - rect.height / 2)
-      if (dyAbs > rect.height * 2.5) {
+      if (!dragged) {
+        const dx = ev.clientX - startX
+        const dy = ev.clientY - startY
+        if (dx * dx + dy * dy < DRAG_THRESHOLD * DRAG_THRESHOLD) return
         dragged = true
-        return
       }
-      dragged = true
-      const t = Math.max(minPos, Math.min(maxPos, (ev.clientX - rect.left) / rect.width))
+      const dyAbs = Math.abs(ev.clientY - rect.top - rect.height / 2)
+      // Past the delete pull, freeze horizontal preview — the user is on their
+      // way to flicking the stop off the bar.
+      if (dyAbs > rect.height * DELETE_PULL_RATIO) return
+      const t = Math.max(0, Math.min(1, (ev.clientX - rect.left) / rect.width))
       const nextStops = sorted.map((s, i) => (i === index ? { ...s, position: t } : s))
       onChange({ ...ramp, stops: nextStops }, false)
       lastCommitted = t
@@ -163,13 +201,18 @@ function StopChip({ stop, index, sorted, stripRef, ramp, onChange }: StopChipPro
 
     const up = (ev: PointerEvent) => {
       cleanup()
+      if (!dragged) {
+        // True click — open the colour picker. Programmatic .click() works
+        // even though the input is pointer-events:none + 1×1px.
+        pickerRef.current?.click()
+        return
+      }
       const dyAbs = Math.abs(ev.clientY - rect.top - rect.height / 2)
-      if (dyAbs > rect.height * 2.5 && sorted.length > 0) {
+      if (dyAbs > rect.height * DELETE_PULL_RATIO) {
         const nextStops = sorted.filter((_, i) => i !== index)
         onChange({ ...ramp, stops: nextStops }, true)
         return
       }
-      if (!dragged) return
       const nextStops = sorted.map((s, i) => (i === index ? { ...s, position: lastCommitted } : s))
       onChange({ ...ramp, stops: nextStops }, true)
     }
@@ -183,17 +226,22 @@ function StopChip({ stop, index, sorted, stripRef, ramp, onChange }: StopChipPro
       onChange({ ...ramp, stops: nextStops }, true)
     }
 
-    chip.addEventListener('pointermove', move)
-    chip.addEventListener('pointerup', up)
-    chip.addEventListener('pointercancel', cancel)
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
+    window.addEventListener('pointercancel', cancel)
+  }
+
+  const onContextMenu = (e: MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const nextStops = sorted.filter((_, i) => i !== index)
+    onChange({ ...ramp, stops: nextStops }, true)
   }
 
   const onColorInput = (e: Event) => {
     const v = (e.target as HTMLInputElement).value.replace('#', '')
     const c = hexToRgb(v)
-    if (!c) return
-    const nextStops = sorted.map((s, i) => (i === index ? { ...s, color: c } : s))
-    onChange({ ...ramp, stops: nextStops }, true)
+    if (c) setColor(c)
   }
 
   return (
@@ -201,14 +249,16 @@ function StopChip({ stop, index, sorted, stripRef, ramp, onChange }: StopChipPro
       class="gradient-ramp-stop"
       style={`left: ${(stop.position * 100).toFixed(2)}%; --chip: #${rgbToHex(stop.color)}`}
       onPointerDown={onPointerDown}
+      onContextMenu={onContextMenu}
       role="slider"
       tabIndex={0}
-      aria-label={`Stop ${index + 1} at ${(stop.position * 100).toFixed(0)}%`}
+      aria-label={`Stop ${index + 1} at ${(stop.position * 100).toFixed(0)}% — drag to move, click to recolor, right-click to remove`}
       aria-valuenow={stop.position}
       aria-valuemin={0}
       aria-valuemax={1}
     >
       <input
+        ref={pickerRef}
         type="color"
         class="gradient-ramp-stop-picker"
         value={`#${rgbToHex(stop.color)}`}
@@ -216,5 +266,40 @@ function StopChip({ stop, index, sorted, stripRef, ramp, onChange }: StopChipPro
         aria-label={`Color for stop ${index + 1}`}
       />
     </span>
+  )
+}
+
+interface HexButtonProps {
+  color: Color
+  onColor: (color: Color) => void
+}
+
+function HexButton({ color, onColor }: HexButtonProps) {
+  const pickerRef = useRef<HTMLInputElement>(null)
+  const hex = rgbToHex(color)
+  const onInput = (e: Event) => {
+    const v = (e.target as HTMLInputElement).value.replace('#', '')
+    const c = hexToRgb(v)
+    if (c) onColor(c)
+  }
+  return (
+    <button
+      type="button"
+      class="appearance-hex is-button"
+      onClick={() => pickerRef.current?.click()}
+      aria-label={`Edit color ${hex}`}
+      title="Edit color"
+    >
+      {hex}
+      <input
+        ref={pickerRef}
+        type="color"
+        class="appearance-hex-picker"
+        value={`#${hex}`}
+        onInput={onInput}
+        aria-hidden="true"
+        tabIndex={-1}
+      />
+    </button>
   )
 }

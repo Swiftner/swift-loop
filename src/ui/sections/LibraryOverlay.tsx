@@ -95,6 +95,17 @@ export function LibraryOverlay({ open, config, onClose, onApply }: Props) {
     // biome-ignore lint/a11y/useSemanticElements: deliberate custom overlay; native <dialog> imposes UA border/padding the .library-overlay class doesn't reset.
     <div class="library-overlay" role="dialog" aria-modal="true" aria-labelledby="library-title">
       <header class="library-header">
+        <button class="library-back" onClick={onClose} type="button" aria-label="Back">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <path
+              d="M8.5 3 4.5 7l4 4"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
         <h2 class="library-title" id="library-title">
           Library
         </h2>
@@ -106,9 +117,6 @@ export function LibraryOverlay({ open, config, onClose, onApply }: Props) {
           value={query}
           onInput={(e) => setQuery((e.target as HTMLInputElement).value)}
         />
-        <button class="library-close" onClick={onClose} type="button" aria-label="Close library">
-          ×
-        </button>
       </header>
       <div class="library-tags">
         <button
