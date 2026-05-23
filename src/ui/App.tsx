@@ -132,21 +132,24 @@ export function App() {
   // One-shot listener per click: subscribe right before requesting bytes so
   // we don't accidentally trigger a download on a stale earlier reply.
   const onDownload = () => {
-    const off = on('loop:svg-ready', (payload: { ok: boolean; bytes?: Uint8Array; name?: string; reason?: string }) => {
-      off()
-      if (!payload.ok || !payload.bytes) return
-      const blob = new Blob([payload.bytes as BlobPart], { type: 'image/svg+xml;charset=utf-8' })
-      const stamp = new Date().toISOString().replace(/[:T]/g, '-').slice(0, 19)
-      const slug = (payload.name ?? 'swift-loop').replace(/[^\w.-]+/g, '-')
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `${slug}-${stamp}.svg`
-      document.body.appendChild(a)
-      a.click()
-      a.remove()
-      URL.revokeObjectURL(url)
-    })
+    const off = on(
+      'loop:svg-ready',
+      (payload: { ok: boolean; bytes?: Uint8Array; name?: string; reason?: string }) => {
+        off()
+        if (!payload.ok || !payload.bytes) return
+        const blob = new Blob([payload.bytes as BlobPart], { type: 'image/svg+xml;charset=utf-8' })
+        const stamp = new Date().toISOString().replace(/[:T]/g, '-').slice(0, 19)
+        const slug = (payload.name ?? 'swift-loop').replace(/[^\w.-]+/g, '-')
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `${slug}-${stamp}.svg`
+        document.body.appendChild(a)
+        a.click()
+        a.remove()
+        URL.revokeObjectURL(url)
+      },
+    )
     emit('loop:download-svg')
   }
 

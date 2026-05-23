@@ -162,6 +162,7 @@ body,
   gap: 2px;
 }
 .section-chip-source {
+  font: inherit;
   color: var(--fg);
   font-style: italic;
   letter-spacing: 0;
@@ -169,7 +170,6 @@ body,
   border: 0;
   padding: 0;
   cursor: pointer;
-  font: inherit;
   text-decoration: underline dotted transparent;
   text-underline-offset: 2px;
   transition: color 120ms ease, text-decoration-color 120ms ease;

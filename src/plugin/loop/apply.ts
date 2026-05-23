@@ -1,11 +1,12 @@
 // src/plugin/loop/apply.ts
 import { sampleRamp } from '../../shared/color'
 import type { Color, ColorRamp, EvaluatedValues, ScalarProperty } from '../../shared/types'
-import { rotateAroundCenter } from '../figma/rotate'
+import type { HostAdapter, NodeId, NodeSnapshot } from '../hosts/host'
 
 export interface ApplyInput {
-  clone: SceneNode
-  source: SceneNode
+  adapter: HostAdapter
+  cloneId: NodeId
+  source: NodeSnapshot
   values: EvaluatedValues
   fill: ColorRamp
   stroke: ColorRamp
@@ -19,7 +20,8 @@ export interface ApplyInput {
 
 export async function applyToClone(input: ApplyInput): Promise<void> {
   const {
-    clone,
+    adapter,
+    cloneId,
     source,
     values,
     fill,
@@ -40,36 +42,31 @@ export async function applyToClone(input: ApplyInput): Promise<void> {
     dirty.has('scaleY') ||
     dirty.has('rotation')
   if (transformDirty) {
-    if ('rotation' in clone) (clone as LayoutMixin).rotation = 0
-    if ('resize' in clone) {
-      const newW = Math.max(1, source.width + values.scaleX)
-      const newH = Math.max(1, source.height + values.scaleY)
-      ;(clone as LayoutMixin & { resize: (w: number, h: number) => void }).resize(newW, newH)
-    }
-    clone.x = source.x + values.x - values.scaleX / 2
-    clone.y = source.y + values.y - values.scaleY / 2
-    await rotateAroundCenter(clone, values.rotation)
-  }
-  if (dirty.has('opacity')) {
-    if ('opacity' in clone)
-      (clone as MinimalFillsMixin & { opacity: number }).opacity = Math.max(
-        0,
-        Math.min(1, values.opacity / 100),
-      )
+    const newW = Math.max(1, source.width + values.scaleX)
+    const newH = Math.max(1, source.height + values.scaleY)
+    await adapter.setTransform(cloneId, {
+      x: source.x + values.x - values.scaleX / 2,
+      y: source.y + values.y - values.scaleY / 2,
+      rotation: values.rotation,
+      width: newW,
+      height: newH,
+    })
   }
 
-  if (dirty.has('fill') && 'fills' in clone) {
-    const fc = fillColorAt(fill, fillFactor)
-    if (fc) (clone as GeometryMixin).fills = [{ type: 'SOLID', color: fc }]
+  if (dirty.has('opacity')) {
+    await adapter.setOpacity(cloneId, Math.max(0, Math.min(1, values.opacity / 100)))
   }
-  if (dirty.has('stroke') && 'strokes' in clone) {
-    const sc = fillColorAt(stroke, strokeFactor)
-    if (sc) (clone as GeometryMixin).strokes = [{ type: 'SOLID', color: sc }]
+
+  if (dirty.has('fill')) {
+    await adapter.setSolidFill(cloneId, fillColorAt(fill, fillFactor))
   }
-  if (dirty.has('strokeWeight') && 'strokeWeight' in clone) {
+  if (dirty.has('stroke')) {
+    await adapter.setSolidStroke(cloneId, fillColorAt(stroke, strokeFactor))
+  }
+  if (dirty.has('strokeWeight')) {
     const start = strokeWeight.value
     const end = strokeWeight.end ?? start
-    ;(clone as GeometryMixin).strokeWeight = start + strokeWeightFactor * (end - start)
+    await adapter.setStrokeWeight(cloneId, start + strokeWeightFactor * (end - start))
   }
 }
 

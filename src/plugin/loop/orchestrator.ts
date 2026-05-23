@@ -4,6 +4,7 @@ import { applyAngleToOffset } from '../engine/angle'
 import { type CompiledFactors, compileConfig, compileFactors } from '../engine/compile'
 import { applyEasing } from '../engine/easing'
 import { buildScope } from '../engine/scope'
+import type { HostAdapter, NodeSnapshot } from '../hosts/host'
 import { applyToClone } from './apply'
 import { type DiffResult, type DirtyProperty, diffConfig } from './diff'
 import type { LastRunStore } from './state'
@@ -20,7 +21,8 @@ const SUPPORTED_TYPES = [
 ]
 
 interface GenerateInput {
-  source: SceneNode
+  adapter: HostAdapter
+  source: NodeSnapshot
   config: LoopConfig
   previousConfig: LoopConfig | null
   store: LastRunStore
@@ -28,7 +30,7 @@ interface GenerateInput {
 }
 
 export async function generate(input: GenerateInput): Promise<void> {
-  const { source, config, previousConfig, store, commit } = input
+  const { adapter, source, config, previousConfig, store, commit } = input
   if (!SUPPORTED_TYPES.includes(source.type)) return
 
   const prevRecord = store.get()
@@ -46,45 +48,47 @@ export async function generate(input: GenerateInput): Promise<void> {
   if (diff.mode === 'noop') return
 
   if (diff.mode === 'full') {
-    await fullRegen(source, config, store)
+    await fullRegen(adapter, source, config, store)
   } else {
-    await inPlaceMutation(source, config, store, diff)
+    await inPlaceMutation(adapter, source, config, store, diff)
   }
 
-  if (commit) figma.commitUndo()
+  if (commit) adapter.commitUndoStep()
 }
 
 async function fullRegen(
-  source: SceneNode,
+  adapter: HostAdapter,
+  source: NodeSnapshot,
   config: LoopConfig,
   store: LastRunStore,
 ): Promise<void> {
   // remove previous clones and unwrap the previous SwiftLoopGroup so we don't
   // nest a new group inside it on every regen.
   const prev = store.get()
+  // On regen the selected source lives inside the old SwiftLoopGroup, so its
+  // snapshot parentId points at a group we're about to delete. When we reparent
+  // the source back out, the new clones + group must target that original
+  // parent (prev.parentId) — not the stale snapshot value.
+  let parentId = source.parentId
   if (prev) {
     for (const id of prev.cloneIds) {
-      const n = await figma.getNodeByIdAsync(id)
-      if (n && !n.removed) n.remove()
+      await adapter.removeNode(id)
     }
-    const oldGroup = await figma.getNodeByIdAsync(prev.groupId)
-    if (oldGroup && !oldGroup.removed) {
-      const originalParent = await figma.getNodeByIdAsync(prev.parentId)
-      if (originalParent && !originalParent.removed && 'appendChild' in originalParent) {
-        ;(originalParent as ChildrenMixin).appendChild(source)
+    if (await adapter.nodeExists(prev.groupId)) {
+      if (await adapter.nodeExists(prev.parentId)) {
+        await adapter.reparentNode(source.id, prev.parentId)
+        parentId = prev.parentId
       }
-      if (!oldGroup.removed) oldGroup.remove()
+      await adapter.removeNode(prev.groupId)
     }
   }
 
   const compiled = compileConfig(config)
   const factors = compileFactors(config)
-  const parent = source.parent
-  if (!parent) return
+  if (!parentId) return
 
   const n = config.cols * config.rows
   const cloneIds: string[] = []
-  const clones: SceneNode[] = []
 
   for (let i = 1; i < n; i++) {
     const c = i % config.cols
@@ -100,9 +104,11 @@ async function fullRegen(
       c,
       r,
     )
-    const clone = (source as SceneNode & { clone: () => SceneNode }).clone()
-    clone.name = `${source.name}_${i}`
-    if ('insertChild' in parent) (parent as ChildrenMixin).insertChild(0, clone)
+    const cloneId = await adapter.cloneNode(source.id, {
+      parentId,
+      index: 0,
+      name: `${source.name}_${i}`,
+    })
 
     const f = evalFactors(config, factors, scope)
     const rotated = applyAngleToOffset(
@@ -111,7 +117,8 @@ async function fullRegen(
       config.angle,
     )
     await applyToClone({
-      clone,
+      adapter,
+      cloneId,
       source,
       values: {
         x: rotated.x,
@@ -140,26 +147,27 @@ async function fullRegen(
       ]),
     })
 
-    cloneIds.push(clone.id)
-    clones.push(clone)
+    cloneIds.push(cloneId)
   }
 
-  const nodes = [source, ...clones]
-  const group = figma.group(nodes, parent as BaseNode & ChildrenMixin)
-  group.name = 'SwiftLoopGroup'
+  const groupId = await adapter.groupNodes([source.id, ...cloneIds], {
+    parentId,
+    name: 'SwiftLoopGroup',
+  })
 
   store.set({
     originalId: source.id,
-    parentId: parent.id,
+    parentId,
     cloneIds,
-    groupId: group.id,
+    groupId,
   })
 
-  figma.viewport.scrollAndZoomIntoView([group])
+  adapter.scrollIntoView(groupId)
 }
 
 async function inPlaceMutation(
-  source: SceneNode,
+  adapter: HostAdapter,
+  source: NodeSnapshot,
   config: LoopConfig,
   store: LastRunStore,
   diff: DiffResult,
@@ -175,8 +183,7 @@ async function inPlaceMutation(
   for (let i = 1; i < n; i++) {
     const cloneId = prev.cloneIds[i - 1]
     if (!cloneId) continue
-    const clone = await figma.getNodeByIdAsync(cloneId)
-    if (!clone || clone.removed) continue
+    if (!(await adapter.nodeExists(cloneId))) continue
 
     const c = i % config.cols
     const r = Math.floor(i / config.cols)
@@ -198,7 +205,8 @@ async function inPlaceMutation(
       config.angle,
     )
     await applyToClone({
-      clone: clone as SceneNode,
+      adapter,
+      cloneId,
       source,
       values: {
         x: rotated.x,
@@ -240,28 +248,18 @@ function computeInterpFactor(config: LoopConfig, tx: number, ty: number): number
   return tx
 }
 
-export async function revert(_source: SceneNode, store: LastRunStore): Promise<void> {
+export async function revert(adapter: HostAdapter, store: LastRunStore): Promise<void> {
   const prev = store.get()
   if (!prev) return
   for (const id of prev.cloneIds) {
-    const n = await figma.getNodeByIdAsync(id)
-    if (n && !n.removed) n.remove()
+    await adapter.removeNode(id)
   }
   // unwrap the original source out of the SwiftLoopGroup before discarding it
-  const oldGroup = await figma.getNodeByIdAsync(prev.groupId)
-  if (oldGroup && !oldGroup.removed) {
-    const source = await figma.getNodeByIdAsync(prev.originalId)
-    const originalParent = await figma.getNodeByIdAsync(prev.parentId)
-    if (
-      source &&
-      !source.removed &&
-      originalParent &&
-      !originalParent.removed &&
-      'appendChild' in originalParent
-    ) {
-      ;(originalParent as ChildrenMixin).appendChild(source as SceneNode)
+  if (await adapter.nodeExists(prev.groupId)) {
+    if ((await adapter.nodeExists(prev.originalId)) && (await adapter.nodeExists(prev.parentId))) {
+      await adapter.reparentNode(prev.originalId, prev.parentId)
     }
-    if (!oldGroup.removed) oldGroup.remove()
+    await adapter.removeNode(prev.groupId)
   }
   store.clear()
 }

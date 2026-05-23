@@ -7,7 +7,7 @@ import { sampleRamp } from '../shared/color'
 import { DEFAULT_CONFIG } from '../shared/defaults'
 import type { LoopConfig } from '../shared/types'
 import { renderLoop, sourceSize } from './render-loop'
-import { loadShape, type UploadedShape } from './shape'
+import { type UploadedShape, loadShape } from './shape'
 
 const SVG_NS = 'http://www.w3.org/2000/svg'
 
@@ -661,7 +661,10 @@ document.getElementById('clear-all')?.addEventListener('click', () => {
 exportBtn.addEventListener('click', (e) => {
   e.stopPropagation()
   exportMenu.classList.toggle('is-open')
-  exportBtn.setAttribute('aria-expanded', exportMenu.classList.contains('is-open') ? 'true' : 'false')
+  exportBtn.setAttribute(
+    'aria-expanded',
+    exportMenu.classList.contains('is-open') ? 'true' : 'false',
+  )
 })
 document.addEventListener('click', () => {
   exportMenu.classList.remove('is-open')
@@ -695,10 +698,7 @@ stage.addEventListener('drop', async (e) => {
   await addFilesAsLoops(Array.from(files), point)
 })
 
-async function addFilesAsLoops(
-  files: File[],
-  origin?: { x: number; y: number },
-): Promise<void> {
+async function addFilesAsLoops(files: File[], origin?: { x: number; y: number }): Promise<void> {
   let offset = 0
   for (const file of files) {
     const shape = await loadShape(file)
@@ -720,7 +720,11 @@ function buildExportSvg(): { svg: string; width: number; height: number } {
   // Build a fresh SVG sized to the bounding box of all loops, with each
   // loop's clones — but skip the dashed source rects.
   if (loops.length === 0) {
-    return { svg: '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" />', width: 100, height: 100 }
+    return {
+      svg: '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" />',
+      width: 100,
+      height: 100,
+    }
   }
   const bb = loopsLayer.getBBox()
   const pad = 20
@@ -918,10 +922,7 @@ window.addEventListener('keydown', (e: KeyboardEvent) => {
   const target = e.target as HTMLElement | null
   const tag = target?.tagName
   const inEdit =
-    tag === 'INPUT' ||
-    tag === 'TEXTAREA' ||
-    tag === 'SELECT' ||
-    target?.isContentEditable === true
+    tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target?.isContentEditable === true
   if (inEdit) return
 
   if (e.code === 'Space' && !spaceHeld) {

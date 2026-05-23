@@ -81,7 +81,7 @@ export function Section({
         ) : null}
         {!alwaysOpen && (
           <span class={`section-disclosure-caret${open ? ' is-open' : ''}`} aria-hidden="true">
-            <svg viewBox="0 0 10 10" width="10" height="10">
+            <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
               <path
                 d="M3.5 2 L7 5 L3.5 8"
                 fill="none"

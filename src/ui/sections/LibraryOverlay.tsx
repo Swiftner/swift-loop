@@ -92,6 +92,7 @@ export function LibraryOverlay({ open, config, onClose, onApply }: Props) {
   if (!open) return null
 
   return (
+    // biome-ignore lint/a11y/useSemanticElements: deliberate custom overlay; native <dialog> imposes UA border/padding the .library-overlay class doesn't reset.
     <div class="library-overlay" role="dialog" aria-modal="true" aria-labelledby="library-title">
       <header class="library-header">
         <h2 class="library-title" id="library-title">

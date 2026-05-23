@@ -8,7 +8,7 @@ import { applyEasing } from '../plugin/engine/easing'
 import { buildScope } from '../plugin/engine/scope'
 import { sampleRamp } from '../shared/color'
 import type { Color, ColorRamp, LoopConfig } from '../shared/types'
-import { makeSourceRect, type UploadedShape } from './shape'
+import { type UploadedShape, makeSourceRect } from './shape'
 
 const SVG_NS = 'http://www.w3.org/2000/svg'
 const DEFAULT_SOURCE = { w: 48, h: 48 }
@@ -68,9 +68,7 @@ export function renderLoop(opts: RenderLoopOptions): SVGGElement {
 
     const baseEased = applyEasing(config.easing, computeInterp(config, scope.tx, scope.ty))
     const fillFactor = factors.fill ? factors.fill.evaluate(scope, 'fillFactor') : baseEased
-    const strokeFactor = factors.stroke
-      ? factors.stroke.evaluate(scope, 'strokeFactor')
-      : baseEased
+    const strokeFactor = factors.stroke ? factors.stroke.evaluate(scope, 'strokeFactor') : baseEased
     const strokeWeightFactor = factors.strokeWeight
       ? factors.strokeWeight.evaluate(scope, 'strokeWeightFactor')
       : baseEased

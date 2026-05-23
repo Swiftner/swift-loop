@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { rotateAroundCenter } from '../src/plugin/figma/rotate'
+import { rotateAroundCenter } from '../src/plugin/hosts/figma/adapter'
 
 // Minimal stand-in for a Figma SceneNode — only the fields rotateAroundCenter touches.
 interface FakeNode {
@@ -30,44 +30,59 @@ function visualCenter(node: FakeNode): { x: number; y: number } {
   return visualPoint(node, node.width / 2, node.height / 2)
 }
 
+// rotateAroundCenter now takes explicit target top-left (cx, cy) and dimensions
+// instead of reading them off the node — callers pass the pre-rotation top-left
+// they would have set on the node. These wrappers keep the test assertions
+// (visual center preservation) unchanged.
+function rotateInPlace(node: FakeNode, angleDegrees: number): void {
+  rotateAroundCenter(
+    node as unknown as SceneNode,
+    node.x,
+    node.y,
+    angleDegrees,
+    node.width,
+    node.height,
+  )
+}
+
 describe('rotateAroundCenter', () => {
-  it('keeps visual center fixed at 0 degrees', async () => {
+  it('keeps visual center fixed at 0 degrees', () => {
     const node = makeNode()
     const before = visualCenter(node)
-    await rotateAroundCenter(node as unknown as SceneNode, 0)
+    rotateInPlace(node, 0)
     const after = visualCenter(node)
     expect(after.x).toBeCloseTo(before.x, 6)
     expect(after.y).toBeCloseTo(before.y, 6)
   })
 
-  it.each([15, -24, 45, 90, 137, -180])('keeps visual center fixed at %i degrees', async (deg) => {
+  it.each([15, -24, 45, 90, 137, -180])('keeps visual center fixed at %i degrees', (deg) => {
     const node = makeNode()
     const before = visualCenter(node)
-    await rotateAroundCenter(node as unknown as SceneNode, deg)
+    rotateInPlace(node, deg)
     expect(node.rotation).toBe(deg)
     const after = visualCenter(node)
     expect(after.x).toBeCloseTo(before.x, 6)
     expect(after.y).toBeCloseTo(before.y, 6)
   })
 
-  it('keeps visual center fixed for non-square nodes (regression: 15x15 rotation -24)', async () => {
+  it('keeps visual center fixed for non-square nodes (regression: 15x15 rotation -24)', () => {
     const node = makeNode({ width: 80, height: 24 })
     const before = visualCenter(node)
-    await rotateAroundCenter(node as unknown as SceneNode, -24)
+    rotateInPlace(node, -24)
     const after = visualCenter(node)
     expect(after.x).toBeCloseTo(before.x, 6)
     expect(after.y).toBeCloseTo(before.y, 6)
   })
 
-  it('clears prior rotation before applying the new angle', async () => {
+  it('clears prior rotation before applying the new angle', () => {
     const node = makeNode({ rotation: 45 })
-    await rotateAroundCenter(node as unknown as SceneNode, 90)
+    rotateInPlace(node, 90)
     expect(node.rotation).toBe(90)
   })
 
-  it('resets a previously rotated node when angle is 0', async () => {
+  it('resets a previously rotated node when angle is 0', () => {
     const node = makeNode({ rotation: 45 })
-    await rotateAroundCenter(node as unknown as SceneNode, 0)
+    rotateInPlace(node, 0)
     expect(node.rotation).toBe(0)
   })
 })
