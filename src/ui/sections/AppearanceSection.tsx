@@ -76,6 +76,15 @@ export function AppearanceSection({ config, update }: Props) {
         unit="%"
         onChange={(v, commit) => update({ ...config, layerFade: v }, commit)}
       />
+      <SliderRow
+        label="Random"
+        value={config.layerRandom ?? 0}
+        min={0}
+        max={120}
+        step={0.5}
+        unit="px"
+        onChange={(v, commit) => update({ ...config, layerRandom: v }, commit)}
+      />
       <label class="layer-colour-toggle">
         <input
           type="checkbox"

@@ -4,7 +4,7 @@ import type { FormulaProperty, LoopConfig, NumericProperty } from '../../shared/
 import { Section } from '../components/Section'
 import { SliderRow } from '../components/SliderRow'
 import { rewriteTrailingScale } from '../formula-scale'
-import { sliderRangeFor } from '../slider-ranges'
+import { randomMaxFor, sliderRangeFor } from '../slider-ranges'
 
 interface Props {
   id: string
@@ -100,6 +100,14 @@ export function AxisSection({
         onChange={onAngle}
       />
       <SliderRow label="Fade" value={fade} min={0} max={100} step={1} unit="%" onChange={onFade} />
+      <SliderRow
+        label="Random"
+        value={step.random}
+        min={0}
+        max={randomMaxFor(stepKey, sourceSize)}
+        step={0.5}
+        onChange={(v, commit) => update({ ...config, [stepKey]: { ...step, random: v } }, commit)}
+      />
     </Section>
   )
 }

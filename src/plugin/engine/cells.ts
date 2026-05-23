@@ -8,6 +8,7 @@ import type { CompiledFormulas, LoopConfig, Scope } from '../../shared/types'
 import { applyAngleToOffset } from './angle'
 import type { CompiledFactors } from './compile'
 import { applyEasing } from './easing'
+import { rand } from './prng'
 import { buildScope } from './scope'
 
 // Hard cap on cells rendered/cloned in one loop. cols×rows alone tops out at
@@ -86,6 +87,11 @@ export function evaluateCell(i: number, input: EvaluateCellInput): CellValues {
   if (layerStep !== 0) {
     x += l * layerStep * 0.82 // oblique offset, up-and-to-the-right
     y -= l * layerStep * 0.57
+  }
+  const layerRandom = config.layerRandom ?? 0
+  if (layerRandom !== 0) {
+    x += (rand(config.seed, scope.i, 'layerRandomX') - 0.5) * 2 * layerRandom
+    y += (rand(config.seed, scope.i, 'layerRandomY') - 0.5) * 2 * layerRandom
   }
   const rotation =
     compiled.rotation.evaluate(scope, 'rotation') +

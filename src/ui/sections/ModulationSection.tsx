@@ -15,7 +15,7 @@ export function ModulationSection({ config, update, sourceSize }: Props) {
   return (
     <Section id="modulation" title="Modulation" defaultOpen={false}>
       <h3 class="subsection-title">Random ±</h3>
-      {(['x', 'y', 'rotation', 'scaleX', 'scaleY', 'opacity'] as const).map((k) => (
+      {(['rotation', 'scaleX', 'scaleY', 'opacity'] as const).map((k) => (
         <SliderRow
           key={k}
           label={k}

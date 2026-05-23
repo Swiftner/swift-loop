@@ -66,6 +66,7 @@ export interface LoopConfig {
   rowFade?: number // × ty
   layerFade?: number // × tz (back-to-front)
   layerColour?: boolean // sweep the fill/stroke ramp by depth (factor = tz)
+  layerRandom?: number // px of seeded random position jitter per cell
 
   // Base transforms (per-step)
   x: NumericProperty

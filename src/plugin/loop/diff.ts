@@ -49,7 +49,8 @@ export function diffConfig(
     (prev.columnFade ?? 0) !== (next.columnFade ?? 0) ||
     (prev.rowFade ?? 0) !== (next.rowFade ?? 0) ||
     (prev.layerFade ?? 0) !== (next.layerFade ?? 0) ||
-    (prev.layerColour ?? false) !== (next.layerColour ?? false)
+    (prev.layerColour ?? false) !== (next.layerColour ?? false) ||
+    (prev.layerRandom ?? 0) !== (next.layerRandom ?? 0)
   ) {
     return { mode: 'full', dirty: ALL_PROPS }
   }
