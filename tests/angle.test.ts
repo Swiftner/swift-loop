@@ -50,4 +50,41 @@ describe('applyAngleToOffset', () => {
     expect(r.x).toBeCloseTo(3 * s - 4 * s, 6)
     expect(r.y).toBeCloseTo(3 * s + 4 * s, 6)
   })
+
+  describe('angleZ (depth tilt, orthographic projection)', () => {
+    it('is backward compatible: angleZ=0 matches the pure-XY result', () => {
+      for (let i = 1; i <= 6; i++) {
+        const flat = applyAngleToOffset({ x: 30, y: 40 }, i, 17)
+        const withZero = applyAngleToOffset({ x: 30, y: 40 }, i, 17, 0)
+        expect(withZero.x).toBeCloseTo(flat.x, 6)
+        expect(withZero.y).toBeCloseTo(flat.y, 6)
+      }
+    })
+
+    it('leaves x untouched and foreshortens y by cos(angleZ × i)', () => {
+      // angleZ only (no XY): x is unchanged, y scales by cos(angleZ × i).
+      const r = applyAngleToOffset({ x: 10, y: 20 }, 1, 0, 60)
+      expect(r.x).toBeCloseTo(10, 6)
+      expect(r.y).toBeCloseTo(20 * Math.cos((60 * Math.PI) / 180), 6) // 20 × 0.5
+    })
+
+    it('collapses y to 0 when the tilt reaches edge-on (angleZ × i = 90°)', () => {
+      const r = applyAngleToOffset({ x: 10, y: 20 }, 1, 0, 90)
+      expect(r.x).toBeCloseTo(10, 6)
+      expect(r.y).toBeCloseTo(0, 6)
+    })
+
+    it('applies the depth tilt after the in-plane rotation', () => {
+      // Rz(90°) sends (10,0) -> (0,10); then Rx tilt foreshortens that y by cos(60°).
+      const r = applyAngleToOffset({ x: 10, y: 0 }, 1, 90, 60)
+      expect(r.x).toBeCloseTo(0, 6)
+      expect(r.y).toBeCloseTo(10 * Math.cos((60 * Math.PI) / 180), 6) // 5
+    })
+
+    it('returns the origin unchanged regardless of either angle', () => {
+      const r = applyAngleToOffset({ x: 0, y: 0 }, 4, 30, 45)
+      expect(r.x).toBeCloseTo(0, 6)
+      expect(r.y).toBeCloseTo(0, 6)
+    })
+  })
 })

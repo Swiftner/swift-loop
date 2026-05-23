@@ -16,7 +16,13 @@
       "type": "number",
       "minimum": -360,
       "maximum": 360,
-      "description": "Per-cell rotation in degrees applied to the grid offset around the source center. Cell i is rotated by `angle * i`. Use with cols ≥ 2 to trace spirals or swirl a 2D grid."
+      "description": "Per-cell rotation in degrees applied to the grid offset in the screen plane. Cell i is rotated by `angle * i`. Use with cols ≥ 2 to trace spirals or swirl a 2D grid."
+    },
+    "angleZ": {
+      "type": "number",
+      "minimum": -360,
+      "maximum": 360,
+      "description": "Per-cell tilt into depth in degrees, applied after `angle` and orthographically projected to 2D. Cell i is tilted by `angleZ * i`, turning a flat spiral into a cone/helix. 0 = flat."
     },
     "showFirst": {
       "type": "boolean",

@@ -75,13 +75,22 @@ export function IterationsSection({
         onChange={(v, commit) => update({ ...config, rows: Math.max(1, Math.round(v)) }, commit)}
       />
       <SliderRow
-        label="Angle"
+        label="Angle XY"
         value={config.angle}
         min={-180}
         max={180}
         step={0.1}
         unit="°"
         onChange={(v, commit) => update({ ...config, angle: v }, commit)}
+      />
+      <SliderRow
+        label="Angle Z"
+        value={config.angleZ ?? 0}
+        min={-180}
+        max={180}
+        step={0.1}
+        unit="°"
+        onChange={(v, commit) => update({ ...config, angleZ: v }, commit)}
       />
     </Section>
   )

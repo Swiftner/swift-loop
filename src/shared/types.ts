@@ -41,10 +41,18 @@ export interface LoopConfig {
   // Iteration
   cols: number
   rows: number
-  // Degrees of per-cell rotation around the source center, applied to the
-  // grid offset (values.x, values.y) post-formula. Cell i is rotated by
-  // angle * i degrees, so a 1-row line + nonzero angle traces a spiral.
+  // Degrees of per-cell rotation in the screen plane (around the view's Z
+  // axis), applied to the grid offset (values.x, values.y) post-formula. Cell
+  // i is rotated by angle * i degrees, so a 1-row line + nonzero angle traces a
+  // spiral. Surfaced in the UI as "Angle XY".
   angle: number
+  // Degrees of per-cell tilt into depth (rotation about the screen's horizontal
+  // X axis), applied after `angle` and orthographically projected back to 2D.
+  // Cell i is tilted by angleZ * i degrees; the depth component is dropped, so
+  // a flat spiral foreshortens into a cone/helix. 0 = flat (output identical to
+  // angle alone). Surfaced in the UI as "Angle Z". Optional for back-compat
+  // with saved configs and library entries that predate it.
+  angleZ?: number
 
   // Base transforms (per-step)
   x: NumericProperty

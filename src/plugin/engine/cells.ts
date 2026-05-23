@@ -55,6 +55,7 @@ export function evaluateCell(i: number, input: EvaluateCellInput): CellValues {
     { x: compiled.x.evaluate(scope, 'x'), y: compiled.y.evaluate(scope, 'y') },
     scope.i,
     config.angle,
+    config.angleZ ?? 0,
   )
   const baseEased = applyEasing(config.easing, computeInterpFactor(config, scope.tx, scope.ty))
   return {

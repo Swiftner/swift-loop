@@ -22,7 +22,9 @@ The first section. This is where you set the count.
 
 **Rows.** How many rows. 1 to 100. Leave at 1 for linear and radial patterns.
 
-**Angle.** Degrees of per-cell rotation, applied to each clone's grid offset around the source center. Leave at 0 for straight lines and rectangular grids. Bump it 5 to 30 degrees and a line curls into a spiral, a grid swirls. Crank it past 90 to wrap the pattern back around on itself. Think "how much do successive cells lean".
+**Angle XY.** Degrees of per-cell rotation in the screen plane, applied to each clone's grid offset around the source center. Leave at 0 for straight lines and rectangular grids. Bump it 5 to 30 degrees and a line curls into a spiral, a grid swirls. Crank it past 90 to wrap the pattern back around on itself. Think "how much do successive cells lean".
+
+**Angle Z.** Degrees of per-cell tilt into depth, applied after Angle XY. The tool is flat 2D, so there's no real depth axis — instead each clone's offset is tilted toward/away from you and projected back onto the canvas, which foreshortens it. Leave at 0 to stay flat. Dial it up and a flat spiral leans into a cone or helix, a ring squashes into an ellipse seen at an angle. Because it's a projection, the result is still plain 2D positions, so it exports and round-trips like everything else.
 
 If you've applied a library pattern, you'll also see a little pill showing its name. Click it to jump back to the library and pick something else.
 

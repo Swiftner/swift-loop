@@ -47,7 +47,8 @@ You, the LLM reading this, are helping a designer write a new library pattern. Y
 | `author` | recommended | `@handle` form. |
 | `cols` | yes | Integer 1 to 100. The default column count when the pattern loads. |
 | `rows` | yes | Integer 1 to 100. The default row count. Use `1` for linear or radial patterns. |
-| `angle` | optional | Number, -360 to 360. Per-cell rotation in degrees applied to the grid offset around the source center, *after* the formulas compute `x` and `y`. Cell `i` is rotated by `angle * i`. Lets a pattern declare a spiral or swirl without folding the rotation into every formula. Default `0`. See "Using `angle`" below. |
+| `angle` | optional | Number, -360 to 360. Per-cell rotation in degrees applied to the grid offset *in the screen plane*, *after* the formulas compute `x` and `y`. Cell `i` is rotated by `angle * i`. Lets a pattern declare a spiral or swirl without folding the rotation into every formula. Default `0`. See "Using `angle`" below. |
+| `angleZ` | optional | Number, -360 to 360. Per-cell tilt into depth in degrees, applied *after* `angle` and orthographically projected back to 2D (the tool is flat — there is no real depth axis). Cell `i` is tilted by `angleZ * i`, foreshortening its offset; a flat spiral leans into a cone/helix, a ring squashes into an ellipse. Output is still plain 2D positions. Default `0`. |
 | `showFirst` | optional | Defaults to `true`. Set to `false` only for radial or spiral patterns where the `i=0` clone naturally lands away from the origin, and you want the source shape to stay visually centered. See "showFirst" below. |
 | `formulas` | yes | Object. Any subset of `x`, `y`, `rotation`, `scaleX`, `scaleY`, `opacity`. Omit properties that should stay at their default. |
 

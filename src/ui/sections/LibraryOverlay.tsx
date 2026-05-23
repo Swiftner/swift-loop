@@ -35,6 +35,7 @@ function applyEntry(config: LoopConfig, entry: LibraryEntry): LoopConfig {
     cols: entry.cols,
     rows: entry.rows,
     angle: entry.angle ?? 0,
+    angleZ: entry.angleZ ?? 0,
     fxMode: true,
     showFirst: entry.showFirst ?? true,
   }

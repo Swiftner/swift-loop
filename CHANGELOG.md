@@ -2,6 +2,11 @@
 
 All notable changes to Swift Loop. Versions follow SemVer; the [v0.x.y] anchor links to the GitHub release.
 
+## [Unreleased]
+
+### Added
+- **Angle Z (pseudo-3D depth).** The Iterations section now has a second rotation: the old **Angle** is renamed **Angle XY** (the in-plane spiral/swirl), and **Angle Z** tilts each cell's offset into depth. The tool is flat 2D — Figma, Penpot, and SVG have no depth axis — so the tilt is computed in 3D and orthographically projected back to 2D. A flat spiral leans into a cone or helix; a ring squashes into an ellipse seen at an angle. Output stays plain 2D positions, so it exports and round-trips like everything else. Library entries can declare an optional `angleZ`.
+
 ## [v0.2.0] — 2026-05-22
 
 ### Added
