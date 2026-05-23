@@ -46,6 +46,9 @@ export async function startHostLoop(adapter: HostAdapter, bridge: HostBridge): P
   })
 
   bridge.on('loop:revert', async () => {
+    // Match the pre-refactor guard: only revert when a valid source is
+    // selected, so Revert with nothing selected stays a no-op.
+    if (!adapter.getSelectedNode()) return
     await revert(adapter, store)
   })
 

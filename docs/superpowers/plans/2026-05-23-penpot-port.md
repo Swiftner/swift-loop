@@ -219,6 +219,11 @@ So the *real* duplication — the ~80 lines of per-cell math copied between `orc
 
 **Phase 5 — fill-in / polish (mostly absorbed into Phase 4).** Remaining: smoke-test in Penpot and fix whatever the two residual runtime checks turn up; consider theme integration (`penpot.theme` is already passed to the UI URL); hide any UI controls Penpot can't honor (none known yet).
 
+**Code review (post-Phase-4).** A multi-angle review surfaced 13 findings; the clear, low-risk ones are fixed (revert selection-guard regression, Figma rotation-center uses realized size, `scrollIntoView` `.catch`, orchestrator parent-gone bail, and on the Penpot side: reset-rotation-before-position in `setTransform`, undo-block depth counter, stroke-width preserve-or-omit, group reparented under the intended parent, `cloneNode` honors `index`, multi-handler bridge). **Two deliberately deferred to the first real Penpot session:**
+
+- **Boot-message race (`entry.ts`).** The UI only emits after it receives `loop:initial-config`, so if `host-loop` sends boot state before the external `ui.html`/`ui.js` finishes loading, the saved config/selection is dropped and the panel stays on defaults. The correct fix is a UI-ready handshake (UI emits `ui:ready` on mount; `host-loop` holds boot sends until then) — but that touches the shared UI and the *proven* Figma boot path, so it shouldn't be done blind. Verify whether Penpot's `penpot.ui.open` already guarantees load ordering before adding the handshake.
+- **`nodeExists` removed-flag.** Penpot's `Shape` has no `removed`/`isValid` flag, so `getShapeById(id) === null` is the only liveness signal available. Confirm Penpot returns `null` for removed/stale ids (Figma's adapter additionally checks `!node.removed`).
+
 **Phase 6 — polish & ship.** Penpot README section, screenshots, listing submission. Document known degradations (no `commitUndo` coalescing, no `closePlugin`, possibly no `scrollAndZoomIntoView`).
 
 Each phase ends with every previous host's build still green. The contract test suite (`tests/host-adapter-contract.test.ts`) is the safety net — any adapter that fails it doesn't ship.

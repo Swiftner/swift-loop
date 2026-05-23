@@ -10,14 +10,17 @@ import type { HostBridge } from '../host'
 type Envelope = { pluginMessage?: [string, unknown] }
 
 export class PenpotBridge implements HostBridge {
-  private handlers = new Map<string, (payload: unknown) => void>()
+  // Multiple handlers per channel (matches @create-figma-plugin's on()): a
+  // single-slot map would let a second on(channel) silently clobber the first.
+  private handlers = new Map<string, Set<(payload: unknown) => void>>()
 
   constructor(penpot: Penpot) {
     penpot.ui.onMessage<Envelope>((msg) => {
       const pm = msg?.pluginMessage
       if (!Array.isArray(pm)) return
       const [channel, payload] = pm
-      this.handlers.get(channel)?.(payload)
+      const set = this.handlers.get(channel)
+      if (set) for (const h of set) h(payload)
     })
     this.penpot = penpot
   }
@@ -29,7 +32,14 @@ export class PenpotBridge implements HostBridge {
   }
 
   on(channel: string, handler: (payload: unknown) => void): () => void {
-    this.handlers.set(channel, handler)
-    return () => this.handlers.delete(channel)
+    let set = this.handlers.get(channel)
+    if (!set) {
+      set = new Set()
+      this.handlers.set(channel, set)
+    }
+    set.add(handler)
+    return () => {
+      set?.delete(handler)
+    }
   }
 }

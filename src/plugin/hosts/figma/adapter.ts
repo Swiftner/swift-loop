@@ -121,7 +121,11 @@ export class FigmaAdapter implements HostAdapter {
         Math.max(1, t.height),
       )
     }
-    rotateAroundCenter(node as SceneNode, t.x, t.y, t.rotation, t.width, t.height)
+    // Center the rotation on the REALIZED size, not the requested one — a node
+    // that ignores resize (e.g. auto-width TEXT) would otherwise rotate around
+    // the wrong center.
+    const sized = node as SceneNode
+    rotateAroundCenter(sized, t.x, t.y, t.rotation, sized.width, sized.height)
   }
 
   async setOpacity(id: NodeId, opacity01: number): Promise<void> {
@@ -183,11 +187,16 @@ export class FigmaAdapter implements HostAdapter {
 
   scrollIntoView(id: NodeId): void {
     // Fire-and-forget; we don't block the orchestrator on viewport polish.
-    figma.getNodeByIdAsync(id).then((node) => {
-      if (node && !node.removed) {
-        figma.viewport.scrollAndZoomIntoView([node as SceneNode])
-      }
-    })
+    // Swallow rejections — framing is non-essential and must not surface as an
+    // unhandled rejection.
+    figma
+      .getNodeByIdAsync(id)
+      .then((node) => {
+        if (node && !node.removed) {
+          figma.viewport.scrollAndZoomIntoView([node as SceneNode])
+        }
+      })
+      .catch(() => {})
   }
 
   beginUndoBlock(): void {

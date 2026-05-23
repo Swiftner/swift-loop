@@ -67,14 +67,22 @@ async function fullRegen(
   // parent (prev.parentId) — not the stale snapshot value.
   let parentId = source.parentId
   if (prev) {
+    const groupLive = await adapter.nodeExists(prev.groupId)
+    const parentLive = await adapter.nodeExists(prev.parentId)
+    // Edge case: the old group survives but its original parent is gone. The
+    // source still lives inside the group, so removing the group would
+    // cascade-delete the source. Bail without touching anything rather than
+    // destroying the user's work.
+    if (groupLive && !parentLive) return
+
     for (const id of prev.cloneIds) {
       await adapter.removeNode(id)
     }
-    if (await adapter.nodeExists(prev.groupId)) {
-      if (await adapter.nodeExists(prev.parentId)) {
-        await adapter.reparentNode(source.id, prev.parentId)
-        parentId = prev.parentId
-      }
+    if (groupLive) {
+      // parentLive is true here. Reparent the source out of the old group,
+      // then drop the group; the rebuilt loop targets the original parent.
+      await adapter.reparentNode(source.id, prev.parentId)
+      parentId = prev.parentId
       await adapter.removeNode(prev.groupId)
     }
   }
