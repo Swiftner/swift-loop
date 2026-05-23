@@ -8,10 +8,10 @@
   "rows": 5,
   "layers": 5,
   "formulas": {
-    "x": "x = (c - (cols - 1) / 2) * {x:64} + (l - (layers - 1) / 2) * 34",
-    "y": "y = (r - (rows - 1) / 2) * {y:64} - (l - (layers - 1) / 2) * 34",
-    "scaleX": "scaleX = (l - (layers - 1) / 2) * 4 - 8",
-    "scaleY": "scaleY = (l - (layers - 1) / 2) * 4 - 8",
-    "opacity": "opacity = 100 - (layers - 1 - l) * 11"
+    "x": "x = (c - (cols - 1) / 2) * {x:64} + (tz - 0.5) * 170",
+    "y": "y = (r - (rows - 1) / 2) * {y:64} - (tz - 0.5) * 170",
+    "scaleX": "scaleX = (tz - 0.5) * 24",
+    "scaleY": "scaleY = (tz - 0.5) * 24",
+    "opacity": "opacity = 55 + tz * 45"
   }
 }

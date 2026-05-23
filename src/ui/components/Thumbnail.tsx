@@ -29,20 +29,33 @@ function evaluateEntry(entry: LibraryEntry): CellPoint[] {
     compiled[k] = src ? compileFormula(expandPlaceholders(src, k, null), k) : null
   }
   const points: CellPoint[] = []
-  for (let r = 0; r < entry.rows; r++) {
-    for (let c = 0; c < entry.cols; c++) {
-      const scope = buildScope(
-        { cols: entry.cols, rows: entry.rows, seed: THUMB_SEED, sourceWidth: 40, sourceHeight: 40 },
-        c,
-        r,
-      )
-      try {
-        const x = compiled.x ? compiled.x.evaluate(scope, 'x') : 0
-        const y = compiled.y ? compiled.y.evaluate(scope, 'y') : 0
-        const opacity = compiled.opacity ? compiled.opacity.evaluate(scope, 'opacity') / 100 : 0.8
-        points.push({ x, y, opacity: Math.max(0.35, Math.min(1, opacity)) })
-      } catch {
-        // skip malformed cell
+  const layers = entry.layers ?? 1
+  // Iterate all three axes back-to-front so 3D presets (layers > 1) render
+  // their depth in the thumbnail instead of a single flat layer-0 slice.
+  for (let l = 0; l < layers; l++) {
+    for (let r = 0; r < entry.rows; r++) {
+      for (let c = 0; c < entry.cols; c++) {
+        const scope = buildScope(
+          {
+            cols: entry.cols,
+            rows: entry.rows,
+            layers,
+            seed: THUMB_SEED,
+            sourceWidth: 40,
+            sourceHeight: 40,
+          },
+          c,
+          r,
+          l,
+        )
+        try {
+          const x = compiled.x ? compiled.x.evaluate(scope, 'x') : 0
+          const y = compiled.y ? compiled.y.evaluate(scope, 'y') : 0
+          const opacity = compiled.opacity ? compiled.opacity.evaluate(scope, 'opacity') / 100 : 0.8
+          points.push({ x, y, opacity: Math.max(0.35, Math.min(1, opacity)) })
+        } catch {
+          // skip malformed cell
+        }
       }
     }
   }
