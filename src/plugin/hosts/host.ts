@@ -63,7 +63,11 @@ export interface HostAdapter {
 
   // --- viewport / undo ---
   scrollIntoView(id: NodeId): void
-  commitUndoStep(): void
+  // Bracket a committed mutation so it collapses into one host-native undo
+  // step. Figma auto-groups (begin is a no-op, end commits); Penpot opens an
+  // explicit undo block. Only called around committed generates.
+  beginUndoBlock(): void
+  endUndoBlock(): void
 
   // --- persistence ---
   storageGet<T>(key: string): Promise<T | null>

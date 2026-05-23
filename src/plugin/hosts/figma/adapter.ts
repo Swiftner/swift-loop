@@ -190,7 +190,11 @@ export class FigmaAdapter implements HostAdapter {
     })
   }
 
-  commitUndoStep(): void {
+  beginUndoBlock(): void {
+    // Figma auto-groups operations; nothing to open. endUndoBlock commits.
+  }
+
+  endUndoBlock(): void {
     figma.commitUndo()
   }
 

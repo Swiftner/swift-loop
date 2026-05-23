@@ -67,7 +67,8 @@ class FakeTreeAdapter implements HostAdapter {
   }
 
   scrollIntoView(): void {}
-  commitUndoStep(): void {}
+  beginUndoBlock(): void {}
+  endUndoBlock(): void {}
   async storageGet(): Promise<null> {
     return null
   }

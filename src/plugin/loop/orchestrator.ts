@@ -7,16 +7,9 @@ import { applyToClone } from './apply'
 import { type DiffResult, type DirtyProperty, diffConfig } from './diff'
 import type { LastRunStore } from './state'
 
-const SUPPORTED_TYPES = [
-  'VECTOR',
-  'STAR',
-  'LINE',
-  'ELLIPSE',
-  'POLYGON',
-  'RECTANGLE',
-  'TEXT',
-  'GROUP',
-]
+// Which node types can be looped is the adapter's call — `getSelectedNode`
+// only ever hands back a supported selection (each host has its own type
+// vocabulary). The orchestrator stays host-neutral and trusts the snapshot.
 
 interface GenerateInput {
   adapter: HostAdapter
@@ -29,7 +22,6 @@ interface GenerateInput {
 
 export async function generate(input: GenerateInput): Promise<void> {
   const { adapter, source, config, previousConfig, store, commit } = input
-  if (!SUPPORTED_TYPES.includes(source.type)) return
 
   const prevRecord = store.get()
   const diff = diffConfig(
@@ -45,13 +37,19 @@ export async function generate(input: GenerateInput): Promise<void> {
 
   if (diff.mode === 'noop') return
 
-  if (diff.mode === 'full') {
-    await fullRegen(adapter, source, config, store)
-  } else {
-    await inPlaceMutation(adapter, source, config, store, diff)
+  // Bracket the committed mutation so it's one undo step. The finally guarantees
+  // the block closes even if a mutation throws (a dangling block would wedge
+  // Penpot's history).
+  if (commit) adapter.beginUndoBlock()
+  try {
+    if (diff.mode === 'full') {
+      await fullRegen(adapter, source, config, store)
+    } else {
+      await inPlaceMutation(adapter, source, config, store, diff)
+    }
+  } finally {
+    if (commit) adapter.endUndoBlock()
   }
-
-  if (commit) adapter.commitUndoStep()
 }
 
 async function fullRegen(

@@ -15,6 +15,7 @@
     "lint:fix": "biome check --write src tests",
     "build:preview": "bun build src/preview/host.ts --outfile=build/preview.js --target=browser",
     "watch:preview": "bun build src/preview/host.ts --outfile=build/preview.js --target=browser --watch",
+    "build:penpot": "bun run build && node scripts/build-penpot.mjs",
     "dev": "bun run build && bun run build:preview && bunx --bun serve -l 4173 .",
     "package": "bash scripts/package.sh"
   },
@@ -24,19 +25,22 @@
     "preact": "^10.22.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.9.0",
     "@create-figma-plugin/build": "^4.0.1",
     "@create-figma-plugin/tsconfig": "^4.0.1",
     "@figma/plugin-typings": "^1.103.0",
-    "@biomejs/biome": "^1.9.0",
+    "@penpot/plugin-types": "^1.4.2",
+    "@types/node": "^22.0.0",
     "typescript": "^5.6.0",
-    "vitest": "^2.1.0",
-    "@types/node": "^22.0.0"
+    "vitest": "^2.1.0"
   },
   "figma-plugin": {
     "id": "swift-loop-dev",
     "editorType": ["figma", "figjam"],
     "documentAccess": "dynamic-page",
-    "networkAccess": { "allowedDomains": ["none"] },
+    "networkAccess": {
+      "allowedDomains": ["none"]
+    },
     "name": "Swift Loop",
     "main": "src/main.ts",
     "ui": "src/ui.tsx"
