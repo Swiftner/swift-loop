@@ -20,9 +20,9 @@ A **live preview** that re-renders as you drag, so you're not stuck in a "Genera
 
 **Grids, not just chains.** Set `cols × rows` and watch your shape tile.
 
-**Spirals without a math degree.** A single **Angle** slider curls a line into a spiral or swirls a grid, no formula required.
+**Spirals without a math degree.** A **Spiral** ramp curls a line into a spiral or swirls a grid, no formula required — and because it's a ramp you can make the curl tighten along the loop.
 
-**A formula library** with 25 patterns to start from, browsable right in the UI.
+**A formula library** with 33 patterns to start from, browsable right in the UI.
 
 **Custom formulas** for when a slider won't cut it. Drop into `fx` mode and write the math yourself.
 
@@ -80,9 +80,9 @@ When you're happy, click **Generate** to commit it to the canvas. Undo always wo
 
 ## The Library
 
-25 patterns ship with the plugin:
+33 patterns ship with the plugin:
 
-Brick, Checker, Comet, Confetti, Curl, Damped Wave, Diamond, Fountain, Grid, Halftone, Heart, Hex Tile, Lissajous, Mandala, Phyllotaxis, Pinwheel, Polar Grid, Radial Burst, Ribbon, Ripple, Rose, Spiral, Starburst, Vortex, Wave.
+Brick, Checker, Comet, Concentric Squares, Confetti, Cube, Curl, Cylinder, Damped Wave, Diamond, Fountain, Grid, Halftone, Heart, Helix, Hex Tile, Lissajous, Mandala, Phyllotaxis, Pinwheel, Polar Grid, Radial Burst, Ribbon, Ripple, Rose, Sphere, Spiral, Square Spiral, Starburst, Torus, Truchet, Vortex, Wave.
 
 Each one is a tiny JSON file in [`library/`](./library) with the formulas inline. No code, no rebuild, just the math. If you want to add your own, it's one file and one PR. See [CONTRIBUTING.md](./CONTRIBUTING.md) for the schema.
 

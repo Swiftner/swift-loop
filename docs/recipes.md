@@ -8,11 +8,11 @@ Useful for ghosted UI states, breadcrumbs, motion-trail effects.
 
 Start a row of 12. Set Cols to 12, Rows to 1.
 
-Transform: X = 32, all others 0.
+Column: X step = 32, all others 0.
 
-Appearance: Opacity start 100, end 0. Easing `easeOut`.
+Appearance: drag the **Opacity** ramp's right-hand stop down to 0 (the left stop stays at 100). For a softer trail-off, press the track to add a middle stop and curve it.
 
-That's it. The trick is the start/end opacity.
+That's it. The trick is the opacity ramp fading along the row.
 
 ## A pulsing circle of dots
 
@@ -28,9 +28,9 @@ Optional: open Modulation and set the Scale wave to amplitude 0.3, frequency 1. 
 
 Looks hand-placed without being hand-placed.
 
-Start with a plain grid. Cols 8, Rows 8, X = 30, Y = 30.
+Start with a plain grid. Cols 8, Rows 8, X step = 30, Y step = 30.
 
-On the Rotation slider, set the random (`±`) to 30.
+Open **Modulation** and raise the **Rotation** random ramp to 30.
 
 Reroll the seed until you find a layout you like. Save snapshots as you go.
 
@@ -40,13 +40,13 @@ You just want a spiral, you don't want to type math.
 
 Cols 40, Rows 1.
 
-Transform: X = 14, all others 0.
+Column: X step = 14, all others 0.
 
-In Iterations, drag the **Angle** slider up from 0. At 18 degrees the line curls into a tidy spiral; bigger numbers tighten it, smaller ones loosen it.
+In **Appearance**, raise the **Spiral** ramp from 0. Around 18 degrees the line curls into a tidy spiral; bigger tightens it, smaller loosens it. Because it's a ramp, you can start small and end large to make the curl tighten as it goes.
 
-Optional: set Rotation start 0, end 360 so each cell also turns as it travels.
+Optional: drag the **Rotation** ramp's right stop to 360 so each cell also turns as it travels.
 
-That's it. The angle slider is the whole trick.
+That's it. The Spiral ramp is the whole trick.
 
 ## A spiral of shrinking shapes
 
@@ -58,7 +58,7 @@ Cols 80, Rows 1.
 
 Tweak the `{x:N}` and `{y:N}` placeholders in the spiral formula to control radius growth.
 
-In Transform, set Scale X and Scale Y start 1, end 0 with `easeIn` easing.
+In **Appearance**, drag the **Size X** and **Size Y** ramps so they start near 0 and fall to a strong negative value at the right — the shapes shrink as they spiral in. Add a middle stop and pull it down for an `easeIn`-style accelerating shrink.
 
 ## A wave of text
 
@@ -82,7 +82,7 @@ Apply **Polar Grid**.
 
 Cols controls spokes, Rows controls rings. Try 24 cols, 8 rows.
 
-Optional: in Appearance, fade opacity from 100 to 30 with `easeOut` for a "signal weakens at the edges" feel.
+Optional: in Appearance, drag the **Opacity** ramp's right stop down to 30 (curve it with a middle stop) for a "signal weakens at the edges" feel.
 
 ## An organic scatter (no chaos, but no grid)
 
@@ -102,7 +102,7 @@ Start with a small dot (a 4px circle).
 
 Apply **Confetti** for randomness on position.
 
-In Transform, set Scale X/Y random to 0.5 so dots vary in size.
+In **Modulation**, raise the **Size X** and **Size Y** random ramps to ~0.5 so dots vary in size.
 
 Boost the X and Y range inside the formula if you want a wider field.
 
@@ -110,7 +110,7 @@ Boost the X and Y range inside the formula if you want a wider field.
 
 Apply any grid pattern (Grid, Halftone, Hex Tile).
 
-In Appearance, click the Fill swatch. Pick two colors. The fill now interpolates from color 1 to color 2 across the loop.
+In Appearance, click the **Fill** strip to drop a colour stop, then add a second and recolour it. The fill now interpolates from the first colour to the second across the loop.
 
 For a less linear feel, switch easing to `ease` and try `easeIn` versus `easeOut`.
 

@@ -20,9 +20,11 @@ Try this: apply a plain 1x20 row, set X = 30, then set Rotation wave amplitude t
 
 ### Randomness
 
-Every Transform property (X, Y, Rotation, Scale X, Scale Y) has a small **± random** input. Set it above 0 to add jitter to that property on every clone.
+Randomness is a **ramp** too — a curve you drag, sampled along the loop, where the value is the ± jitter amount. A flat line means even jitter everywhere; a rising line means the loop gets noisier toward the end.
 
-So X = 30 with a random of 10 means every clone is offset by 30 plus or minus 10 pixels, randomly. The seed controls "which random." Same seed always gives the same arrangement.
+Position jitter lives in the **Column / Row / Layer** sections as their **Random** ramp. Per-property jitter (Rotation, Size X, Size Y, Opacity) lives in the **Modulation** section under **Random ±**.
+
+So a flat Column Random of 10 means every clone is offset by ±10 pixels horizontally. The seed controls "which random." Same seed always gives the same arrangement.
 
 Bigger random equals more chaos. Scrub the seed (in the History section) to get a fresh roll.
 
@@ -44,7 +46,7 @@ X = 30, Cols 20, Rotation wave amplitude 5, frequency 3.
 
 ### Organic grid
 
-8x8 grid with X = 30, Y = 30, and random on each of X, Y, Rotation set to 4. Looks like a hand-drawn paper texture.
+8x8 grid with X step = 30, Y step = 30, the Column and Row Random ramps set to 4 (position jitter), and the Modulation Rotation random set to 4. Looks like a hand-drawn paper texture.
 
 ### Pulsing radial
 

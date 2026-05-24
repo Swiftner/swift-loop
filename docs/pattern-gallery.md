@@ -1,8 +1,8 @@
 # Pattern gallery
 
-The 25 patterns that ship with Swift Loop, with what they look like and when to reach for them. Patterns are grouped roughly by feel, not by alphabetical order, because that's actually useful.
+The 33 patterns that ship with Swift Loop, with what they look like and when to reach for them. Patterns are grouped roughly by feel, not by alphabetical order, because that's actually useful.
 
-A few of the radial patterns now use the **Angle** field instead of `cos`/`sin` in their formulas — same look, simpler math, and you can scrub the Angle slider after applying them.
+A few of the radial patterns lean on the **Spiral** control (in Appearance) instead of `cos`/`sin` in their formulas — same look, simpler math, and you can scrub the Spiral ramp after applying them.
 
 If you want to see them live, open the plugin and click through the Library. There are thumbnails. It's faster than reading.
 
@@ -28,7 +28,7 @@ Things that arrange themselves around a point.
 
 **Pinwheel.** A radial arrangement where each cell is also rotated, giving it spin.
 
-**Curl.** A straight line curled into a spiral via per-cell angle. Shows what the Angle slider does on its own. Scrub Angle from 0 upward and watch the line bend.
+**Curl.** A straight line curled into a spiral via per-cell lean. Shows what the Spiral ramp does on its own. Scrub Spiral from 0 upward and watch the line bend.
 
 **Vortex.** Tight inward spiral with shapes shrinking and fading toward the center. The most dramatic of the spiral family.
 

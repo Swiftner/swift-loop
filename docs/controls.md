@@ -38,11 +38,11 @@ Rotation and size used to live here as per-step sliders. They now live in **Appe
 
 Where things stop being grids and start being interesting. See [Modulation](./modulation.md) for the full story.
 
-**Rotation wave.** Adds a sinusoidal jiggle to rotation. Three knobs: amplitude (how wide), frequency (how many waves across the loop), phase (where the wave starts).
+**Random ±.** A ramp per property — Rotation, Size X, Size Y, Opacity — sampled along the loop. Raise it above 0 to add seeded per-clone jitter to that property; a flat line means even jitter everywhere, a rising line means more jitter toward the end. (Position jitter lives in the Column / Row / Layer sections as their **Random** ramp.)
 
-**Scale wave.** Same as above but for scale.
+**Sinusoidal: Rotation.** A sine wave on rotation. Three knobs: amplitude (how wide), frequency (how many waves across the loop), phase (where the wave starts).
 
-**Random on each property.** Every Transform slider also has a `±` random control. Set it above 0 to introduce per-clone jitter on that property.
+**Sinusoidal: Scale.** Same, for size.
 
 ## Appearance
 

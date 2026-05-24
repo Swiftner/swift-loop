@@ -30,7 +30,7 @@ The plugin window opens, and you'll see your shape sitting in the preview area o
 
 ## Drag a slider
 
-Look at the **Transform** section. There's an `X` and a `Y` slider, both showing `60`. Drag `X`. Watch the preview.
+Look at the **Column** section. There's an `X step` showing `60` (and a matching `Y step` in **Row**). Drag `X step`. Watch the preview.
 
 You should see 100 copies of your shape arranged in a 10x10 grid, each one 60 pixels further along the X axis than the last.
 
@@ -44,7 +44,7 @@ This is the fastest way to learn what's possible. Click through the presets. Rea
 
 ## Try the Library
 
-Below Presets, you'll find the **Library**. 25 patterns by name. Click **Phyllotaxis** and you should see a sunflower. Click **Halftone** and you'll get a dot pattern that fades from the center.
+Below Presets, you'll find the **Library**. 33 patterns by name. Click **Phyllotaxis** and you should see a sunflower. Click **Halftone** and you'll get a dot pattern that fades from the center.
 
 Library patterns are like presets, but they use formulas under the hood. Which means they can do things sliders can't, like spirals and waves and golden-angle phyllotaxis.
 

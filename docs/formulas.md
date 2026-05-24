@@ -6,9 +6,9 @@ That's what `fx` mode is for. And honestly? If you've ever written a CSS animati
 
 ## Turning it on
 
-Top-right of the plugin UI. There's a little `fx` pill. Click it.
+Every Appearance row — and the colour gradients, and the X / Y step fields in Column and Row — has its own little `fx` button. Click it and that property's curve is replaced by a text field where the formula lives.
 
-Every property in Transform and Appearance now shows a text field instead of a slider. That's where the formula lives.
+Each property is independent: you can drive Rotation with a formula while Size stays a hand-drawn curve. The curve isn't thrown away either — clear the formula and your stops come right back.
 
 ## The shape of a formula
 

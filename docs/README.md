@@ -12,7 +12,7 @@ If this is your first time:
 
 ## Make things
 
-[Pattern gallery](./pattern-gallery.md). All 25 built-in patterns, with what they look like and when to reach for them.
+[Pattern gallery](./pattern-gallery.md). All 33 built-in patterns, with what they look like and when to reach for them.
 
 [Recipe cookbook](./recipes.md). "I want to make X" with step-by-step settings.
 

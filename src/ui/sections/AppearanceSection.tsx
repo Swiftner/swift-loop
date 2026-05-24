@@ -25,22 +25,10 @@ export function AppearanceSection({ config, update, sourceSize }: Props) {
   const setRamp = (key: RampKey) => (next: NumericRamp, commit: boolean) =>
     update({ ...config, [key]: { ...config[key], ramp: next } }, commit)
 
-  // fx: an empty formula clears back to the ramp (unlocked:false); any text
-  // takes over the value. The ramp is left untouched so toggling loses nothing.
-  const setFormula = (key: RampKey) => (text: string) => {
-    const p = config[key] as NumericProperty
-    const trimmed = text.trim()
-    update(
-      {
-        ...config,
-        [key]:
-          trimmed === ''
-            ? { ...p, unlocked: false, formula: null }
-            : { ...p, unlocked: true, formula: text },
-      },
-      false,
-    )
-  }
+  // fx: an empty formula clears back to the ramp/stops; any text takes over the
+  // value. The ramp/stops are left untouched so toggling fx loses nothing.
+  const setFormula = (key: RampKey | 'fill' | 'stroke') => (text: string) =>
+    update({ ...config, [key]: withFormula(config[key], text) }, false)
 
   const rampRow = (
     key: RampKey,
@@ -70,6 +58,19 @@ export function AppearanceSection({ config, update, sourceSize }: Props) {
       />
     )
   }
+
+  // Fill / Stroke colour gradient: stops define the colours, the fx formula
+  // returns the 0..1 position to sample along them (default = loop progress).
+  const colorRow = (key: 'fill' | 'stroke', label: string) => (
+    <GradientRampEditor
+      label={label}
+      ramp={config[key]}
+      onChange={(next, commit) => update({ ...config, [key]: next }, commit)}
+      formulaActive={!!config[key].unlocked}
+      formula={factorForColorStop(config, config[key])}
+      onFormulaChange={setFormula(key)}
+    />
+  )
 
   return (
     <Section
@@ -116,53 +117,26 @@ export function AppearanceSection({ config, update, sourceSize }: Props) {
       })}
       {rampRow('opacity', 'Opacity', { min: 0, max: 100, step: 1 }, { unit: '%' })}
 
-      {/* Fill */}
-      <GradientRampEditor
-        label="Fill"
-        ramp={config.fill}
-        onChange={(next, commit) => update({ ...config, fill: next }, commit)}
-        formulaActive={!!config.fill.unlocked}
-        formula={factorForColorStop(config, config.fill)}
-        onFormulaChange={(text) => {
-          const trimmed = text.trim()
-          update(
-            {
-              ...config,
-              fill:
-                trimmed === ''
-                  ? { ...config.fill, unlocked: false, formula: null }
-                  : { ...config.fill, unlocked: true, formula: text },
-            },
-            false,
-          )
-        }}
-      />
-
-      {/* Stroke */}
-      <GradientRampEditor
-        label="Stroke"
-        ramp={config.stroke}
-        onChange={(next, commit) => update({ ...config, stroke: next }, commit)}
-        formulaActive={!!config.stroke.unlocked}
-        formula={factorForColorStop(config, config.stroke)}
-        onFormulaChange={(text) => {
-          const trimmed = text.trim()
-          update(
-            {
-              ...config,
-              stroke:
-                trimmed === ''
-                  ? { ...config.stroke, unlocked: false, formula: null }
-                  : { ...config.stroke, unlocked: true, formula: text },
-            },
-            false,
-          )
-        }}
-      />
+      {colorRow('fill', 'Fill')}
+      {colorRow('stroke', 'Stroke')}
 
       {rampRow('strokeWeight', 'Stroke width', { min: 0, max: 50, step: 0.5 }, { decimals: 1 })}
     </Section>
   )
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+// Toggle a property/ramp between its sugar (stops) and an fx formula: empty text
+// clears back to the sugar (unlocked:false), any text takes over. Shared by the
+// numeric ramps and the colour gradients, which carry the same unlocked/formula
+// pair — the stops are left untouched so toggling fx never drops them.
+function withFormula<T extends { unlocked?: boolean; formula?: string | null }>(
+  obj: T,
+  text: string,
+): T {
+  if (text.trim() === '') return { ...obj, unlocked: false, formula: null }
+  return { ...obj, unlocked: true, formula: text }
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
