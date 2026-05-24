@@ -75,9 +75,6 @@ class FakeTreeAdapter implements HostAdapter {
     return null
   }
   async storageSet(): Promise<void> {}
-  async exportSvg(): Promise<{ bytes: Uint8Array; name: string }> {
-    return { bytes: new Uint8Array(), name: 'x' }
-  }
   resizePanel(): void {}
   closePlugin(): void {}
 }

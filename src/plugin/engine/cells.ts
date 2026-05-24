@@ -4,7 +4,8 @@
 // for one cell of a loop. Consumers decide what to do with them (mutate a
 // Figma node, build an SVG element, etc.).
 
-import type { CompiledFormulas, LoopConfig, Scope } from '../../shared/types'
+import { sampleNumericRamp } from '../../shared/numeric-ramp'
+import type { CompiledFormulas, LoopConfig, NumericRamp, Scope } from '../../shared/types'
 import { applyAngleToOffset } from './angle'
 import type { CompiledFactors } from './compile'
 import { applyEasing } from './easing'
@@ -114,21 +115,35 @@ export function evaluateCell(i: number, input: EvaluateCellInput): CellValues {
     x += l * layerStep * Math.cos(dir)
     y -= l * layerStep * Math.sin(dir) // screen y is down, so subtract to go up
   }
-  const layerRandom = config.layerRandom ?? 0
+  // Seeded ± position jitter, amount sampled along each axis. Column jitters x,
+  // Row jitters y, Layer jitters both — matching the pre-ramp behavior.
+  const colRandom = sampleNumericRamp(config.columnRandom, scope.tx)
+  const rowRandom = sampleNumericRamp(config.rowRandom, scope.ty)
+  const layerRandom = sampleNumericRamp(config.layerRandom, scope.tz)
+  if (colRandom !== 0) x += (rand(config.seed, scope.i, 'colRandomX') - 0.5) * 2 * colRandom
+  if (rowRandom !== 0) y += (rand(config.seed, scope.i, 'rowRandomY') - 0.5) * 2 * rowRandom
   if (layerRandom !== 0) {
     x += (rand(config.seed, scope.i, 'layerRandomX') - 0.5) * 2 * layerRandom
     y += (rand(config.seed, scope.i, 'layerRandomY') - 0.5) * 2 * layerRandom
   }
+  // Modulation random: seeded ± jitter per property, amount sampled along the
+  // overall loop progress (t). Added on top of the evaluated value.
+  const modJitter = (ramp: NumericRamp | undefined, key: string): number => {
+    const amt = sampleNumericRamp(ramp, scope.t)
+    return amt === 0 ? 0 : (rand(config.seed, scope.i, key) - 0.5) * 2 * amt
+  }
   const rotation =
     compiled.rotation.evaluate(scope, 'rotation') +
-    c * (config.columnAngle ?? 0) +
-    r * (config.rowAngle ?? 0) +
-    l * (config.layerAngle ?? 0)
+    sampleNumericRamp(config.columnAngle, scope.tx) +
+    sampleNumericRamp(config.rowAngle, scope.ty) +
+    sampleNumericRamp(config.layerAngle, scope.tz) +
+    modJitter(config.rotationRandom, 'rotationRandom')
   const opacity =
     compiled.opacity.evaluate(scope, 'opacity') -
-    scope.tx * (config.columnFade ?? 0) -
-    scope.ty * (config.rowFade ?? 0) -
-    scope.tz * (config.layerFade ?? 0)
+    sampleNumericRamp(config.columnFade, scope.tx) -
+    sampleNumericRamp(config.rowFade, scope.ty) -
+    sampleNumericRamp(config.layerFade, scope.tz) +
+    modJitter(config.opacityRandom, 'opacityRandom')
   const colourFactor = config.layerColour ? scope.tz : baseEased
 
   // Per-axis Scale: a uniform size change ramping along each axis (like Fade,
@@ -136,16 +151,18 @@ export function evaluateCell(i: number, input: EvaluateCellInput): CellValues {
   // end can vanish but not flip inside-out.
   const scaleMul = Math.max(
     0,
-    (1 + scope.tx * ((config.columnScale ?? 0) / 100)) *
-      (1 + scope.ty * ((config.rowScale ?? 0) / 100)) *
-      (1 + scope.tz * ((config.layerScale ?? 0) / 100)),
+    (1 + sampleNumericRamp(config.columnScale, scope.tx) / 100) *
+      (1 + sampleNumericRamp(config.rowScale, scope.ty) / 100) *
+      (1 + sampleNumericRamp(config.layerScale, scope.tz) / 100),
   )
   // scaleX/scaleY are size *deltas* added to the source size downstream
   // (renderedW = sourceWidth + scaleX). So fold the per-axis multiplier through
   // the whole rendered size — this works even when the base delta is 0, and at
   // mul=1 it collapses back to exactly the base delta (no change to old configs).
-  const baseScaleX = compiled.scaleX.evaluate(scope, 'scaleX')
-  const baseScaleY = compiled.scaleY.evaluate(scope, 'scaleY')
+  const baseScaleX =
+    compiled.scaleX.evaluate(scope, 'scaleX') + modJitter(config.scaleXRandom, 'scaleXRandom')
+  const baseScaleY =
+    compiled.scaleY.evaluate(scope, 'scaleY') + modJitter(config.scaleYRandom, 'scaleYRandom')
 
   return {
     i,

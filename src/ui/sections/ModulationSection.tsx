@@ -1,4 +1,5 @@
 import type { LoopConfig } from '../../shared/types'
+import { NumericRampRow } from '../components/NumericRampRow'
 import { Section } from '../components/Section'
 import { SliderRow } from '../components/SliderRow'
 import { randomMaxFor, sinusoidalAmplitudeMaxFor } from '../slider-ranges'
@@ -9,13 +10,14 @@ interface Props {
   sourceSize: { width: number; height: number } | null
 }
 
-// Human labels matching the Appearance section (scaleX/scaleY are "Size X/Y").
-const RANDOM_LABELS = {
-  rotation: 'Rotation',
-  scaleX: 'Size X',
-  scaleY: 'Size Y',
-  opacity: 'Opacity',
-} as const
+// Per-property random jitter, now a ramp sampled along the loop. `prop` keys the
+// slider range; `key` is the ramp field. Labels match the Appearance section.
+const RANDOM_ROWS = [
+  { prop: 'rotation', key: 'rotationRandom', label: 'Rotation', unit: '°' },
+  { prop: 'scaleX', key: 'scaleXRandom', label: 'Size X', unit: 'px' },
+  { prop: 'scaleY', key: 'scaleYRandom', label: 'Size Y', unit: 'px' },
+  { prop: 'opacity', key: 'opacityRandom', label: 'Opacity', unit: '%' },
+] as const
 
 export function ModulationSection({ config, update, sourceSize }: Props) {
   const rotAmpMax = sinusoidalAmplitudeMaxFor('rotation', sourceSize)
@@ -28,15 +30,17 @@ export function ModulationSection({ config, update, sourceSize }: Props) {
       defaultOpen={false}
     >
       <h3 class="subsection-title">Random ±</h3>
-      {(['rotation', 'scaleX', 'scaleY', 'opacity'] as const).map((k) => (
-        <SliderRow
-          key={k}
-          label={RANDOM_LABELS[k]}
-          value={config[k].random}
+      {RANDOM_ROWS.map(({ prop, key, label, unit }) => (
+        <NumericRampRow
+          key={key}
+          label={label}
+          ramp={config[key]}
           min={0}
-          max={randomMaxFor(k, sourceSize)}
+          max={randomMaxFor(prop, sourceSize)}
           step={0.5}
-          onChange={(v, commit) => update({ ...config, [k]: { ...config[k], random: v } }, commit)}
+          decimals={1}
+          unit={unit}
+          onChange={(next, commit) => update({ ...config, [key]: next }, commit)}
         />
       ))}
       <h3 class="subsection-title">Sinusoidal: Rotation</h3>

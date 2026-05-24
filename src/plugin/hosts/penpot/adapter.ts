@@ -16,7 +16,6 @@ import type {
   HostAdapter,
   NodeId,
   NodeSnapshot,
-  SvgExportResult,
   TransformPatch,
 } from '../host'
 
@@ -49,11 +48,11 @@ function rgbToHex(c: ColorRGB): string {
 
 export class PenpotAdapter implements HostAdapter {
   // Penpot's reactive document + WASM renderer can't take a full regenerate per
-  // drag frame, so regenerate on commit only (see host-loop). The cell ceiling
-  // is a crash guard for the render engine — conservative; tune against real
-  // Penpot.
+  // drag frame, so regenerate on commit only (see host-loop). And even one
+  // commit storms React #185 past a few hundred nodes (~290 confirmed broken),
+  // so cap hard: a 10×10 grid is the comfortable "small loops" ceiling here.
   readonly liveUpdates = false
-  readonly maxCells = 1000
+  readonly maxCells = 100
 
   // undoBlockBegin returns the wrapper `Symbol` type; capture it via ReturnType
   // so we don't hand-write the banned identifier.
@@ -261,15 +260,6 @@ export class PenpotAdapter implements HostAdapter {
 
   async storageSet<T>(key: string, value: T): Promise<void> {
     this.penpot.localStorage?.setItem(key, JSON.stringify(value))
-  }
-
-  // --- export --------------------------------------------------------------
-
-  async exportSvg(id: NodeId): Promise<SvgExportResult> {
-    const shape = this.getShape(id)
-    if (!shape) throw new Error(`exportSvg: shape ${id} not found`)
-    const bytes = await shape.export({ type: 'svg' })
-    return { bytes, name: shape.name }
   }
 
   // --- UI panel ------------------------------------------------------------

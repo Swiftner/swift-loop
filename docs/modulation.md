@@ -24,7 +24,7 @@ Every Transform property (X, Y, Rotation, Scale X, Scale Y) has a small **± ran
 
 So X = 30 with a random of 10 means every clone is offset by 30 plus or minus 10 pixels, randomly. The seed controls "which random." Same seed always gives the same arrangement.
 
-Bigger random equals more chaos. Reroll the seed (top bar) to get a fresh roll.
+Bigger random equals more chaos. Scrub the seed (in the History section) to get a fresh roll.
 
 ## When to reach for which
 
@@ -60,4 +60,4 @@ Randomness happens **after** easing is applied, so a randomized opacity fade is 
 
 ## Tip
 
-When you're modulating something, scrub the **seed** in the top bar. Watch the loop reconfigure. Some seeds will be perfect. Stop on the one you love and click Generate.
+When you're modulating something, scrub the **seed** in the History section. Watch the loop reconfigure. Some seeds will be perfect. Stop on the one you love and click Generate.

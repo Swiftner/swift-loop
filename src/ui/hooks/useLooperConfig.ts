@@ -2,6 +2,7 @@ import { emit, on } from '@create-figma-plugin/utilities'
 // src/ui/hooks/useLooperConfig.ts
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
 import { DEFAULT_CONFIG } from '../../shared/defaults'
+import { normalizeConfig } from '../../shared/migrate'
 import type { LoopConfig } from '../../shared/types'
 
 const HISTORY_LIMIT = 50
@@ -27,10 +28,12 @@ export function useLooperConfig() {
 
   useEffect(() => {
     return on('loop:initial-config', (payload: { config: LoopConfig | null }) => {
-      const initial = payload.config ?? DEFAULT_CONFIG
+      // Upgrade a persisted config (legacy scalar Twist/Scale/Fade, old color
+      // stops) to the current shape before it becomes editable state.
+      const initial = payload.config ? normalizeConfig(payload.config) : DEFAULT_CONFIG
       if (payload.config) {
-        setConfig(payload.config)
-        lastCommitted.current = payload.config
+        setConfig(initial)
+        lastCommitted.current = initial
         undoStack.current = []
         redoStack.current = []
       }

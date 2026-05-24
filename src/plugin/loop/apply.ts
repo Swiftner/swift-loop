@@ -53,17 +53,23 @@ export async function applyToClone(input: ApplyInput): Promise<void> {
     })
   }
 
+  // Skip no-op writes. Each one is a reactive host mutation — Penpot trips
+  // React #185 under hundreds of them — and a fully-opaque clone or an empty
+  // fill/stroke ramp should just inherit the source (which also matches what
+  // the preview renders). So a plain grid is now ~2 mutations/clone, not ~6.
   if (dirty.has('opacity')) {
-    await adapter.setOpacity(cloneId, Math.max(0, Math.min(1, values.opacity / 100)))
+    const o = Math.max(0, Math.min(1, values.opacity / 100))
+    if (o < 1) await adapter.setOpacity(cloneId, o)
   }
-
   if (dirty.has('fill')) {
-    await adapter.setSolidFill(cloneId, fillColorAt(fill, fillFactor))
+    const c = fillColorAt(fill, fillFactor)
+    if (c) await adapter.setSolidFill(cloneId, c)
   }
-  if (dirty.has('stroke')) {
-    await adapter.setSolidStroke(cloneId, fillColorAt(stroke, strokeFactor))
+  const strokeColor = fillColorAt(stroke, strokeFactor)
+  if (dirty.has('stroke') && strokeColor) {
+    await adapter.setSolidStroke(cloneId, strokeColor)
   }
-  if (dirty.has('strokeWeight')) {
+  if (dirty.has('strokeWeight') && strokeColor) {
     const start = strokeWeight.value
     const end = strokeWeight.end ?? start
     await adapter.setStrokeWeight(cloneId, start + strokeWeightFactor * (end - start))

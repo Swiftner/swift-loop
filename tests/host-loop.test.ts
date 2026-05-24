@@ -39,7 +39,6 @@ function makeAdapter(overrides: Partial<HostAdapter> = {}): HostAdapter {
     endUndoBlock: () => {},
     storageGet: async () => null,
     storageSet: async () => {},
-    exportSvg: async () => ({ bytes: new Uint8Array(), name: 'x' }),
     resizePanel: () => {},
     closePlugin: () => {},
   }
@@ -92,16 +91,6 @@ describe('startHostLoop boot handshake', () => {
       bridge,
     )
     expect(sizes).toContainEqual({ w: 500, h: 600 })
-  })
-
-  it('reports group-missing on download when no loop exists', async () => {
-    const bridge = new FakeBridge()
-    await startHostLoop(makeAdapter(), bridge)
-    bridge.handlers.get('loop:download-svg')?.(undefined)
-    // Drain microtasks the async handler scheduled.
-    await Promise.resolve()
-    const ready = bridge.sent.find((s) => s.channel === 'loop:svg-ready')
-    expect(ready?.payload).toEqual({ ok: false, reason: 'no-loop' })
   })
 })
 

@@ -1,11 +1,27 @@
 import type { ComponentChildren } from 'preact'
 import { formulaForProperty } from '../../plugin/engine/compile'
-import type { FormulaProperty, LoopConfig, NumericProperty } from '../../shared/types'
+import type { FormulaProperty, LoopConfig, NumericProperty, NumericRamp } from '../../shared/types'
+import { NumericRampRow } from '../components/NumericRampRow'
 import { Section } from '../components/Section'
 import { SliderRow } from '../components/SliderRow'
 import { MAX_AXIS } from '../config-ops'
 import { rewriteTrailingScale } from '../formula-scale'
 import { randomMaxFor, sliderRangeFor } from '../slider-ranges'
+
+// The per-axis NumericRamp fields one AxisSection (or LayerSection) drives.
+export type AxisRampKey =
+  | 'columnAngle'
+  | 'rowAngle'
+  | 'layerAngle'
+  | 'columnScale'
+  | 'rowScale'
+  | 'layerScale'
+  | 'columnFade'
+  | 'rowFade'
+  | 'layerFade'
+  | 'columnRandom'
+  | 'rowRandom'
+  | 'layerRandom'
 
 interface Props {
   id: string
@@ -19,14 +35,12 @@ interface Props {
   // step (a NumericProperty, so it keeps its fx + modulation)
   stepKey: FormulaProperty
   stepLabel: string
-  // angle (clone rotation per index), scale (size ramp), and fade (opacity
-  // falloff) — plain numbers applied along this axis.
-  angle: number
-  onAngle: (v: number, commit: boolean) => void
-  scale: number
-  onScale: (v: number, commit: boolean) => void
-  fade: number
-  onFade: (v: number, commit: boolean) => void
+  // Twist (clone rotation), Scale (size), and Fade (opacity) — each a
+  // NumericRamp sampled along this axis. Identified by config key.
+  twistKey: AxisRampKey
+  scaleKey: AxisRampKey
+  fadeKey: AxisRampKey
+  randomKey: AxisRampKey
   hint?: string
   chip?: ComponentChildren
 }
@@ -52,16 +66,16 @@ export function AxisSection({
   onCount,
   stepKey,
   stepLabel,
-  angle,
-  onAngle,
-  scale,
-  onScale,
-  fade,
-  onFade,
+  twistKey,
+  scaleKey,
+  fadeKey,
+  randomKey,
   hint,
   chip,
 }: Props) {
   const step = config[stepKey] as NumericProperty
+  const setRamp = (key: AxisRampKey) => (next: NumericRamp, commit: boolean) =>
+    update({ ...config, [key]: next }, commit)
   const range = sliderRangeFor(stepKey, sourceSize)
   // A single column/row has nothing to spread, twist, scale or fade across.
   const inactive = count <= 1
@@ -101,44 +115,47 @@ export function AxisSection({
           update({ ...config, [stepKey]: computeStepUpdate(step, v) }, commit)
         }
       />
-      <SliderRow
+      <NumericRampRow
         label="Twist"
-        value={angle}
+        ramp={config[twistKey]}
         min={-90}
         max={90}
         step={0.5}
+        decimals={1}
         unit="°"
         disabled={inactive}
-        onChange={onAngle}
+        onChange={setRamp(twistKey)}
       />
-      <SliderRow
+      <NumericRampRow
         label="Scale"
-        value={scale}
+        ramp={config[scaleKey]}
         min={-100}
         max={100}
         step={1}
         unit="%"
         disabled={inactive}
-        onChange={onScale}
+        onChange={setRamp(scaleKey)}
       />
-      <SliderRow
+      <NumericRampRow
         label="Fade"
-        value={fade}
+        ramp={config[fadeKey]}
         min={0}
         max={100}
         step={1}
         unit="%"
         disabled={inactive}
-        onChange={onFade}
+        onChange={setRamp(fadeKey)}
       />
-      <SliderRow
+      <NumericRampRow
         label="Random"
-        value={step.random}
+        ramp={config[randomKey]}
         min={0}
         max={randomMaxFor(stepKey, sourceSize)}
         step={0.5}
+        decimals={1}
+        unit="px"
         disabled={inactive}
-        onChange={(v, commit) => update({ ...config, [stepKey]: { ...step, random: v } }, commit)}
+        onChange={setRamp(randomKey)}
       />
     </Section>
   )

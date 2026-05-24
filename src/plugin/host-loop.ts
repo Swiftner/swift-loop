@@ -56,27 +56,6 @@ export async function startHostLoop(adapter: HostAdapter, bridge: HostBridge): P
     await revert(adapter, store)
   })
 
-  bridge.on('loop:download-svg', async () => {
-    const last = store.get()
-    if (!last) {
-      bridge.send('loop:svg-ready', { ok: false, reason: 'no-loop' })
-      return
-    }
-    if (!(await adapter.nodeExists(last.groupId))) {
-      bridge.send('loop:svg-ready', { ok: false, reason: 'group-missing' })
-      return
-    }
-    try {
-      const { bytes, name } = await adapter.exportSvg(last.groupId)
-      bridge.send('loop:svg-ready', { ok: true, bytes, name })
-    } catch (err) {
-      bridge.send('loop:svg-ready', {
-        ok: false,
-        reason: err instanceof Error ? err.message : String(err),
-      })
-    }
-  })
-
   bridge.on('loop:close', () => {
     adapter.closePlugin()
   })

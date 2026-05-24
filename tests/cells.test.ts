@@ -13,6 +13,7 @@ import { compileConfig, compileFactors } from '../src/plugin/engine/compile'
 import { applyEasing } from '../src/plugin/engine/easing'
 import { buildScope } from '../src/plugin/engine/scope'
 import { DEFAULT_CONFIG } from '../src/shared/defaults'
+import { rampFromTo } from '../src/shared/numeric-ramp'
 import type { LoopConfig } from '../src/shared/types'
 
 // Independent re-derivation of one cell from the engine primitives. evaluateCell
@@ -152,25 +153,27 @@ describe('paintOrder', () => {
 })
 
 describe('per-axis transforms', () => {
-  it('adds each axis angle to rotation, offsets layers, and fades by axis', () => {
+  it('adds each axis twist ramp to rotation, offsets layers, and fades by axis', () => {
     const config: LoopConfig = {
       ...DEFAULT_CONFIG,
       cols: 3,
       rows: 3,
       layers: 2,
-      columnAngle: 10,
-      rowAngle: 5,
-      layerAngle: 20,
+      // Twist ramps sampled at tx/ty/tz. Endpoints chosen so the sampled
+      // contributions are 20 (tx=1), 5 (ty=0.5), 20 (tz=1).
+      columnAngle: rampFromTo(0, 20),
+      rowAngle: rampFromTo(0, 10),
+      layerAngle: rampFromTo(0, 20),
       layerStep: 50,
-      columnFade: 50,
+      columnFade: rampFromTo(0, 50),
     }
     const cell = run(config, 14) // i=14 → l=1, r=1, c=2
     expect(cell.scope).toMatchObject({ c: 2, r: 1, l: 1 })
-    // rotation = base(0) + c*10 + r*5 + l*20
+    // rotation = base(0) + 20 (tx=1) + 5 (ty=0.5 of 10) + 20 (tz=1)
     expect(cell.rotation).toBeCloseTo(45, 6)
     // x = base column step (c*60) + depth step along the default 35° direction
     expect(cell.x).toBeCloseTo(2 * 60 + 1 * 50 * Math.cos((DEFAULT_DEPTH_DIR * Math.PI) / 180), 6)
-    // opacity = base(100) - tx*columnFade, tx = c/(cols-1) = 1
+    // opacity = base(100) - sampled columnFade (tx=1 → 50)
     expect(cell.opacity).toBeCloseTo(50, 6)
   })
 
@@ -191,20 +194,26 @@ describe('per-axis transforms', () => {
     const base: LoopConfig = { ...DEFAULT_CONFIG, cols: 3, rows: 1 }
     // c=2 sits at tx=1, so columnScale -50 halves the *rendered* size
     // (renderedW = sw + scaleX), even though the base size delta is 0.
-    const far = run({ ...base, columnScale: -50 }, 2, sw, sh)
+    const far = run({ ...base, columnScale: rampFromTo(0, -50) }, 2, sw, sh)
     expect(sw + far.scaleX).toBeCloseTo((sw + run(base, 2, sw, sh).scaleX) * 0.5, 6)
     expect(sh + far.scaleY).toBeCloseTo((sh + run(base, 2, sw, sh).scaleY) * 0.5, 6)
     // c=0 (tx=0) is untouched.
-    expect(run({ ...base, columnScale: -50 }, 0, sw, sh).scaleX).toBeCloseTo(
+    expect(run({ ...base, columnScale: rampFromTo(0, -50) }, 0, sw, sh).scaleX).toBeCloseTo(
       run(base, 0, sw, sh).scaleX,
       6,
     )
   })
 
-  it('is a no-op when all per-axis fields are absent (back-compat)', () => {
+  it('is a no-op when all per-axis fields are absent or all-zero (back-compat)', () => {
     const a = run(DEFAULT_CONFIG, 23)
     const b = run(
-      { ...DEFAULT_CONFIG, columnAngle: 0, layerStep: 0, layerFade: 0, columnScale: 0 },
+      {
+        ...DEFAULT_CONFIG,
+        columnAngle: rampFromTo(0, 0),
+        layerStep: 0,
+        layerFade: rampFromTo(0, 0),
+        columnScale: rampFromTo(0, 0),
+      },
       23,
     )
     expect(b.scaleX).toBeCloseTo(a.scaleX, 6)

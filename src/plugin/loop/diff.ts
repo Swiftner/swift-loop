@@ -29,6 +29,32 @@ function eqNumericProperty(a: LoopConfig[keyof LoopConfig], b: typeof a): boolea
   return JSON.stringify(a) === JSON.stringify(b)
 }
 
+// The per-axis Twist / Scale / Fade / Random ramps plus the modulation random
+// ramps. Compared structurally (they're objects now); any change forces a full
+// re-layout since they touch every cell's rotation, size, opacity, or position.
+const RAMP_FIELDS = [
+  'columnAngle',
+  'rowAngle',
+  'layerAngle',
+  'columnFade',
+  'rowFade',
+  'layerFade',
+  'columnScale',
+  'rowScale',
+  'layerScale',
+  'columnRandom',
+  'rowRandom',
+  'layerRandom',
+  'rotationRandom',
+  'scaleXRandom',
+  'scaleYRandom',
+  'opacityRandom',
+] as const
+
+function rampsChanged(prev: LoopConfig, next: LoopConfig): boolean {
+  return RAMP_FIELDS.some((k) => JSON.stringify(prev[k]) !== JSON.stringify(next[k]))
+}
+
 export function diffConfig(
   prev: LoopConfig | null,
   next: LoopConfig,
@@ -42,20 +68,11 @@ export function diffConfig(
     prev.cols !== next.cols ||
     prev.rows !== next.rows ||
     (prev.layers ?? 1) !== (next.layers ?? 1) ||
-    (prev.columnAngle ?? 0) !== (next.columnAngle ?? 0) ||
-    (prev.rowAngle ?? 0) !== (next.rowAngle ?? 0) ||
     (prev.layerStep ?? 0) !== (next.layerStep ?? 0) ||
     (prev.layerDirection ?? 0) !== (next.layerDirection ?? 0) ||
     (prev.stackOrder ?? 'near-top') !== (next.stackOrder ?? 'near-top') ||
-    (prev.layerAngle ?? 0) !== (next.layerAngle ?? 0) ||
-    (prev.columnFade ?? 0) !== (next.columnFade ?? 0) ||
-    (prev.rowFade ?? 0) !== (next.rowFade ?? 0) ||
-    (prev.layerFade ?? 0) !== (next.layerFade ?? 0) ||
-    (prev.columnScale ?? 0) !== (next.columnScale ?? 0) ||
-    (prev.rowScale ?? 0) !== (next.rowScale ?? 0) ||
-    (prev.layerScale ?? 0) !== (next.layerScale ?? 0) ||
     (prev.layerColour ?? false) !== (next.layerColour ?? false) ||
-    (prev.layerRandom ?? 0) !== (next.layerRandom ?? 0)
+    rampsChanged(prev, next)
   ) {
     return { mode: 'full', dirty: ALL_PROPS }
   }

@@ -1,5 +1,6 @@
 import { DEFAULT_DEPTH_DIR } from '../../plugin/engine/cells'
-import type { LoopConfig } from '../../shared/types'
+import type { LoopConfig, NumericRamp } from '../../shared/types'
+import { NumericRampRow } from '../components/NumericRampRow'
 import { Section } from '../components/Section'
 import { SliderRow } from '../components/SliderRow'
 import { MAX_AXIS } from '../config-ops'
@@ -16,6 +17,10 @@ interface Props {
 export function LayerSection({ config, update }: Props) {
   // With a single layer there's no depth, so the depth controls do nothing yet.
   const noDepth = (config.layers ?? 1) <= 1
+  const setRamp =
+    (key: 'layerAngle' | 'layerScale' | 'layerFade' | 'layerRandom') =>
+    (next: NumericRamp, commit: boolean) =>
+      update({ ...config, [key]: next }, commit)
   return (
     <Section
       id="layer"
@@ -51,45 +56,47 @@ export function LayerSection({ config, update }: Props) {
         disabled={noDepth}
         onChange={(v, commit) => update({ ...config, layerDirection: v }, commit)}
       />
-      <SliderRow
+      <NumericRampRow
         label="Twist"
-        value={config.layerAngle ?? 0}
+        ramp={config.layerAngle}
         min={-90}
         max={90}
         step={0.5}
+        decimals={1}
         unit="°"
         disabled={noDepth}
-        onChange={(v, commit) => update({ ...config, layerAngle: v }, commit)}
+        onChange={setRamp('layerAngle')}
       />
-      <SliderRow
+      <NumericRampRow
         label="Scale"
-        value={config.layerScale ?? 0}
+        ramp={config.layerScale}
         min={-100}
         max={100}
         step={1}
         unit="%"
         disabled={noDepth}
-        onChange={(v, commit) => update({ ...config, layerScale: v }, commit)}
+        onChange={setRamp('layerScale')}
       />
-      <SliderRow
+      <NumericRampRow
         label="Fade"
-        value={config.layerFade ?? 0}
+        ramp={config.layerFade}
         min={0}
         max={100}
         step={1}
         unit="%"
         disabled={noDepth}
-        onChange={(v, commit) => update({ ...config, layerFade: v }, commit)}
+        onChange={setRamp('layerFade')}
       />
-      <SliderRow
+      <NumericRampRow
         label="Random"
-        value={config.layerRandom ?? 0}
+        ramp={config.layerRandom}
         min={0}
         max={120}
         step={0.5}
+        decimals={1}
         unit="px"
         disabled={noDepth}
-        onChange={(v, commit) => update({ ...config, layerRandom: v }, commit)}
+        onChange={setRamp('layerRandom')}
       />
       <label class={`toggle-row${noDepth ? ' is-disabled' : ''}`}>
         <input

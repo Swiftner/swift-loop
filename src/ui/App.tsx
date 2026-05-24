@@ -1,7 +1,7 @@
-import { emit, on } from '@create-figma-plugin/utilities'
+import { on } from '@create-figma-plugin/utilities'
 import { useCallback, useEffect, useState } from 'preact/hooks'
-import { legacyColorStopToRamp } from '../shared/color'
 import { RESET_CONFIG } from '../shared/defaults'
+import { normalizeConfig } from '../shared/migrate'
 import type { LoopConfig, Snapshot } from '../shared/types'
 import { ResizeHandle } from './components/ResizeHandle'
 import { resetKeepingPattern } from './config-ops'
@@ -12,6 +12,7 @@ import { LayerSection } from './sections/LayerSection'
 import { LibraryOverlay } from './sections/LibraryOverlay'
 import { ModulationSection } from './sections/ModulationSection'
 import { PresetsSection } from './sections/PresetsSection'
+import { HistorySection } from './sections/HistorySection'
 import { SnapshotsBar } from './sections/SnapshotsBar'
 
 const SNAPSHOTS_KEY = 'swift-loop:snapshots'
@@ -89,11 +90,7 @@ export function App() {
         const parsed = JSON.parse(stored) as Snapshot[]
         const migrated = parsed.map((s) => ({
           ...s,
-          config: {
-            ...s.config,
-            fill: legacyColorStopToRamp(s.config.fill as never),
-            stroke: legacyColorStopToRamp(s.config.stroke as never),
-          },
+          config: normalizeConfig(s.config),
         }))
         const seen = new Set<number>()
         const deduped = migrated.filter((s) => {
@@ -113,7 +110,7 @@ export function App() {
     setSnapshots((prev) => {
       const filtered = prev.filter((p) => p.config.seed !== c.seed)
       const s: Snapshot = { config: c, timestamp: Date.now(), label: buildLabel(c) }
-      const next = [s, ...filtered].slice(0, 8)
+      const next = [s, ...filtered].slice(0, 48)
       window.localStorage.setItem(SNAPSHOTS_KEY, JSON.stringify(next))
       return next
     })
@@ -127,30 +124,6 @@ export function App() {
     const next = { ...config, seed: Math.round(v) }
     update(next, commit)
     if (commit) recordSnapshot(next)
-  }
-
-  // One-shot listener per click: subscribe right before requesting bytes so
-  // we don't accidentally trigger a download on a stale earlier reply.
-  const onDownload = () => {
-    const off = on(
-      'loop:svg-ready',
-      (payload: { ok: boolean; bytes?: Uint8Array; name?: string; reason?: string }) => {
-        off()
-        if (!payload.ok || !payload.bytes) return
-        const blob = new Blob([payload.bytes as BlobPart], { type: 'image/svg+xml;charset=utf-8' })
-        const stamp = new Date().toISOString().replace(/[:T]/g, '-').slice(0, 19)
-        const slug = (payload.name ?? 'swift-loop').replace(/[^\w.-]+/g, '-')
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `${slug}-${stamp}.svg`
-        document.body.appendChild(a)
-        a.click()
-        a.remove()
-        URL.revokeObjectURL(url)
-      },
-    )
-    emit('loop:download-svg')
   }
 
   const onReset = () => {
@@ -168,13 +141,9 @@ export function App() {
   return (
     <div class="app">
       <SnapshotsBar
-        snapshots={snapshots}
-        activeSeed={config.seed}
-        seed={config.seed}
-        onSelect={onSelectSnapshot}
-        onSeedChange={onSeedChange}
         onReset={onReset}
-        onDownload={onDownload}
+        appliedName={appliedName}
+        onOpenLibrary={() => setLibraryOpen(true)}
       />
       {!selectionValid && (
         <div class="selection-warning">Select a single Vector, Shape, Text, or Group</div>
@@ -191,25 +160,10 @@ export function App() {
           onCount={(v, commit) => update({ ...config, cols: v }, commit)}
           stepKey="x"
           stepLabel="X step"
-          angle={config.columnAngle ?? 0}
-          onAngle={(v, commit) => update({ ...config, columnAngle: v }, commit)}
-          scale={config.columnScale ?? 0}
-          onScale={(v, commit) => update({ ...config, columnScale: v }, commit)}
-          fade={config.columnFade ?? 0}
-          onFade={(v, commit) => update({ ...config, columnFade: v }, commit)}
-          chip={
-            <button
-              type="button"
-              class="section-chip-source"
-              onClick={(e) => {
-                e.stopPropagation()
-                setLibraryOpen(true)
-              }}
-              title={appliedName ? 'Pick a different pattern' : 'Browse patterns'}
-            >
-              {appliedName ?? 'library →'}
-            </button>
-          }
+          twistKey="columnAngle"
+          scaleKey="columnScale"
+          fadeKey="columnFade"
+          randomKey="columnRandom"
         />
         <AxisSection
           id="row"
@@ -222,16 +176,21 @@ export function App() {
           onCount={(v, commit) => update({ ...config, rows: v }, commit)}
           stepKey="y"
           stepLabel="Y step"
-          angle={config.rowAngle ?? 0}
-          onAngle={(v, commit) => update({ ...config, rowAngle: v }, commit)}
-          scale={config.rowScale ?? 0}
-          onScale={(v, commit) => update({ ...config, rowScale: v }, commit)}
-          fade={config.rowFade ?? 0}
-          onFade={(v, commit) => update({ ...config, rowFade: v }, commit)}
+          twistKey="rowAngle"
+          scaleKey="rowScale"
+          fadeKey="rowFade"
+          randomKey="rowRandom"
         />
         <LayerSection config={config} update={update} />
         <AppearanceSection config={config} update={update} sourceSize={sourceSize} />
         <ModulationSection config={config} update={update} sourceSize={sourceSize} />
+        <HistorySection
+          snapshots={snapshots}
+          activeSeed={config.seed}
+          seed={config.seed}
+          onSelect={onSelectSnapshot}
+          onSeedChange={onSeedChange}
+        />
         <PresetsSection
           config={config}
           update={update}

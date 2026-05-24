@@ -191,12 +191,4 @@ describe('PenpotAdapter', () => {
     expect(groupId).toBe('group-1')
     expect(a.parent?.id).toBe('group-1')
   })
-
-  it('exports SVG bytes with the shape name', async () => {
-    const s = new FakeShape('a')
-    s.name = 'Loop'
-    const res = await new PenpotAdapter(makePenpot([s]).penpot).exportSvg('a')
-    expect(res.name).toBe('Loop')
-    expect(Array.from(res.bytes)).toEqual([1, 2, 3])
-  })
 })

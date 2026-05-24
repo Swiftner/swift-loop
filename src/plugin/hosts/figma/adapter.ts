@@ -8,7 +8,6 @@ import type {
   HostAdapter,
   NodeId,
   NodeSnapshot,
-  SvgExportResult,
   TransformPatch,
 } from '../host'
 
@@ -220,18 +219,6 @@ export class FigmaAdapter implements HostAdapter {
 
   async storageSet<T>(key: string, value: T): Promise<void> {
     await figma.clientStorage.setAsync(key, value)
-  }
-
-  // --- export --------------------------------------------------------------
-
-  async exportSvg(id: NodeId): Promise<SvgExportResult> {
-    await this.ensurePages()
-    const node = await figma.getNodeByIdAsync(id)
-    if (!node || node.removed || !('exportAsync' in node)) {
-      throw new Error(`exportSvg: node ${id} missing or not exportable`)
-    }
-    const bytes = await (node as ExportMixin).exportAsync({ format: 'SVG' })
-    return { bytes, name: (node as SceneNode).name }
   }
 
   // --- UI panel ------------------------------------------------------------

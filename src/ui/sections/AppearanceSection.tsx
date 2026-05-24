@@ -63,6 +63,18 @@ export function AppearanceSection({ config, update, sourceSize }: Props) {
         />
       }
     >
+      {/* Spiral: rotates every clone's grid offset by angle × index, curling a
+          line into a spiral or swirling a grid. Global (not per-axis), so it
+          lives here with the other whole-loop transforms. */}
+      <SliderRow
+        label="Spiral"
+        value={config.angle}
+        min={-180}
+        max={180}
+        step={0.1}
+        unit="°"
+        onChange={(v, commit) => update({ ...config, angle: v }, commit)}
+      />
       {/* Base transforms (each formula-capable) */}
       {BASE_ROWS.map((row) => {
         const cur = config[row.key]

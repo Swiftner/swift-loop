@@ -32,11 +32,6 @@ export interface TransformPatch {
   height: number
 }
 
-export interface SvgExportResult {
-  bytes: Uint8Array
-  name: string
-}
-
 export interface HostAdapter {
   // --- capabilities ---
   // Can the host absorb a full regenerate on every drag frame? Figma can;
@@ -82,9 +77,6 @@ export interface HostAdapter {
   // --- persistence ---
   storageGet<T>(key: string): Promise<T | null>
   storageSet<T>(key: string, value: T): Promise<void>
-
-  // --- export ---
-  exportSvg(id: NodeId): Promise<SvgExportResult>
 
   // --- UI panel ---
   resizePanel(width: number, height: number): void

@@ -6,13 +6,13 @@ This is every slider, every chip, every clickable thing in the Swift Loop UI, in
 
 This is the strip across the top of the plugin window. It's about your loop as a whole, not any one property.
 
-**Seed.** A number you can scrub. Whenever the loop uses randomness, the seed determines the exact "random" outcome. Same seed gives the same result, always. Change it and the dice get rerolled.
+**Reset.** On the left. Wipes everything back to a true blank slate: 1x1 grid (just the source, no clones), every transform dial at zero, no angle. Useful when you've made a mess and want to dial in from nothing. The first time you open the plugin you still see the readable 10x10 grid; Reset is what collapses it.
 
-**Reroll.** A dice icon. Picks a new random seed for you. Useful when you've got a pattern with randomness and just want to keep flipping through variations.
+**Library.** On the right, a `library →` button (once you've applied a pattern, it shows that pattern's name instead). Click it to open the pattern library and pick something, or swap to a different pattern.
 
-**Reset.** Wipes everything back to a true blank slate: 1x1 grid (just the source, no clones), every transform dial at zero, no angle. Useful when you've made a mess and want to dial in from nothing. The first time you open the plugin you still see the readable 10x10 grid; Reset is what collapses it.
+**Help.** The `i` icon, far right. Version info and links.
 
-**Snapshots.** Little squares of recent configurations. Swift Loop quietly remembers your last few rerolls. Click any snapshot to jump back to it.
+(The seed and your recent seeds now live in their own **History** section near the bottom — see below.)
 
 ## Iterations
 
@@ -24,9 +24,9 @@ The first section. This is where you set the count.
 
 **Layers.** Depth layers (Z), 1 to 50. The grid becomes a Columns × Rows × Layers cube of clones. On its own it just stacks more copies in place — the 3D look comes from a formula (or a library preset like **Cube**) that reads the layer index `l`. Leave at 1 for a flat 2D pattern.
 
-**Angle.** Degrees of per-cell rotation, applied to each clone's grid offset around the source center. Leave at 0 for straight lines and rectangular grids. Bump it 5 to 30 degrees and a line curls into a spiral, a grid swirls. Crank it past 90 to wrap the pattern back around on itself. Think "how much do successive cells lean".
+**Spiral.** (In the Appearance section.) Degrees of per-cell rotation, applied to each clone's grid offset around the source center. Leave at 0 for straight lines and rectangular grids. Bump it 5 to 30 degrees and a line curls into a spiral, a grid swirls. Crank it past 90 to wrap the pattern back around on itself. Think "how much do successive cells lean".
 
-If you've applied a library pattern, you'll also see a little pill showing its name. Click it to jump back to the library and pick something else.
+**Twist / Scale / Fade / Random (per axis).** Each of Column, Row, and Layer carries these four as **ramps**, not single numbers. A ramp is a little curve with stops you drag: left to right is position along the axis (first clone → last), up and down is the value. Drag the dots, press the track to add a stop, or type an exact value in the number beside each stop. Twist adds rotation, Scale grows or shrinks, Fade drops opacity, Random adds seeded position jitter — each shaped across that axis by its stops. A flat line means no effect (a flat line above zero, for Random, means even jitter everywhere).
 
 ## Transform
 
@@ -68,6 +68,14 @@ Color and opacity stuff.
 
 **Easing chip.** Top-right of the section. Controls how start-to-end interpolations curve. `linear` is uniform, `ease` is smooth in and out, `easeIn` accelerates, `easeOut` decelerates.
 
+## History
+
+A collapsible section near the bottom of the sidebar, just above the library. Open it to find:
+
+**Seed.** A number you can scrub. Whenever the loop uses randomness, the seed determines the exact "random" outcome. Same seed gives the same result, always. Change it and the dice get rerolled.
+
+**Recent seeds.** A row of little dots, one per recent configuration. Swift Loop quietly remembers your recent rerolls; click any dot to jump back to that seed. They wrap onto more lines as you accumulate them.
+
 ## Presets and Library
 
 Bottom of the sidebar.
@@ -84,7 +92,7 @@ Top-right corner of the plugin. The `fx` pill toggles formula mode. When it's on
 
 A few things to know about state.
 
-Snapshots are automatic. Every time you click Reroll or apply a library pattern with a new seed, Swift Loop saves a snapshot. You can return to any of the last eight.
+Snapshots are automatic. Every time you change the seed or apply a library pattern with a new seed, Swift Loop saves a snapshot in the **History** section. You can return to any of the recent ones.
 
 Cmd/Ctrl+Z works everywhere. The undo stack lives inside the plugin, so you can step back through every change you've made in this session.
 

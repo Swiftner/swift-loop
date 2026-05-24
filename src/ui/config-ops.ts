@@ -2,6 +2,7 @@
 // Pure transforms on LoopConfig that the UI invokes via update().
 
 import { DEFAULT_CONFIG, RESET_CONFIG } from '../shared/defaults'
+import { normalizeConfig } from '../shared/migrate'
 import type { FormulaProperty, LoopConfig } from '../shared/types'
 
 // Library patterns set every animated property to `unlocked: true` with a
@@ -44,7 +45,8 @@ export function sanitizePastedConfig(parsed: unknown): LoopConfig | null {
   for (const k of ['fill', 'stroke'] as const) {
     if (typeof next[k] !== 'object' || next[k] === null) next[k] = DEFAULT_CONFIG[k]
   }
-  return next
+  // Upgrade legacy scalar Twist/Scale/Fade and old color stops to current shape.
+  return normalizeConfig(next)
 }
 
 // Reset semantics: when a library pattern is applied, keep only "the chosen

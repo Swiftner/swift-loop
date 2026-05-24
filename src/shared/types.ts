@@ -17,6 +17,18 @@ export interface ColorRamp {
   formula?: string | null // formula returning a number in [0, 1] used as the ramp factor
 }
 
+export interface NumericStop {
+  value: number
+  position: number // 0..1
+}
+
+// A scalar ramp sampled along one axis (Column→tx, Row→ty, Layer→tz). The
+// per-axis Twist / Scale / Fade controls each carry one. 0 stops = no effect;
+// 1 stop = constant; 2+ = interpolated. Sorted by position when read.
+export interface NumericRamp {
+  stops: NumericStop[]
+}
+
 export type EasingKind = 'linear' | 'ease' | 'easeIn' | 'easeOut'
 
 export interface NumericProperty {
@@ -53,28 +65,43 @@ export interface LoopConfig {
   // angle * i degrees, so a 1-row line + nonzero angle traces a spiral.
   angle: number
 
-  // Per-axis transforms (additive post-process; 0/false = no effect, so configs
+  // Per-axis transforms (additive post-process; absent = no effect, so configs
   // that predate these render identically). Column step is `x` and Row step is
-  // `y` (the NumericProperties below); Layer has its own oblique step. Each axis
-  // adds a clone rotation and an opacity falloff, and Layer can sweep the
-  // fill/stroke ramp by depth.
-  columnAngle?: number // deg of clone rotation added per column (× c)
-  rowAngle?: number // × r
+  // `y` (the NumericProperties below); Layer has its own oblique step.
+  //
+  // Twist / Scale / Fade are NumericRamps sampled along the axis (Column→tx,
+  // Row→ty, Layer→tz): Twist adds degrees of clone rotation, Scale a % size
+  // change, Fade a % opacity loss. A legacy scalar in a saved config is upgraded
+  // to a 2-stop ramp by normalizeConfig (see src/shared/migrate.ts).
+  columnAngle?: NumericRamp // clone rotation (deg) across columns
+  rowAngle?: NumericRamp // across rows
   layerStep?: number // px depth offset per layer (× l), along layerDirection
   layerDirection?: number // deg, direction of the depth offset (default 35 = up-right)
-  layerAngle?: number // deg of clone rotation per layer (× l)
+  layerAngle?: NumericRamp // clone rotation (deg) across layers
   // Z-order of overlapping depth layers. 'near-top' (default) keeps the front
   // layer (l=0) on top — the natural reading of a receding stack. 'far-top'
   // flips it so deep layers sit in front.
   stackOrder?: 'near-top' | 'far-top'
-  columnFade?: number // % opacity lost across columns (× tx)
-  rowFade?: number // × ty
-  layerFade?: number // × tz (back-to-front)
-  columnScale?: number // % size change toward the last column (× tx); -100 = vanishes
-  rowScale?: number // × ty
-  layerScale?: number // × tz; negative = perspective falloff (far layers smaller)
+  columnFade?: NumericRamp // % opacity lost across columns
+  rowFade?: NumericRamp // across rows
+  layerFade?: NumericRamp // across layers (back-to-front)
+  columnScale?: NumericRamp // % size change across columns; -100 = vanishes
+  rowScale?: NumericRamp // across rows
+  layerScale?: NumericRamp // across layers; negative = perspective falloff
   layerColour?: boolean // sweep the fill/stroke ramp by depth (factor = tz)
-  layerRandom?: number // px of seeded random position jitter per cell
+  // Seeded ± position jitter (px), amount sampled along the axis. Column jitters
+  // x, Row jitters y, Layer jitters both. A flat ramp = uniform jitter.
+  columnRandom?: NumericRamp
+  rowRandom?: NumericRamp
+  layerRandom?: NumericRamp
+
+  // Modulation: seeded ± jitter on each appearance/transform property, amount
+  // sampled along the overall loop progress (t). Migrated from the per-property
+  // `.random` scalar; absent = no jitter. A flat ramp = uniform jitter.
+  rotationRandom?: NumericRamp
+  scaleXRandom?: NumericRamp
+  scaleYRandom?: NumericRamp
+  opacityRandom?: NumericRamp
 
   // Base transforms (per-step)
   x: NumericProperty

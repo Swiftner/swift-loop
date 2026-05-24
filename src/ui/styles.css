@@ -423,6 +423,127 @@ body,
   pointer-events: none;
 }
 
+/* ── Numeric ramp (per-axis Twist / Scale / Fade) ──────────────────────────
+   A curve editor: x = position along the axis, y = value. Pairs a draggable
+   strip with per-stop ScrubNum readouts for precise entry. */
+.numeric-ramp {
+  padding: 6px 0;
+}
+.numeric-ramp.is-disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+.numeric-ramp-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+.numeric-ramp-label {
+  color: var(--muted);
+  flex: none;
+}
+.numeric-ramp-readout {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 2px 6px;
+}
+.numeric-ramp-stop-readout {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+}
+.numeric-ramp-remove {
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+.numeric-ramp-remove:hover {
+  color: var(--fg);
+  background: var(--hairline);
+}
+.numeric-ramp-strip {
+  position: relative;
+  height: 44px;
+  border: 1px solid var(--hairline);
+  border-radius: 3px;
+  /* A translucent white lift over the field bg — lightens the strip in dark
+     mode, near-invisible in light mode (no color-mix needed). */
+  background-color: var(--field-bg);
+  background-image: linear-gradient(rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.07));
+  cursor: copy;
+  touch-action: none;
+}
+.numeric-ramp-line {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* Let presses fall through to the strip so pressing the track adds a stop;
+     the dots are separate siblings stacked above and keep their own handlers. */
+  pointer-events: none;
+}
+.numeric-ramp-line polyline {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1;
+  opacity: 0.7;
+  vector-effect: non-scaling-stroke;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.numeric-ramp-zero {
+  stroke: var(--muted);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+  vector-effect: non-scaling-stroke;
+  opacity: 0.6;
+}
+/* The dot is a generous invisible hit target (easy to grab); the visible mark
+   is a small hollow circle drawn by ::after, kept subtle until hover/focus. */
+.numeric-ramp-dot {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: grab;
+  touch-action: none;
+}
+.numeric-ramp-dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--bg);
+  border: 1.5px solid var(--accent);
+  opacity: 0.75;
+  transition: opacity 100ms ease;
+}
+.numeric-ramp-strip:hover .numeric-ramp-dot::after,
+.numeric-ramp-dot:focus-visible::after {
+  opacity: 1;
+}
+.numeric-ramp-dot:focus-visible {
+  outline: none;
+}
+.numeric-ramp-dot:focus-visible::after {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
 /* One-line plain-language summary under a section title. */
 .section-hint {
   margin: -2px 0 8px;
@@ -626,6 +747,24 @@ body,
   padding: 6px 14px 7px;
   border-bottom: 1px solid var(--hairline);
 }
+.snapshots-bar .section-chip-source {
+  margin-left: auto;
+}
+.history-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+/* History sits on its own line under the seed control, so drop the toolbar's
+   right-push and left divider and let the swatches wrap to fill the width. */
+.history-section .snapshots-history {
+  align-self: stretch;
+  align-items: flex-start;
+  margin-left: 0;
+  padding-left: 0;
+  border-left: 0;
+}
 .snapshots-reset {
   font-family: inherit;
   font-size: 10px;
@@ -642,32 +781,6 @@ body,
 .snapshots-reset:hover {
   background: var(--hairline);
   border-color: var(--muted);
-}
-.snapshots-download {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 22px;
-  color: var(--fg);
-  background: transparent;
-  border: 1px solid var(--hairline);
-  border-radius: 4px;
-  cursor: pointer;
-  flex: 0 0 auto;
-  padding: 0;
-}
-.snapshots-download:hover {
-  background: var(--hairline);
-  border-color: var(--muted);
-}
-.snapshots-label {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-  flex: 0 0 auto;
 }
 .snapshots-history {
   display: flex;
