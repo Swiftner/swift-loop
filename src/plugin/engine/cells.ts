@@ -5,7 +5,14 @@
 // Figma node, build an SVG element, etc.).
 
 import { sampleNumericRamp } from '../../shared/numeric-ramp'
-import type { CompiledFormulas, LoopConfig, NumericRamp, Scope } from '../../shared/types'
+import type {
+  CompiledFormulas,
+  LoopConfig,
+  NumericProperty,
+  NumericRamp,
+  Scope,
+  SinusoidalLayer,
+} from '../../shared/types'
 import { applyAngleToOffset } from './angle'
 import type { CompiledFactors } from './compile'
 import { applyEasing } from './easing'
@@ -59,10 +66,10 @@ export interface CellValues {
   scaleX: number
   scaleY: number
   opacity: number // raw evaluated value (0..100); consumers clamp/normalize
-  // Per-property lerp factors in [0, 1] (formula-resolved or eased fallback).
+  strokeWeight: number // resolved stroke weight (ramp- or formula-derived)
+  // Fill / stroke lerp factors in [0, 1] (formula-resolved or eased fallback).
   fillFactor: number
   strokeFactor: number
-  strokeWeightFactor: number
 }
 
 export interface EvaluateCellInput {
@@ -96,10 +103,13 @@ export function evaluateCell(i: number, input: EvaluateCellInput): CellValues {
     r,
     l,
   )
+  // Spiral lean: a ramp(t) × i rotation of the grid offset, falling back to the
+  // constant `angle` when no ramp is set (a flat ramp reproduces it exactly).
+  const spiralAngle = sampleNumericRamp(config.angleRamp, scope.t, config.angle)
   const rotated = applyAngleToOffset(
     { x: compiled.x.evaluate(scope, 'x'), y: compiled.y.evaluate(scope, 'y') },
     scope.i,
-    config.angle,
+    spiralAngle,
   )
   const baseEased = applyEasing(config.easing, computeInterpFactor(config, scope.tx, scope.ty))
 
@@ -132,18 +142,34 @@ export function evaluateCell(i: number, input: EvaluateCellInput): CellValues {
     const amt = sampleNumericRamp(ramp, scope.t)
     return amt === 0 ? 0 : (rand(config.seed, scope.i, key) - 0.5) * 2 * amt
   }
+  // Appearance sugar: each of rotation / scaleX / scaleY / opacity is a
+  // multi-stop ramp sampled along overall loop progress. fx (unlocked) swaps in
+  // the compiled formula instead, which is why the ramp and the formula can
+  // coexist — only one drives the value per cell.
+  const interp = computeInterpFactor(config, scope.tx, scope.ty)
+  const appearance = (key: 'rotation' | 'scaleX' | 'scaleY' | 'opacity'): number => {
+    const p = config[key]
+    if (p.unlocked) return compiled[key].evaluate(scope, key)
+    return sampleNumericRamp(p.ramp, interp, p.value)
+  }
+
   const rotation =
-    compiled.rotation.evaluate(scope, 'rotation') +
+    appearance('rotation') +
+    sinusoidalSugar(config.rotation, config.rotationSinusoidal, scope) +
     sampleNumericRamp(config.columnAngle, scope.tx) +
     sampleNumericRamp(config.rowAngle, scope.ty) +
     sampleNumericRamp(config.layerAngle, scope.tz) +
     modJitter(config.rotationRandom, 'rotationRandom')
   const opacity =
-    compiled.opacity.evaluate(scope, 'opacity') -
+    appearance('opacity') -
     sampleNumericRamp(config.columnFade, scope.tx) -
     sampleNumericRamp(config.rowFade, scope.ty) -
     sampleNumericRamp(config.layerFade, scope.tz) +
     modJitter(config.opacityRandom, 'opacityRandom')
+  const strokeWeight =
+    config.strokeWeight.unlocked && factors.strokeWeight
+      ? factors.strokeWeight.evaluate(scope, 'strokeWeight')
+      : sampleNumericRamp(config.strokeWeight.ramp, interp, config.strokeWeight.value)
   const colourFactor = config.layerColour ? scope.tz : baseEased
 
   // Per-axis Scale: a uniform size change ramping along each axis (like Fade,
@@ -160,9 +186,13 @@ export function evaluateCell(i: number, input: EvaluateCellInput): CellValues {
   // the whole rendered size — this works even when the base delta is 0, and at
   // mul=1 it collapses back to exactly the base delta (no change to old configs).
   const baseScaleX =
-    compiled.scaleX.evaluate(scope, 'scaleX') + modJitter(config.scaleXRandom, 'scaleXRandom')
+    appearance('scaleX') +
+    sinusoidalSugar(config.scaleX, config.scaleSinusoidal, scope) +
+    modJitter(config.scaleXRandom, 'scaleXRandom')
   const baseScaleY =
-    compiled.scaleY.evaluate(scope, 'scaleY') + modJitter(config.scaleYRandom, 'scaleYRandom')
+    appearance('scaleY') +
+    sinusoidalSugar(config.scaleY, config.scaleSinusoidal, scope) +
+    modJitter(config.scaleYRandom, 'scaleYRandom')
 
   return {
     i,
@@ -175,12 +205,19 @@ export function evaluateCell(i: number, input: EvaluateCellInput): CellValues {
     scaleX: (sourceWidth + baseScaleX) * scaleMul - sourceWidth,
     scaleY: (sourceHeight + baseScaleY) * scaleMul - sourceHeight,
     opacity,
+    strokeWeight,
     fillFactor: factors.fill ? factors.fill.evaluate(scope, 'fillFactor') : colourFactor,
     strokeFactor: factors.stroke ? factors.stroke.evaluate(scope, 'strokeFactor') : colourFactor,
-    strokeWeightFactor: factors.strokeWeight
-      ? factors.strokeWeight.evaluate(scope, 'strokeWeightFactor')
-      : baseEased,
   }
+}
+
+// The sinusoidal modulation layer, evaluated directly (it used to be folded into
+// the compiled sugar formula). Applies only in sugar mode — an fx formula on the
+// property takes over the whole value, matching the pre-ramp behavior where the
+// unlocked formula replaced the sugar + its sinusoidal term.
+function sinusoidalSugar(prop: NumericProperty, layer: SinusoidalLayer, scope: Scope): number {
+  if (prop.unlocked || layer.amplitude === 0) return 0
+  return layer.amplitude * Math.sin((scope.c + scope.r) * layer.frequency + layer.phase)
 }
 
 export function computeInterpFactor(config: LoopConfig, tx: number, ty: number): number {

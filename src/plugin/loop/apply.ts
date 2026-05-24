@@ -1,6 +1,6 @@
 // src/plugin/loop/apply.ts
 import { sampleRamp } from '../../shared/color'
-import type { Color, ColorRamp, EvaluatedValues, ScalarProperty } from '../../shared/types'
+import type { Color, ColorRamp, EvaluatedValues } from '../../shared/types'
 import type { HostAdapter, NodeId, NodeSnapshot } from '../hosts/host'
 
 export interface ApplyInput {
@@ -10,11 +10,11 @@ export interface ApplyInput {
   values: EvaluatedValues
   fill: ColorRamp
   stroke: ColorRamp
-  strokeWeight: ScalarProperty
-  // Per-property lerp factors in [0, 1] — already eased / formula-resolved upstream.
+  // Resolved stroke weight for this clone (ramp- or formula-derived upstream).
+  strokeWeight: number
+  // Colour lerp factors in [0, 1] — already eased / formula-resolved upstream.
   fillFactor: number
   strokeFactor: number
-  strokeWeightFactor: number
   dirty: Set<string>
 }
 
@@ -29,7 +29,6 @@ export async function applyToClone(input: ApplyInput): Promise<void> {
     strokeWeight,
     fillFactor,
     strokeFactor,
-    strokeWeightFactor,
     dirty,
   } = input
 
@@ -70,9 +69,7 @@ export async function applyToClone(input: ApplyInput): Promise<void> {
     await adapter.setSolidStroke(cloneId, strokeColor)
   }
   if (dirty.has('strokeWeight') && strokeColor) {
-    const start = strokeWeight.value
-    const end = strokeWeight.end ?? start
-    await adapter.setStrokeWeight(cloneId, start + strokeWeightFactor * (end - start))
+    await adapter.setStrokeWeight(cloneId, Math.max(0, strokeWeight))
   }
 }
 

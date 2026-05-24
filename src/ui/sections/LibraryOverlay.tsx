@@ -36,6 +36,9 @@ function applyEntry(config: LoopConfig, entry: LibraryEntry): LoopConfig {
     rows: entry.rows,
     layers: entry.layers ?? 1,
     angle: entry.angle ?? 0,
+    // Patterns set a constant Spiral via `angle`; drop any ramp the user had so
+    // the pattern's value isn't overridden by a leftover curve.
+    angleRamp: undefined,
     fxMode: true,
     showFirst: entry.showFirst ?? true,
   }

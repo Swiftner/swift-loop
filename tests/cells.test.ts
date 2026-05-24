@@ -13,7 +13,7 @@ import { compileConfig, compileFactors } from '../src/plugin/engine/compile'
 import { applyEasing } from '../src/plugin/engine/easing'
 import { buildScope } from '../src/plugin/engine/scope'
 import { DEFAULT_CONFIG } from '../src/shared/defaults'
-import { rampFromTo } from '../src/shared/numeric-ramp'
+import { rampFromTo, sampleNumericRamp } from '../src/shared/numeric-ramp'
 import type { LoopConfig } from '../src/shared/types'
 
 // Independent re-derivation of one cell from the engine primitives. evaluateCell
@@ -40,21 +40,31 @@ function reference(
     config.angle,
   )
   const baseEased = applyEasing(config.easing, computeInterpFactor(config, scope.tx, scope.ty))
+  const interp = computeInterpFactor(config, scope.tx, scope.ty)
+  // Appearance sugar: each ramp sampled along loop progress (or its fx formula).
+  // Assumes no per-axis scale/jitter — true for the DEFAULT_CONFIG this checks.
+  const appearance = (key: 'rotation' | 'scaleX' | 'scaleY' | 'opacity'): number => {
+    const p = config[key]
+    return p.unlocked
+      ? compiled[key].evaluate(scope, key)
+      : sampleNumericRamp(p.ramp, interp, p.value)
+  }
   return {
     i,
     c,
     r,
     x: off.x,
     y: off.y,
-    rotation: compiled.rotation.evaluate(scope, 'rotation'),
-    scaleX: compiled.scaleX.evaluate(scope, 'scaleX'),
-    scaleY: compiled.scaleY.evaluate(scope, 'scaleY'),
-    opacity: compiled.opacity.evaluate(scope, 'opacity'),
+    rotation: appearance('rotation'),
+    scaleX: appearance('scaleX'),
+    scaleY: appearance('scaleY'),
+    opacity: appearance('opacity'),
+    strokeWeight:
+      config.strokeWeight.unlocked && factors.strokeWeight
+        ? factors.strokeWeight.evaluate(scope, 'strokeWeight')
+        : sampleNumericRamp(config.strokeWeight.ramp, interp, config.strokeWeight.value),
     fillFactor: factors.fill ? factors.fill.evaluate(scope, 'fillFactor') : baseEased,
     strokeFactor: factors.stroke ? factors.stroke.evaluate(scope, 'strokeFactor') : baseEased,
-    strokeWeightFactor: factors.strokeWeight
-      ? factors.strokeWeight.evaluate(scope, 'strokeWeightFactor')
-      : baseEased,
   }
 }
 
@@ -97,7 +107,7 @@ describe('evaluateCell', () => {
     expect(run(DEFAULT_CONFIG, 4).opacity).toBeCloseTo(100, 6)
   })
 
-  it('falls back to the eased base factor when a ramp has no formula', () => {
+  it('falls back to the eased base factor for colours when no formula is set', () => {
     const config: LoopConfig = { ...DEFAULT_CONFIG, cols: 5, rows: 1, easing: 'linear' }
     const cell = run(config, 3)
     const expected = applyEasing(
@@ -106,7 +116,9 @@ describe('evaluateCell', () => {
     )
     expect(cell.fillFactor).toBeCloseTo(expected, 6)
     expect(cell.strokeFactor).toBeCloseTo(expected, 6)
-    expect(cell.strokeWeightFactor).toBeCloseTo(expected, 6)
+    // strokeWeight is now a resolved value, not a factor: the default flat ramp
+    // at 1 yields 1 everywhere.
+    expect(cell.strokeWeight).toBeCloseTo(1, 6)
   })
 
   it('maps the flat index to a 3D (layer, row, column) address', () => {
@@ -118,6 +130,107 @@ describe('evaluateCell', () => {
     expect(run(config, 11).scope).toMatchObject({ l: 2, r: 1, c: 1 })
     expect(run(config, 0).scope.n).toBe(12) // 2 * 2 * 3
     expect(run(config, 0).scope.layers).toBe(3)
+  })
+})
+
+describe('appearance ramps', () => {
+  it('samples the rotation ramp along loop progress (linear strip)', () => {
+    // 5-wide strip → interp = tx. A [0 → 40] ramp puts cell 2 (tx=0.5) at 20.
+    const config: LoopConfig = {
+      ...DEFAULT_CONFIG,
+      cols: 5,
+      rows: 1,
+      rotation: { ...DEFAULT_CONFIG.rotation, ramp: rampFromTo(0, 40) },
+    }
+    expect(run(config, 0).rotation).toBeCloseTo(0, 6)
+    expect(run(config, 2).rotation).toBeCloseTo(20, 6)
+    expect(run(config, 4).rotation).toBeCloseTo(40, 6)
+  })
+
+  it('ramps opacity along the loop', () => {
+    const config: LoopConfig = {
+      ...DEFAULT_CONFIG,
+      cols: 5,
+      rows: 1,
+      opacity: { ...DEFAULT_CONFIG.opacity, ramp: rampFromTo(100, 0) },
+    }
+    expect(run(config, 0).opacity).toBeCloseTo(100, 6)
+    expect(run(config, 4).opacity).toBeCloseTo(0, 6)
+  })
+
+  it('resolves stroke weight from its ramp', () => {
+    const config: LoopConfig = {
+      ...DEFAULT_CONFIG,
+      cols: 5,
+      rows: 1,
+      strokeWeight: { ...DEFAULT_CONFIG.strokeWeight, ramp: rampFromTo(0, 8) },
+    }
+    expect(run(config, 0).strokeWeight).toBeCloseTo(0, 6)
+    expect(run(config, 4).strokeWeight).toBeCloseTo(8, 6)
+  })
+
+  it('lets an fx formula take over the value, ignoring the ramp', () => {
+    const config: LoopConfig = {
+      ...DEFAULT_CONFIG,
+      cols: 5,
+      rows: 1,
+      rotation: {
+        ...DEFAULT_CONFIG.rotation,
+        ramp: rampFromTo(0, 40), // would give 20 at cell 2 …
+        unlocked: true,
+        formula: 'rotation = 90', // … but the formula wins
+      },
+    }
+    expect(run(config, 2).rotation).toBeCloseTo(90, 6)
+  })
+
+  it('adds the sinusoidal layer in sugar mode only', () => {
+    const base: LoopConfig = {
+      ...DEFAULT_CONFIG,
+      cols: 5,
+      rows: 1,
+      rotationSinusoidal: { amplitude: 8, frequency: 0.5, phase: 0 },
+    }
+    // sugar: ramp(0) + 8 * sin((c + r) * 0.5)
+    expect(run(base, 3).rotation).toBeCloseTo(8 * Math.sin(3 * 0.5), 6)
+    // fx: the formula replaces the sugar AND its sinusoidal layer
+    const fx: LoopConfig = {
+      ...base,
+      rotation: { ...base.rotation, unlocked: true, formula: 'rotation = 0' },
+    }
+    expect(run(fx, 3).rotation).toBeCloseTo(0, 6)
+  })
+})
+
+describe('spiral ramp', () => {
+  it('a flat ramp reproduces the constant angle (back-compat)', () => {
+    const constant: LoopConfig = { ...DEFAULT_CONFIG, cols: 5, rows: 1, angle: 15 }
+    const flat: LoopConfig = {
+      ...DEFAULT_CONFIG,
+      cols: 5,
+      rows: 1,
+      angle: 0,
+      angleRamp: rampFromTo(15, 15),
+    }
+    for (const i of [1, 2, 3, 4]) {
+      expect(run(flat, i).x).toBeCloseTo(run(constant, i).x, 6)
+      expect(run(flat, i).y).toBeCloseTo(run(constant, i).y, 6)
+    }
+  })
+
+  it('samples the spiral angle per cell (a rising ramp leans later clones more)', () => {
+    const rising: LoopConfig = {
+      ...DEFAULT_CONFIG,
+      cols: 5,
+      rows: 1,
+      angleRamp: rampFromTo(0, 20),
+    }
+    const constant20: LoopConfig = { ...DEFAULT_CONFIG, cols: 5, rows: 1, angle: 20 }
+    // i=4 → t=1 → ramp samples 20, identical to a constant-20 spiral there.
+    expect(run(rising, 4).x).toBeCloseTo(run(constant20, 4).x, 6)
+    expect(run(rising, 4).y).toBeCloseTo(run(constant20, 4).y, 6)
+    // i=2 → t=0.5 → ramp samples only 10, so it diverges from the constant.
+    expect(run(rising, 2).x).not.toBeCloseTo(run(constant20, 2).x, 3)
   })
 })
 

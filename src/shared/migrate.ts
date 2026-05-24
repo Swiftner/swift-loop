@@ -4,8 +4,8 @@
 // saved snapshots, and pasted JSON. Safe to call on an already-current config.
 
 import { legacyColorStopToRamp } from './color'
-import { isNumericRamp, rampFromTo } from './numeric-ramp'
-import type { LoopConfig, NumericRamp } from './types'
+import { isNumericRamp, rampConstant, rampFromTo } from './numeric-ramp'
+import type { LoopConfig, NumericProperty, NumericRamp } from './types'
 
 // Per-axis Twist / Scale / Fade used to be single numbers. Twist accumulated per
 // index (rotation = index × value), so as a positional ramp its endpoint is
@@ -30,6 +30,28 @@ function migrateRandomField(existing: unknown, legacy: unknown): NumericRamp | u
   return rampFromTo(legacy, legacy)
 }
 
+// The appearance properties (rotation, scaleX, scaleY, opacity, strokeWeight)
+// gained a multi-stop `ramp` sampled along loop progress. Build one from the old
+// single-value sugar so saved configs keep their look, and leave an existing
+// ramp untouched (idempotent). `accumulate` distinguishes the two old sugars:
+//  - opacity / strokeWeight were `value → end`, so they map to [value → end].
+//  - rotation / scaleX / scaleY were `(c + r) × value` (per-step accumulation),
+//    so the last clone sat at value × span; that becomes the [0 → value × span]
+//    endpoint, reproducing the old look at the saved grid size.
+function migrateAppearanceRamp(
+  prop: NumericProperty,
+  accumulate: boolean,
+  span: number,
+): NumericRamp {
+  if (isNumericRamp(prop.ramp)) return prop.ramp
+  if (accumulate) {
+    const endpoint = prop.value * span
+    return endpoint === 0 ? rampConstant(0) : rampFromTo(0, endpoint)
+  }
+  const end = prop.end ?? prop.value
+  return end === prop.value ? rampConstant(prop.value) : rampFromTo(prop.value, end)
+}
+
 export function normalizeConfig(config: LoopConfig): LoopConfig {
   const { cols, rows } = config
   const layers = config.layers ?? 1
@@ -45,16 +67,33 @@ export function normalizeConfig(config: LoopConfig): LoopConfig {
   const scaleXRandom = migrateRandomField(config.scaleXRandom, config.scaleX?.random)
   const scaleYRandom = migrateRandomField(config.scaleYRandom, config.scaleY?.random)
   const opacityRandom = migrateRandomField(config.opacityRandom, config.opacity?.random)
+  // Per-step accumulation reached `value × span` at the last clone (c + r max).
+  const span = Math.max(0, cols - 1) + Math.max(0, rows - 1)
   return {
     ...config,
+    // Keep a well-formed Spiral ramp; drop anything malformed so the engine
+    // falls back to the constant `angle`.
+    angleRamp: isNumericRamp(config.angleRamp) ? config.angleRamp : undefined,
     fill: legacyColorStopToRamp(config.fill as never),
     stroke: legacyColorStopToRamp(config.stroke as never),
     x: { ...config.x, random: 0 },
     y: { ...config.y, random: 0 },
-    rotation: { ...config.rotation, random: 0 },
-    scaleX: { ...config.scaleX, random: 0 },
-    scaleY: { ...config.scaleY, random: 0 },
-    opacity: { ...config.opacity, random: 0 },
+    rotation: {
+      ...config.rotation,
+      random: 0,
+      ramp: migrateAppearanceRamp(config.rotation, true, span),
+    },
+    scaleX: { ...config.scaleX, random: 0, ramp: migrateAppearanceRamp(config.scaleX, true, span) },
+    scaleY: { ...config.scaleY, random: 0, ramp: migrateAppearanceRamp(config.scaleY, true, span) },
+    opacity: {
+      ...config.opacity,
+      random: 0,
+      ramp: migrateAppearanceRamp(config.opacity, false, span),
+    },
+    strokeWeight: {
+      ...config.strokeWeight,
+      ramp: migrateAppearanceRamp(config.strokeWeight, false, span),
+    },
     columnAngle: migrateAxisField(config.columnAngle, cols, true),
     rowAngle: migrateAxisField(config.rowAngle, rows, true),
     layerAngle: migrateAxisField(config.layerAngle, layers, true),

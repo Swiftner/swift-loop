@@ -24,25 +24,15 @@ The first section. This is where you set the count.
 
 **Layers.** Depth layers (Z), 1 to 50. The grid becomes a Columns × Rows × Layers cube of clones. On its own it just stacks more copies in place — the 3D look comes from a formula (or a library preset like **Cube**) that reads the layer index `l`. Leave at 1 for a flat 2D pattern.
 
-**Spiral.** (In the Appearance section.) Degrees of per-cell rotation, applied to each clone's grid offset around the source center. Leave at 0 for straight lines and rectangular grids. Bump it 5 to 30 degrees and a line curls into a spiral, a grid swirls. Crank it past 90 to wrap the pattern back around on itself. Think "how much do successive cells lean".
+**Spiral.** (In the Appearance section.) Degrees of per-cell lean, applied to each clone's grid offset around the source center — think "how much do successive cells turn". Leave it flat at 0 for straight lines and rectangular grids; a flat line at 5 to 30 degrees curls a line into a spiral or swirls a grid. It's a **ramp**, so you can also start small and end large: the curl then tightens along the loop (a logarithmic-style spiral) instead of turning at a constant rate.
 
 **Twist / Scale / Fade / Random (per axis).** Each of Column, Row, and Layer carries these four as **ramps**, not single numbers. A ramp is a little curve with stops you drag: left to right is position along the axis (first clone → last), up and down is the value. Drag the dots, press the track to add a stop, or type an exact value in the number beside each stop. Twist adds rotation, Scale grows or shrinks, Fade drops opacity, Random adds seeded position jitter — each shaped across that axis by its stops. A flat line means no effect (a flat line above zero, for Random, means even jitter everywhere).
 
-## Transform
+## Position (X step / Y step)
 
-How each clone gets moved relative to the previous one.
+How far each clone moves from the previous one lives inside the **Column** and **Row** sections as **X step** and **Y step**. Drag X step right to spread the loop horizontally, Y step down to spread it vertically. Both are scaled to your selection (±2x the shape's width/height), so a 16-px icon and a 1200-px illustration get the same slider feel.
 
-All Transform sliders are scaled to your selection: ±2x the shape's width/height for X/Y, ±1x for Scale. A 16-px icon and a 1200-px illustration get the same slider feel, not the same absolute pixel range.
-
-**X.** Horizontal offset per step. Drag right to spread the loop horizontally.
-
-**Y.** Vertical offset per step. Drag down to spread it vertically.
-
-**Rotation.** Degrees of rotation added per step. 36 with `cols=10` gives a full 360 across the loop.
-
-**Scale X / Scale Y.** Per-step change to scale. A positive value means clones grow, a negative value means they shrink.
-
-Each of these has two numbers, a **start** and an **end**. Drag the right-side number to enable end interpolation, which makes the value transition from start to end across the whole loop. This is how you get fade-and-shrink effects.
+Rotation and size used to live here as per-step sliders. They now live in **Appearance** as ramps — see below.
 
 ## Modulation
 
@@ -56,17 +46,23 @@ Where things stop being grids and start being interesting. See [Modulation](./mo
 
 ## Appearance
 
-Color and opacity stuff.
+Each clone's look. Every numeric row here is a **ramp** — the same little curve as the per-axis Twist/Scale/Fade: stops you drag along the loop (left = first clone, right = last), up and down is the value. Press the track to add a stop, drag a dot to move it, type an exact value beside each stop, right-click a dot (or its `×`) to remove it. A flat line means "the same everywhere". Every row also has an **`fx`** button — see Formula mode below.
 
-**Opacity.** Per-clone opacity. Has start/end like Transform.
+**Spiral.** Per-cell lean of the grid offset (see Iterations above). As a ramp, a small→large curve tightens the spiral along the loop; a flat line is a uniform spiral.
 
-**Fill.** Optional gradient between two colors, applied across the loop. Click the swatch to enable.
+**Rotation.** Degrees of clone rotation, shaped along the loop. A `0 → 90` ramp turns later clones progressively.
 
-**Stroke.** Same idea but for the stroke color. Click to enable.
+**Size X / Size Y.** Pixel change to each clone's size, shaped along the loop. Positive grows, negative shrinks. Scaled to your selection.
 
-**Stroke weight.** Per-clone stroke weight. Start/end supported.
+**Opacity.** Per-clone opacity (%), shaped along the loop. A `100 → 0` ramp fades the loop out.
 
-**Easing chip.** Top-right of the section. Controls how start-to-end interpolations curve. `linear` is uniform, `ease` is smooth in and out, `easeIn` accelerates, `easeOut` decelerates.
+**Fill.** Optional colour gradient. Click the strip to add a stop, click a stop to recolour. Swept across the loop (or by an `fx` factor — see below).
+
+**Stroke.** Same idea, for the stroke colour.
+
+**Stroke width.** Per-clone stroke weight, shaped along the loop.
+
+**Easing chip.** Top-right of the section. It curves the **colour** sweep (Fill / Stroke) across the loop — `linear`, `ease`, `easeIn`, `easeOut`. The numeric ramps shape themselves with their own stops, so easing doesn't touch them.
 
 ## History
 
@@ -86,7 +82,7 @@ Bottom of the sidebar.
 
 ## Formula mode (`fx`)
 
-Top-right corner of the plugin. The `fx` pill toggles formula mode. When it's on, every transform property turns into a free-form math expression you can edit. See [Formulas for designers](./formulas.md) for the gentle introduction.
+Every ramp and gradient row has its own little **`fx`** button. Press it to reveal a formula box: type a free-form math expression and it takes over that one property, leaving the rest as-is. For a numeric row the formula *is* the value (e.g. `rotation = t * 90`); for a colour gradient it returns a `0..1` position to sample along the stops (e.g. `t`, `tx`, `rand()`). Clearing the box hands control back to the stops — the ramp is kept the whole time, so toggling fx never loses your curve or your formula. Library patterns lean on this to express themselves. See [Formulas for designers](./formulas.md) for the gentle introduction.
 
 ## Snapshots and undo
 

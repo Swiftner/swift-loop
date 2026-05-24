@@ -134,10 +134,9 @@ async function fullRegen(
       },
       fill: config.fill,
       stroke: config.stroke,
-      strokeWeight: config.strokeWeight,
+      strokeWeight: cell.strokeWeight,
       fillFactor: cell.fillFactor,
       strokeFactor: cell.strokeFactor,
-      strokeWeightFactor: cell.strokeWeightFactor,
       dirty: new Set<string>([
         'x',
         'y',
@@ -212,10 +211,9 @@ async function inPlaceMutation(
       },
       fill: config.fill,
       stroke: config.stroke,
-      strokeWeight: config.strokeWeight,
+      strokeWeight: cell.strokeWeight,
       fillFactor: cell.fillFactor,
       strokeFactor: cell.strokeFactor,
-      strokeWeightFactor: cell.strokeWeightFactor,
       dirty,
     })
   }

@@ -51,54 +51,21 @@ describe('formulaForProperty (sugar generation)', () => {
     expect(formulaForProperty(c, 'x')).toBe('x = r * 7')
   })
 
-  it('rotation uses (c + r)', () => {
-    const c = baseConfig()
-    c.rows = 3
-    expect(formulaForProperty(c, 'rotation')).toBe('rotation = (c + r) * 5')
+  // rotation / scaleX / scaleY / opacity now carry a multi-stop ramp sampled in
+  // cells.ts; their sugar is an inert placeholder so the compiled formula is only
+  // ever consulted in fx (unlocked) mode. The sinusoidal layer + the start→end /
+  // (c + r) curves they used to encode are now the ramp's job (see cells.test).
+  it('appearance props compile to an inert sugar (ramp drives them)', () => {
+    for (const p of ['rotation', 'scaleX', 'scaleY', 'opacity'] as const) {
+      expect(formulaForProperty(baseConfig(), p)).toBe(`${p} = 0`)
+    }
   })
 
-  it('opacity start->end with linear easing', () => {
+  it('unlocked appearance formula passes through, expanding its own placeholder', () => {
     const c = baseConfig()
-    c.opacity = { value: 100, end: 0, random: 0, unlocked: false, formula: null }
-    expect(formulaForProperty(c, 'opacity')).toBe('opacity = 100 + t * (0 - 100)')
-  })
-
-  it('opacity end with easeOut', () => {
-    const c = baseConfig()
-    c.opacity = { value: 100, end: 0, random: 0, unlocked: false, formula: null }
-    c.easing = 'easeOut'
-    expect(formulaForProperty(c, 'opacity')).toBe('opacity = 100 + easeOut(t) * (0 - 100)')
-  })
-
-  it('grid both-axis opacity interp uses (tx + ty) / 2', () => {
-    const c = baseConfig()
-    c.cols = 3
-    c.rows = 3
-    c.opacity = { value: 100, end: 0, random: 0, unlocked: false, formula: null }
-    expect(formulaForProperty(c, 'opacity')).toBe('opacity = 100 + (tx + ty) / 2 * (0 - 100)')
-  })
-
-  it('random appended to x', () => {
-    const c = baseConfig()
-    c.x.random = 5
-    expect(formulaForProperty(c, 'x')).toBe('x = c * 10 + (rand() - 0.5) * 2 * 5')
-  })
-
-  it('sinusoidal appended to rotation', () => {
-    const c = baseConfig()
-    c.rotationSinusoidal = { amplitude: 8, frequency: 0.5, phase: 0 }
-    expect(formulaForProperty(c, 'rotation')).toBe(
-      'rotation = (c + r) * 5 + 8 * sin((c + r) * 0.5 + 0)',
-    )
-  })
-
-  it('random + sinusoidal compose', () => {
-    const c = baseConfig()
-    c.rotation.random = 3
-    c.rotationSinusoidal = { amplitude: 8, frequency: 0.5, phase: 0 }
-    expect(formulaForProperty(c, 'rotation')).toBe(
-      'rotation = (c + r) * 5 + 8 * sin((c + r) * 0.5 + 0) + (rand() - 0.5) * 2 * 3',
-    )
+    // rotation.value is 5, so {rotation:18} expands to 5 (the live slider value).
+    c.rotation = { ...c.rotation, unlocked: true, formula: 'rotation = c * {rotation:18}' }
+    expect(formulaForProperty(c, 'rotation')).toBe('rotation = c * 5')
   })
 
   it('unlocked formula passes through verbatim', () => {
@@ -120,17 +87,23 @@ describe('compileConfig', () => {
     expect(typeof cf.opacity.evaluate).toBe('function')
   })
 
-  it('linear-mode rotation reduces to today behavior (r=0 -> step * c)', () => {
-    const c = baseConfig()
-    const cf = compileConfig(c)
+  it('x step compiles to the per-column sugar (c * dx)', () => {
+    const cf = compileConfig(baseConfig())
     for (const col of [0, 1, 2, 3, 4]) {
       const scope = buildScope(
         { cols: 5, rows: 1, seed: 1, sourceWidth: 0, sourceHeight: 0 },
         col,
         0,
       )
-      expect(cf.rotation.evaluate(scope, 'rotation')).toBe(col * 5)
+      expect(cf.x.evaluate(scope, 'x')).toBe(col * 10)
     }
+  })
+
+  it('appearance props compile to an inert 0 in sugar mode (cells samples the ramp)', () => {
+    const cf = compileConfig(baseConfig())
+    const scope = buildScope({ cols: 5, rows: 1, seed: 1, sourceWidth: 0, sourceHeight: 0 }, 2, 0)
+    expect(cf.rotation.evaluate(scope, 'rotation')).toBe(0)
+    expect(cf.opacity.evaluate(scope, 'opacity')).toBe(0)
   })
 
   it('parse error in unlocked formula throws', () => {

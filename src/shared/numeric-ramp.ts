@@ -35,8 +35,8 @@ export function sampleNumericRamp(ramp: NumericRamp | undefined, t: number, fall
   return fallback
 }
 
-// The 2-stop shape a fresh Twist/Scale/Fade control starts in and that a legacy
-// scalar migrates into: `start` at position 0, `end` at position 1.
+// A 2-stop ramp: `start` at position 0, `end` at position 1. Used when a legacy
+// scalar carried real variation across the loop.
 export function rampFromTo(start: number, end: number): NumericRamp {
   return {
     stops: [
@@ -44,6 +44,13 @@ export function rampFromTo(start: number, end: number): NumericRamp {
       { value: end, position: 1 },
     ],
   }
+}
+
+// The shape a fresh ramp starts in: a single stop, i.e. one constant value the
+// whole way. The user presses the track to add more stops and turn it into a
+// curve. sampleNumericRamp returns this value at every t.
+export function rampConstant(value: number): NumericRamp {
+  return { stops: [{ value, position: 0 }] }
 }
 
 // True when a ramp has no effect on output (absent, empty, or all-zero) — lets

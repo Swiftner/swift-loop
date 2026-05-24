@@ -59,19 +59,16 @@ describe('grid cell layout', () => {
     }
   })
 
-  it('rotation accumulator uses (c + r)', () => {
-    const c = cfg(3, 3)
-    const cf = compileConfig(c)
-    const s = buildScope({ cols: 3, rows: 3, seed: 1, sourceWidth: 0, sourceHeight: 0 }, 2, 2)
-    expect(cf.rotation.evaluate(s, 'rotation')).toBe(4 * 4) // (2+2) * 4
-  })
+  // rotation is now a multi-stop ramp sampled along loop progress, not a
+  // compiled (c + r) accumulator — see cells.test for the ramp-driven behavior.
 
   it('1x1 grid: scope works without divide-by-zero', () => {
     const c = cfg(1, 1)
     const cf = compileConfig(c)
     const s = buildScope({ cols: 1, rows: 1, seed: 1, sourceWidth: 0, sourceHeight: 0 }, 0, 0)
+    // The per-step sugar still resolves to 0 with a single cell (c = r = 0).
     expect(cf.x.evaluate(s, 'x')).toBe(0)
-    expect(cf.opacity.evaluate(s, 'opacity')).toBe(100)
+    expect(cf.y.evaluate(s, 'y')).toBe(0)
   })
 })
 

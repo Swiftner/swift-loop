@@ -33,10 +33,17 @@ export type EasingKind = 'linear' | 'ease' | 'easeIn' | 'easeOut'
 
 export interface NumericProperty {
   value: number
-  end: number | null // null = no end interpolation
+  end: number | null // null = no end interpolation (legacy sugar; superseded by `ramp`)
   random: number // ± range; 0 = disabled
-  unlocked: boolean // true = use `formula` instead of sugar
+  unlocked: boolean // true = use `formula` instead of the ramp
   formula: string | null // freeform formula, used when unlocked
+  // Multi-stop sugar for the appearance properties (rotation, scaleX, scaleY,
+  // opacity, strokeWeight): a curve sampled along loop progress, edited with the
+  // same NumericRampRow as the per-axis ramps. `unlocked`/`formula` stay as the
+  // fx escape hatch — the ramp is preserved when fx is on and vice-versa, so
+  // toggling never drops either. Absent on the per-step props (x, y), which keep
+  // the single-value `value` sugar.
+  ramp?: NumericRamp
 }
 
 export interface ScalarProperty extends NumericProperty {
@@ -64,6 +71,11 @@ export interface LoopConfig {
   // grid offset (values.x, values.y) post-formula. Cell i is rotated by
   // angle * i degrees, so a 1-row line + nonzero angle traces a spiral.
   angle: number
+  // Optional multi-stop ramp for the Spiral lean, sampled along loop progress
+  // (t). When present it supersedes `angle`: cell i is rotated by ramp(t_i) * i,
+  // so a small→large ramp curls a line into a tightening spiral. Absent = the
+  // constant `angle` (a flat ramp = today's uniform spiral, byte-identical).
+  angleRamp?: NumericRamp
 
   // Per-axis transforms (additive post-process; absent = no effect, so configs
   // that predate these render identically). Column step is `x` and Row step is

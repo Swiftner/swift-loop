@@ -6,7 +6,6 @@ import type {
   FormulaProperty,
   LoopConfig,
   NumericProperty,
-  ScalarProperty,
 } from '../../shared/types'
 import { compileFormula } from './evaluate'
 
@@ -35,33 +34,16 @@ function baseSugarFor(property: FormulaProperty, config: LoopConfig): string {
       return `${xIdx} * ${p.value}`
     case 'y':
       return `${yIdx} * ${p.value}`
+    // rotation / scaleX / scaleY / opacity carry a multi-stop ramp now; their
+    // sugar value is sampled directly in cells.ts (along with the sinusoidal
+    // layer). The compiled formula is only consulted when the property is
+    // `unlocked` (fx), so the sugar branch is an inert placeholder.
     case 'rotation':
-      return `(c + r) * ${p.value}`
     case 'scaleX':
-      return `(c + r) * ${p.value}`
     case 'scaleY':
-      return `(c + r) * ${p.value}`
-    case 'opacity': {
-      if (p.end === null) return `${p.value}`
-      const f = lerpTerm(config.easing, interpFactor(config))
-      return `${p.value} + ${f} * (${p.end} - ${p.value})`
-    }
+    case 'opacity':
+      return '0'
   }
-}
-
-function sinusoidalLayerFor(property: FormulaProperty, config: LoopConfig): string | null {
-  let layer
-  if (property === 'rotation') layer = config.rotationSinusoidal
-  else if (property === 'scaleX' || property === 'scaleY') layer = config.scaleSinusoidal
-  else return null
-  if (layer.amplitude === 0) return null
-  return `${layer.amplitude} * sin((c + r) * ${layer.frequency} + ${layer.phase})`
-}
-
-function randomLayerFor(property: FormulaProperty, config: LoopConfig): string | null {
-  const p = config[property] as NumericProperty
-  if (p.random === 0) return null
-  return `(rand() - 0.5) * 2 * ${p.random}`
 }
 
 // `{x}` / `{x:200}` placeholders in a formula are replaced with the property's
@@ -89,12 +71,7 @@ export function formulaForProperty(config: LoopConfig, property: FormulaProperty
   if (p.unlocked && p.formula !== null) {
     return expandPlaceholders(p.formula, property, p.value)
   }
-  const parts: string[] = [baseSugarFor(property, config)]
-  const sin = sinusoidalLayerFor(property, config)
-  if (sin) parts.push(sin)
-  const rand = randomLayerFor(property, config)
-  if (rand) parts.push(rand)
-  return `${property} = ${parts.join(' + ')}`
+  return `${property} = ${baseSugarFor(property, config)}`
 }
 
 const PROPERTIES: FormulaProperty[] = ['x', 'y', 'rotation', 'scaleX', 'scaleY', 'opacity']
@@ -108,12 +85,11 @@ export function factorForColorStop(config: LoopConfig, ramp: ColorRamp): string 
   return defaultFactorFormula(config)
 }
 
-export function factorForScalar(config: LoopConfig, scalar: ScalarProperty): string {
-  if (scalar.unlocked && scalar.formula != null) return scalar.formula
-  return defaultFactorFormula(config)
-}
-
 export interface CompiledFactors {
+  // fill / stroke compile to a 0..1 lerp *factor* (position along the colour
+  // ramp). strokeWeight compiles to the stroke weight *value* directly, like the
+  // other numeric appearance props — null when not unlocked, so cells.ts samples
+  // its ramp instead.
   fill: CompiledFormula | null
   stroke: CompiledFormula | null
   strokeWeight: CompiledFormula | null
@@ -131,7 +107,7 @@ export function compileFactors(config: LoopConfig): CompiledFactors {
         : null,
     strokeWeight:
       config.strokeWeight.unlocked && config.strokeWeight.formula != null
-        ? compileFormula(config.strokeWeight.formula, 'strokeWeightFactor')
+        ? compileFormula(config.strokeWeight.formula, 'strokeWeight')
         : null,
   }
 }

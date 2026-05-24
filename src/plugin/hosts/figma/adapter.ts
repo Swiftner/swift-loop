@@ -3,13 +3,7 @@
 // All Figma-specific quirks (rotation-around-top-left compensation, dynamic-page
 // loadAllPagesAsync, ExportMixin guards) live here and nowhere else in src/plugin/**.
 
-import type {
-  ColorRGB,
-  HostAdapter,
-  NodeId,
-  NodeSnapshot,
-  TransformPatch,
-} from '../host'
+import type { ColorRGB, HostAdapter, NodeId, NodeSnapshot, TransformPatch } from '../host'
 
 const SUPPORTED_SELECTION_TYPES = new Set([
   'VECTOR',

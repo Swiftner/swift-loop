@@ -1,6 +1,8 @@
 // src/shared/defaults.ts
+import { rampConstant } from './numeric-ramp'
 import type { LoopConfig, NumericProperty, ScalarProperty } from './types'
 
+// The per-step properties (x, y): a single value, no curve.
 const num = (value: number): NumericProperty => ({
   value,
   end: null,
@@ -8,13 +10,14 @@ const num = (value: number): NumericProperty => ({
   unlocked: false,
   formula: null,
 })
-const scalar = (value: number): ScalarProperty => ({
-  value,
-  end: null,
-  random: 0,
-  unlocked: false,
-  formula: null,
+// The appearance properties (rotation, scaleX, scaleY, opacity, strokeWeight):
+// a multi-stop curve sampled along loop progress. Seeded as a single constant
+// stop at `value` — one value the whole way until the user adds stops.
+const ramped = (value: number): NumericProperty => ({
+  ...num(value),
+  ramp: rampConstant(value),
 })
+const scalar = (value: number): ScalarProperty => ramped(value)
 
 // Defaults aim for an immediately readable grid: dragging Cols/Rows or any
 // Transform slider should feel like it's already "doing something" instead of
@@ -26,10 +29,10 @@ export const DEFAULT_CONFIG: LoopConfig = {
   angle: 0,
   x: num(60),
   y: num(60),
-  rotation: num(0),
-  scaleX: num(0),
-  scaleY: num(0),
-  opacity: num(100),
+  rotation: ramped(0),
+  scaleX: ramped(0),
+  scaleY: ramped(0),
+  opacity: ramped(100),
   fill: { stops: [] },
   stroke: { stops: [] },
   strokeWeight: scalar(1),
@@ -51,7 +54,7 @@ export const RESET_CONFIG: LoopConfig = {
   angle: 0,
   x: num(0),
   y: num(0),
-  rotation: num(0),
-  scaleX: num(0),
-  scaleY: num(0),
+  rotation: ramped(0),
+  scaleX: ramped(0),
+  scaleY: ramped(0),
 }

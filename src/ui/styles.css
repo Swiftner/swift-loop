@@ -544,6 +544,68 @@ body,
   box-shadow: 0 0 0 2px var(--accent);
 }
 
+/* fx escape hatch on a ramp row — mirrors the gradient editor's fx toggle. */
+.numeric-ramp-fx {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-style: italic;
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  padding: 0 4px;
+  cursor: pointer;
+  position: relative;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  flex: none;
+}
+.numeric-ramp-fx::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  bottom: -3px;
+  border-bottom: 1px solid var(--muted);
+  opacity: 0;
+  transition: opacity 120ms ease, border-color 120ms ease;
+}
+.numeric-ramp-fx:hover {
+  color: var(--fg);
+}
+.numeric-ramp-fx:hover::after {
+  opacity: 1;
+  border-color: var(--fg);
+}
+.numeric-ramp.is-fx .numeric-ramp-fx {
+  color: var(--accent);
+}
+.numeric-ramp.is-fx .numeric-ramp-fx::after {
+  opacity: 1;
+  border-color: var(--accent);
+}
+/* When a formula is in charge, the ramp is inert (preserved, not driving). Dim
+   the curve so it reads as a fallback rather than the live value. */
+.numeric-ramp.is-fx .numeric-ramp-line polyline,
+.numeric-ramp.is-fx .numeric-ramp-dot::after {
+  opacity: 0.3;
+}
+.numeric-ramp-formula {
+  display: block;
+  margin-top: 6px;
+  width: 100%;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--fg);
+  background: var(--bg);
+  border: 1px solid var(--accent);
+  border-radius: 2px;
+  padding: 4px 6px;
+  outline: none;
+  resize: vertical;
+  min-height: 22px;
+}
+
 /* One-line plain-language summary under a section title. */
 .section-hint {
   margin: -2px 0 8px;
@@ -1046,100 +1108,6 @@ body,
 .appearance-strip.is-fx .appearance-strip-fx::after {
   opacity: 1;
   border-color: var(--accent);
-}
-
-/* Row: [start col] [bar] [end col] in a 3-col grid */
-.appearance-strip-row {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  column-gap: 6px;
-}
-.appearance-strip-col {
-  display: flex;
-  align-items: center;
-  height: 24px;
-}
-.appearance-strip-col.is-start {
-  justify-content: flex-start;
-}
-.appearance-strip-col.is-end {
-  justify-content: flex-end;
-}
-
-.appearance-strip-bar {
-  position: relative;
-  height: 24px;
-  border-radius: 2px;
-  background: var(--strip-bg, var(--bg));
-  border: 1px solid var(--hairline);
-  overflow: hidden;
-  isolation: isolate;
-}
-/* Cell-grid texture overlay on every bar */
-.appearance-strip-bar::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: repeating-linear-gradient(
-    to right,
-    transparent 0,
-    transparent calc(100% / 12 - 1px),
-    rgba(255, 255, 255, 0.55) calc(100% / 12 - 1px),
-    rgba(255, 255, 255, 0.55) calc(100% / 12)
-  );
-  pointer-events: none;
-  mix-blend-mode: overlay;
-  z-index: 1;
-}
-/* Opacity bar: transparency checker behind the dark fade */
-.appearance-strip-bar.is-opacity {
-  background-color: var(--bg);
-  background-image: var(--strip-bg, none),
-    repeating-conic-gradient(
-      from 0deg at 0 0,
-      rgba(var(--swatch-ink-rgb), 0.1) 0% 25%,
-      transparent 25% 50%,
-      rgba(var(--swatch-ink-rgb), 0.1) 50% 75%,
-      transparent 75% 100%
-    );
-  background-size: 100% 100%, 6px 6px;
-}
-.appearance-strip-curve {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 2;
-}
-.appearance-strip-curve path {
-  fill: none;
-  stroke: var(--curve-ink);
-  stroke-width: 1;
-  stroke-dasharray: 2 3;
-  vector-effect: non-scaling-stroke;
-}
-.appearance-strip.is-fx .appearance-strip-curve path {
-  stroke: var(--accent);
-  stroke-width: 1.5;
-  stroke-dasharray: none;
-}
-.appearance-strip-bar.is-opacity .appearance-strip-curve path {
-  stroke: rgba(255, 255, 255, 0.75);
-  mix-blend-mode: difference;
-}
-.appearance-strip-wedge {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
-}
-.appearance-strip-wedge polygon {
-  fill: var(--fg);
-  opacity: 0.85;
 }
 
 /* Gradient ramp editor */

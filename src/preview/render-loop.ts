@@ -52,12 +52,7 @@ export function renderLoop(opts: RenderLoopOptions): SVGGElement {
 
     const fill = colorAt(config.fill, cell.fillFactor)
     const stroke = colorAt(config.stroke, cell.strokeFactor)
-    const sw =
-      stroke != null
-        ? config.strokeWeight.value +
-          cell.strokeWeightFactor *
-            ((config.strokeWeight.end ?? config.strokeWeight.value) - config.strokeWeight.value)
-        : 0
+    const sw = stroke != null ? Math.max(0, cell.strokeWeight) : 0
 
     g.appendChild(makeClone(x, y, w, h, cell.rotation, op, fill, stroke, sw, shape, keepColors))
   }

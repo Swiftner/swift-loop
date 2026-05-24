@@ -11,13 +11,7 @@
 // adapter is unit-testable with a fake.
 
 import type { Board, Group, Penpot, Shape } from '@penpot/plugin-types'
-import type {
-  ColorRGB,
-  HostAdapter,
-  NodeId,
-  NodeSnapshot,
-  TransformPatch,
-} from '../host'
+import type { ColorRGB, HostAdapter, NodeId, NodeSnapshot, TransformPatch } from '../host'
 
 // Penpot shape types Swift Loop can loop. Mirrors the Figma intent
 // (vector/shape/text/group) in Penpot's lowercase vocabulary.

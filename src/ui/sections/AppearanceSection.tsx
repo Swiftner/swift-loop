@@ -1,15 +1,9 @@
-import {
-  factorForColorStop,
-  factorForScalar,
-  formulaForProperty,
-} from '../../plugin/engine/compile'
-import type { EasingKind, FormulaProperty, LoopConfig, NumericProperty } from '../../shared/types'
+import { factorForColorStop } from '../../plugin/engine/compile'
+import { rampConstant } from '../../shared/numeric-ramp'
+import type { EasingKind, LoopConfig, NumericProperty, NumericRamp } from '../../shared/types'
 import { GradientRampEditor } from '../components/GradientRampEditor'
-import { ScrubNum } from '../components/ScrubNum'
+import { NumericRampRow } from '../components/NumericRampRow'
 import { Section } from '../components/Section'
-import { SliderRow } from '../components/SliderRow'
-import { Strip } from '../components/Strip'
-import { rewriteTrailingScale } from '../formula-scale'
 import { sliderRangeFor } from '../slider-ranges'
 
 interface Props {
@@ -20,41 +14,68 @@ interface Props {
 
 const EASINGS: EasingKind[] = ['linear', 'ease', 'easeIn', 'easeOut']
 
-// The per-clone look: how big each clone is (Size), how it's turned (Rotation),
-// how see-through it is (Opacity), and its Fill / Stroke. These ride underneath
-// the per-axis ramps in Column / Row / Layer. Each numeric row accepts a
-// formula; Easing sets the curve the start→end ramps follow.
-const BASE_ROWS: { key: FormulaProperty; label: string; unit?: string }[] = [
-  { key: 'rotation', label: 'Rotation', unit: '°' },
-  { key: 'scaleX', label: 'Size X', unit: 'px' },
-  { key: 'scaleY', label: 'Size Y', unit: 'px' },
-]
-
-// Drives a slider value into a NumericProperty without destroying an active
-// library formula (mirrors the axis sections).
-function computeSliderUpdate(cur: NumericProperty, v: number): NumericProperty {
-  if (!cur.unlocked) return { ...cur, value: v, unlocked: false, formula: null }
-  const rewritten = cur.formula ? rewriteTrailingScale(cur.formula, v) : null
-  if (rewritten) return { ...cur, value: v, formula: rewritten }
-  return { ...cur, value: v }
-}
+// The numeric appearance properties carrying a multi-stop ramp. Each is edited
+// with the same curve UI as the per-axis Scale/Fade ramps, plus an fx escape
+// hatch. Size X/Y and Rotation take their range from the source size (so a tiny
+// icon and a big illustration feel alike); Opacity and Stroke width are fixed.
+type RampKey = 'rotation' | 'scaleX' | 'scaleY' | 'opacity' | 'strokeWeight'
 
 export function AppearanceSection({ config, update, sourceSize }: Props) {
-  const opacityFormulaActive = !!config.opacity.unlocked
-  const fillFormulaActive = !!config.fill.unlocked
-  const strokeFormulaActive = !!config.stroke.unlocked
-  const widthFormulaActive = !!config.strokeWeight.unlocked
+  // Drive a ramp edit into a property, keeping its fx formula intact.
+  const setRamp = (key: RampKey) => (next: NumericRamp, commit: boolean) =>
+    update({ ...config, [key]: { ...config[key], ramp: next } }, commit)
 
-  const opacityStart = config.opacity.value
-  const opacityEnd = config.opacity.end ?? config.opacity.value
-  const widthStart = config.strokeWeight.value
-  const widthEnd = config.strokeWeight.end ?? config.strokeWeight.value
+  // fx: an empty formula clears back to the ramp (unlocked:false); any text
+  // takes over the value. The ramp is left untouched so toggling loses nothing.
+  const setFormula = (key: RampKey) => (text: string) => {
+    const p = config[key] as NumericProperty
+    const trimmed = text.trim()
+    update(
+      {
+        ...config,
+        [key]:
+          trimmed === ''
+            ? { ...p, unlocked: false, formula: null }
+            : { ...p, unlocked: true, formula: text },
+      },
+      false,
+    )
+  }
+
+  const rampRow = (
+    key: RampKey,
+    label: string,
+    range: { min: number; max: number; step: number },
+    opts: { unit?: string; decimals?: number } = {},
+  ) => {
+    const p = config[key] as NumericProperty
+    // When fx isn't active yet, seed the box with the current value as an
+    // editable starting formula (e.g. `opacity = 100`) instead of a blank field.
+    const live = p.ramp?.stops.length ? p.ramp.stops[0].value : p.value
+    const formula = p.unlocked ? (p.formula ?? '') : `${key} = ${live}`
+    return (
+      <NumericRampRow
+        key={key}
+        label={label}
+        ramp={p.ramp}
+        min={range.min}
+        max={range.max}
+        step={range.step}
+        decimals={opts.decimals}
+        unit={opts.unit}
+        onChange={setRamp(key)}
+        formula={formula}
+        formulaActive={p.unlocked}
+        onFormulaChange={setFormula(key)}
+      />
+    )
+  }
 
   return (
     <Section
       id="appearance"
       title="Appearance"
-      hint="Each clone's base look — size, rotation, colour, opacity."
+      hint="Each clone's look — ramps along the loop. Drag a dot, press to add a stop."
       defaultOpen
       chip={
         <EasingChip
@@ -63,106 +84,44 @@ export function AppearanceSection({ config, update, sourceSize }: Props) {
         />
       }
     >
-      {/* Spiral: rotates every clone's grid offset by angle × index, curling a
-          line into a spiral or swirling a grid. Global (not per-axis), so it
-          lives here with the other whole-loop transforms. */}
-      <SliderRow
+      {/* Spiral: rotates clone i's grid offset by angle × i. As a ramp the angle
+          varies along the loop, so a small→large curve curls a line into a
+          tightening spiral. A flat line is the classic uniform spiral. When no
+          ramp is set yet, show the constant `angle` as a flat line. */}
+      <NumericRampRow
         label="Spiral"
-        value={config.angle}
-        min={-180}
-        max={180}
-        step={0.1}
+        ramp={config.angleRamp ?? rampConstant(config.angle)}
+        // Per-cell lean, multiplied by the cell index — so a few degrees already
+        // makes a full turn over a typical loop. Keep the range small so the
+        // control is fine rather than flinging clones off-canvas.
+        min={-45}
+        max={45}
+        step={0.5}
+        decimals={1}
         unit="°"
-        onChange={(v, commit) => update({ ...config, angle: v }, commit)}
+        onChange={(next, commit) => update({ ...config, angleRamp: next }, commit)}
       />
-      {/* Base transforms (each formula-capable) */}
-      {BASE_ROWS.map((row) => {
-        const cur = config[row.key]
-        const range = sliderRangeFor(row.key, sourceSize)
-        return (
-          <SliderRow
-            key={row.key}
-            label={row.label}
-            value={cur.value}
-            min={range.min}
-            max={range.max}
-            step={range.step}
-            unit={row.unit}
-            formulaIndicator={cur.unlocked}
-            formula={formulaForProperty(config, row.key)}
-            onFormulaChange={(text) => {
-              const trimmed = text.trim()
-              update(
-                {
-                  ...config,
-                  [row.key]:
-                    trimmed === ''
-                      ? { ...cur, unlocked: false, formula: null }
-                      : { ...cur, unlocked: true, formula: text },
-                },
-                false,
-              )
-            }}
-            onChange={(v, commit) =>
-              update({ ...config, [row.key]: computeSliderUpdate(cur, v) }, commit)
-            }
-          />
-        )
-      })}
 
-      {/* Opacity */}
-      <Strip
-        label="Opacity"
-        barClass="is-opacity"
-        barBackground={`linear-gradient(to right, rgba(var(--swatch-ink-rgb), ${opacityStart / 100}), rgba(var(--swatch-ink-rgb), ${opacityEnd / 100}))`}
-        startCol={
-          <ScrubNum
-            value={opacityStart}
-            min={0}
-            max={100}
-            step={1}
-            unit="%"
-            onChange={(v, commit) =>
-              update({ ...config, opacity: { ...config.opacity, value: v } }, commit)
-            }
-          />
-        }
-        endCol={
-          <ScrubNum
-            value={opacityEnd}
-            min={0}
-            max={100}
-            step={1}
-            unit="%"
-            onChange={(v, commit) =>
-              update({ ...config, opacity: { ...config.opacity, end: v } }, commit)
-            }
-          />
-        }
-        easing={config.easing}
-        formulaActive={opacityFormulaActive}
-        formula={formulaForProperty(config, 'opacity')}
-        onFormulaChange={(text) => {
-          const trimmed = text.trim()
-          update(
-            {
-              ...config,
-              opacity:
-                trimmed === ''
-                  ? { ...config.opacity, unlocked: false, formula: null }
-                  : { ...config.opacity, unlocked: true, formula: text },
-            },
-            false,
-          )
-        }}
-      />
+      {rampRow('rotation', 'Rotation', sliderRangeFor('rotation', sourceSize), {
+        unit: '°',
+        decimals: 1,
+      })}
+      {rampRow('scaleX', 'Size X', sliderRangeFor('scaleX', sourceSize), {
+        unit: 'px',
+        decimals: 1,
+      })}
+      {rampRow('scaleY', 'Size Y', sliderRangeFor('scaleY', sourceSize), {
+        unit: 'px',
+        decimals: 1,
+      })}
+      {rampRow('opacity', 'Opacity', { min: 0, max: 100, step: 1 }, { unit: '%' })}
 
       {/* Fill */}
       <GradientRampEditor
         label="Fill"
         ramp={config.fill}
         onChange={(next, commit) => update({ ...config, fill: next }, commit)}
-        formulaActive={fillFormulaActive}
+        formulaActive={!!config.fill.unlocked}
         formula={factorForColorStop(config, config.fill)}
         onFormulaChange={(text) => {
           const trimmed = text.trim()
@@ -184,7 +143,7 @@ export function AppearanceSection({ config, update, sourceSize }: Props) {
         label="Stroke"
         ramp={config.stroke}
         onChange={(next, commit) => update({ ...config, stroke: next }, commit)}
-        formulaActive={strokeFormulaActive}
+        formulaActive={!!config.stroke.unlocked}
         formula={factorForColorStop(config, config.stroke)}
         onFormulaChange={(text) => {
           const trimmed = text.trim()
@@ -201,67 +160,7 @@ export function AppearanceSection({ config, update, sourceSize }: Props) {
         }}
       />
 
-      {/* Stroke width */}
-      <Strip
-        label="Stroke width"
-        barClass="has-wedge"
-        barOverlay={
-          <svg
-            class="appearance-strip-wedge"
-            viewBox="0 0 100 24"
-            preserveAspectRatio="none"
-            aria-hidden="true"
-          >
-            <polygon points={wedgePoints(widthStart, widthEnd)} />
-          </svg>
-        }
-        startCol={
-          <ScrubNum
-            value={widthStart}
-            min={0}
-            max={50}
-            step={0.5}
-            decimals={1}
-            onChange={(v, commit) =>
-              update(
-                { ...config, strokeWeight: { ...config.strokeWeight, value: Math.max(0, v) } },
-                commit,
-              )
-            }
-          />
-        }
-        endCol={
-          <ScrubNum
-            value={widthEnd}
-            min={0}
-            max={50}
-            step={0.5}
-            decimals={1}
-            onChange={(v, commit) =>
-              update(
-                { ...config, strokeWeight: { ...config.strokeWeight, end: Math.max(0, v) } },
-                commit,
-              )
-            }
-          />
-        }
-        easing={config.easing}
-        formulaActive={widthFormulaActive}
-        formula={factorForScalar(config, config.strokeWeight)}
-        onFormulaChange={(text) => {
-          const trimmed = text.trim()
-          update(
-            {
-              ...config,
-              strokeWeight:
-                trimmed === ''
-                  ? { ...config.strokeWeight, unlocked: false, formula: null }
-                  : { ...config.strokeWeight, unlocked: true, formula: text },
-            },
-            false,
-          )
-        }}
-      />
+      {rampRow('strokeWeight', 'Stroke width', { min: 0, max: 50, step: 0.5 }, { decimals: 1 })}
     </Section>
   )
 }
@@ -303,16 +202,4 @@ function EasingGlyph({ easing }: { easing: EasingKind }) {
       <path d={paths[easing]} />
     </svg>
   )
-}
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function wedgePoints(start: number, end: number): string {
-  const sH = Math.min(22, Math.max(1, start * 2))
-  const eH = Math.min(22, Math.max(1, end * 2))
-  const sTop = 12 - sH / 2
-  const sBot = 12 + sH / 2
-  const eTop = 12 - eH / 2
-  const eBot = 12 + eH / 2
-  return `4,${sTop.toFixed(1)} 96,${eTop.toFixed(1)} 96,${eBot.toFixed(1)} 4,${sBot.toFixed(1)}`
 }
