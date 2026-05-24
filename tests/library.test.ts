@@ -51,6 +51,22 @@ describe('library entries', () => {
         }
       })
 
+      it('shipped ramps have finite values and positions in [0, 1]', () => {
+        const ramps: Record<string, { stops?: { value: number; position: number }[] }> = {
+          ...(entry.ramps ?? {}),
+        }
+        if (entry.angleRamp) ramps.angleRamp = entry.angleRamp
+        for (const [name, ramp] of Object.entries(ramps)) {
+          expect(Array.isArray(ramp.stops), `${name} has a stops array`).toBe(true)
+          expect((ramp.stops ?? []).length).toBeGreaterThan(0)
+          for (const s of ramp.stops ?? []) {
+            expect(Number.isFinite(s.value)).toBe(true)
+            expect(s.position).toBeGreaterThanOrEqual(0)
+            expect(s.position).toBeLessThanOrEqual(1)
+          }
+        }
+      })
+
       it('every formula evaluates to a finite number across cells and layers', () => {
         const cols = Math.min(entry.cols, 5)
         const rows = Math.min(entry.rows, 5)

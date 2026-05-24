@@ -1,6 +1,6 @@
 # Pattern gallery
 
-The 33 patterns that ship with Swift Loop, with what they look like and when to reach for them. Patterns are grouped roughly by feel, not by alphabetical order, because that's actually useful.
+The 37 patterns that ship with Swift Loop, with what they look like and when to reach for them. Patterns are grouped roughly by feel, not by alphabetical order, because that's actually useful.
 
 A few of the radial patterns lean on the **Spiral** control (in Appearance) instead of `cos`/`sin` in their formulas — same look, simpler math, and you can scrub the Spiral ramp after applying them.
 
@@ -20,6 +20,10 @@ The well-behaved ones. Predictable, uniform, easy to combine with other things.
 
 **Checker.** Uniform grid with alternating opacity. Half the cells are visible, half are ghosted.
 
+**Concentric Squares.** Nested square rings expanding outward — the polar trick, but snapped to a square instead of a circle. `cols` is points per ring, `rows` is rings.
+
+**Truchet.** A uniform grid where each tile is randomly turned by a multiple of 90°. With the right source shape (a quarter-arc or diagonal) the cells join into winding, maze-like paths. Scrub the seed for a new layout.
+
 ## Radial and circular
 
 Things that arrange themselves around a point.
@@ -38,6 +42,10 @@ Things that arrange themselves around a point.
 
 **Spiral.** Expanding logarithmic spiral. Set `cols` higher for tighter coiling.
 
+**Square Spiral.** The same outward spiral, snapped to right angles — a squared-off coil. Good for circuit-board and maze vibes.
+
+**Whirl.** A line wound into a spiral that *tightens* as it travels, with the tail fading out. Its Spiral and Opacity curves are hand-drawn (no formula), so drag their stops in Appearance to reshape the coil.
+
 **Phyllotaxis.** Sunflower seed pattern using the golden angle. The most satisfying pattern in the library to crank up. Try 200 cols.
 
 **Rose.** Five-petal `r = cos(kθ)` curve. Change the `5` in the formula to any odd number for a different petal count (even numbers give twice as many).
@@ -45,6 +53,26 @@ Things that arrange themselves around a point.
 **Mandala.** Concentric rings, each rotated by the golden angle from the next. Layered radial symmetry without any tedious by-hand placement.
 
 **Heart.** A cardioid traced by the cells, the classic Valentine curve. Crank `cols` for a smooth outline; the highlighted size numbers in `fx` mode stretch it wider or taller.
+
+## Three dimensions
+
+These use the **Layers** axis — the grid becomes a Columns × Rows × Layers lattice, projected to 2D with depth cues (near dots larger and brighter, far ones smaller and dimmer). Raise **Layers** to add depth.
+
+**Cube.** A 3D lattice of dots in oblique projection. The cleanest demonstration of the Layers axis.
+
+**Cylinder.** A tube — columns wrap around, rows climb its height, layers add inner shells.
+
+**Sphere.** A ball — columns as longitude, rows as latitude, layers nesting inward as shells.
+
+**Torus.** A donut seen at a tilt, columns around the ring and rows around the tube.
+
+**Helix.** A coil climbing the canvas. Set Layers to the strand count: 2 is a double helix (DNA), more a twisted rope.
+
+**Spiral Tower.** Rings of dots stacked up the canvas, each rotated a little further — a helical tower. Layers is its height.
+
+**Ring Tunnel.** Concentric rings receding into depth, near ones wide and bright, far ones small and dim. A tunnel to fly into.
+
+**Wave Field.** A sheet of dots rippling as it recedes backward in depth. Layers is how far back it goes.
 
 ## Waves and curves
 

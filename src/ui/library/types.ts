@@ -1,5 +1,8 @@
 // src/ui/library/types.ts
-import type { FormulaProperty } from '../../shared/types'
+import type { FormulaProperty, NumericRamp } from '../../shared/types'
+
+// The appearance properties that carry a multi-stop ramp a pattern can ship.
+export type RampProperty = 'rotation' | 'scaleX' | 'scaleY' | 'opacity' | 'strokeWeight'
 
 export interface LibraryEntry {
   id: string
@@ -20,4 +23,13 @@ export interface LibraryEntry {
   angle?: number
   showFirst?: boolean
   formulas: Partial<Record<FormulaProperty, string>>
+  /** Pre-built multi-stop curves the pattern ships with — the "sugar" for the
+   *  appearance properties. Applied with fx off, so the curve drives the value:
+   *  a pattern can come with a hand-drawn opacity fade or size taper, no formula
+   *  needed. A property's `formula` (if also given) still takes precedence. */
+  ramps?: Partial<Record<RampProperty, NumericRamp>>
+  /** Pre-built Spiral curve (the angle ramp). Cell i leans by `ramp(t_i) * i`,
+   *  so a small→large curve tightens the spiral along the loop. Supersedes the
+   *  scalar `angle`. */
+  angleRamp?: NumericRamp
 }

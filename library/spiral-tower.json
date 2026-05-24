@@ -1,0 +1,18 @@
+{
+  "id": "spiral-tower",
+  "name": "Spiral Tower",
+  "description": "A helical tower — each Layer is a ring of dots, rotated a little further and stacked up the canvas. Raise Layers for a taller tower; the near side reads large and bright.",
+  "tags": ["3d", "spiral", "radial"],
+  "author": "@swiftner",
+  "cols": 16,
+  "rows": 1,
+  "layers": 12,
+  "showFirst": false,
+  "formulas": {
+    "x": "x = cos(c * TAU / cols + l * 0.4) * {x:70} + (tz - 0.5) * 70",
+    "y": "y = (tz - 0.5) * -200 + sin(c * TAU / cols + l * 0.4) * 16",
+    "scaleX": "scaleX = (tz - 0.5) * 16",
+    "scaleY": "scaleY = (tz - 0.5) * 16",
+    "opacity": "opacity = 50 + tz * 50"
+  }
+}

@@ -6,7 +6,7 @@
   "author": "@swiftner",
   "cols": 60,
   "rows": 1,
-  "layers": 1,
+  "layers": 2,
   "formulas": {
     "x": "x = cos(tx * TAU * 3 + l * TAU / layers) * {x:120}",
     "y": "y = (tx - 0.5) * {y:320}",

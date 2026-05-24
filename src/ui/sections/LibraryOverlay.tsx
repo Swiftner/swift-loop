@@ -4,7 +4,7 @@ import type { FormulaProperty, LoopConfig } from '../../shared/types'
 import { Thumbnail } from '../components/Thumbnail'
 import { extractTrailingScale } from '../formula-scale'
 import { library, libraryTags } from '../library/loader'
-import type { LibraryEntry } from '../library/types'
+import type { LibraryEntry, RampProperty } from '../library/types'
 
 interface Props {
   open: boolean
@@ -36,9 +36,9 @@ function applyEntry(config: LoopConfig, entry: LibraryEntry): LoopConfig {
     rows: entry.rows,
     layers: entry.layers ?? 1,
     angle: entry.angle ?? 0,
-    // Patterns set a constant Spiral via `angle`; drop any ramp the user had so
-    // the pattern's value isn't overridden by a leftover curve.
-    angleRamp: undefined,
+    // A pattern's Spiral curve, if it ships one; otherwise drop any ramp the user
+    // had so the pattern's constant `angle` isn't overridden by a leftover curve.
+    angleRamp: entry.angleRamp,
     fxMode: true,
     showFirst: entry.showFirst ?? true,
   }
@@ -61,6 +61,16 @@ function applyEntry(config: LoopConfig, entry: LibraryEntry): LoopConfig {
       if (scale) value = scale.value
     }
     next[k] = { ...next[k], unlocked: true, formula: src, value }
+  }
+  // Pre-built appearance curves the pattern ships with. The ramp drives the
+  // value (fx off); a shipped formula for the same property wins over it.
+  if (entry.ramps) {
+    for (const key of Object.keys(entry.ramps) as RampProperty[]) {
+      const ramp = entry.ramps[key]
+      if (!ramp) continue
+      if (key !== 'strokeWeight' && entry.formulas[key]) continue
+      next[key] = { ...next[key], ramp, unlocked: false, formula: null }
+    }
   }
   return next
 }

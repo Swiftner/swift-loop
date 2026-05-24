@@ -32,7 +32,11 @@ You, the LLM reading this, are helping a designer write a new library pattern. Y
     "scaleX": "scaleX = ...",
     "scaleY": "scaleY = ...",
     "opacity": "opacity = ..."
-  }
+  },
+  "ramps": {
+    "opacity": { "stops": [{ "value": 100, "position": 0 }, { "value": 0, "position": 1 }] }
+  },
+  "angleRamp": { "stops": [{ "value": 3, "position": 0 }, { "value": 24, "position": 1 }] }
 }
 ```
 
@@ -51,6 +55,8 @@ You, the LLM reading this, are helping a designer write a new library pattern. Y
 | `angle` | optional | Number, -360 to 360. Per-cell rotation in degrees applied to the grid offset around the source center, *after* the formulas compute `x` and `y`. Cell `i` is rotated by `angle * i`. Lets a pattern declare a spiral or swirl without folding the rotation into every formula. Default `0`. See "Using `angle`" below. |
 | `showFirst` | optional | Defaults to `true`. Set to `false` only for radial or spiral patterns where the `i=0` clone naturally lands away from the origin, and you want the source shape to stay visually centered. See "showFirst" below. |
 | `formulas` | yes | Object. Any subset of `x`, `y`, `rotation`, `scaleX`, `scaleY`, `opacity`. Omit properties that should stay at their default. |
+| `ramps` | optional | Object. Pre-built multi-stop curves for `rotation`, `scaleX`, `scaleY`, `opacity`, or `strokeWeight` — a hand-drawn fade or taper instead of a formula. Each is `{ "stops": [{ "value": n, "position": 0..1 }, …] }`, sampled along loop progress (one stop = a constant). Applied with fx off; a `formula` for the same property wins. |
+| `angleRamp` | optional | A `{ "stops": […] }` curve for the **Spiral** lean. Cell `i` leans by `ramp(t_i) * i`, so a small→large curve tightens the spiral along the loop. Supersedes the scalar `angle`. |
 
 ### Existing tags (please reuse)
 
