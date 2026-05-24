@@ -815,6 +815,14 @@ body,
 .easing-chip select:focus {
   outline: none;
 }
+/* The closed control is transparent so the pill shows through, but a
+   transparent appearance:none <select> makes Chromium paint the dropdown popup
+   white even under color-scheme: dark. Give the options an explicit themed
+   background so the open list follows the panel. */
+.easing-chip select option {
+  background: var(--bg);
+  color: var(--fg);
+}
 
 /* ── Appearance strip v2 ───────────────────────────────────────────────────
    One row per interpolating property. Layout:

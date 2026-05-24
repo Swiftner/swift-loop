@@ -38,6 +38,16 @@ export interface SvgExportResult {
 }
 
 export interface HostAdapter {
+  // --- capabilities ---
+  // Can the host absorb a full regenerate on every drag frame? Figma can;
+  // Penpot's reactive document + WASM renderer can't — hundreds of node
+  // mutations per frame trip React #185 ("max update depth") and freeze it —
+  // so it regenerates on commit (mouseup) only and drops live-drag frames.
+  readonly liveUpdates: boolean
+  // Hard ceiling on generated nodes for this host. Figma copes with ~10k;
+  // Penpot's renderer degrades far sooner, so it caps much lower.
+  readonly maxCells: number
+
   // --- selection ---
   getSelectedNode(): NodeSnapshot | null
   onSelectionChange(cb: () => void): () => void

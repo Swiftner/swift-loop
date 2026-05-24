@@ -24,6 +24,10 @@ const SUPPORTED_SELECTION_TYPES = new Set([
 ])
 
 export class FigmaAdapter implements HostAdapter {
+  // Figma repaints a full regenerate per drag frame comfortably.
+  readonly liveUpdates = true
+  readonly maxCells = 10_000
+
   // dynamic-page documentAccess requires pages to be loaded before traversal.
   // Cache the promise so concurrent first callers share one await.
   private _pagesLoaded: Promise<void> | null = null

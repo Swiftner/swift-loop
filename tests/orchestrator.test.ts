@@ -14,6 +14,8 @@ interface FakeNode {
 }
 
 class FakeTreeAdapter implements HostAdapter {
+  readonly liveUpdates = true
+  readonly maxCells = 10000
   nodes = new Map<string, FakeNode>()
   private seq = 0
 

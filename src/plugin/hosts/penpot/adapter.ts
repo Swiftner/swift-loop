@@ -48,6 +48,13 @@ function rgbToHex(c: ColorRGB): string {
 }
 
 export class PenpotAdapter implements HostAdapter {
+  // Penpot's reactive document + WASM renderer can't take a full regenerate per
+  // drag frame, so regenerate on commit only (see host-loop). The cell ceiling
+  // is a crash guard for the render engine — conservative; tune against real
+  // Penpot.
+  readonly liveUpdates = false
+  readonly maxCells = 1000
+
   // undoBlockBegin returns the wrapper `Symbol` type; capture it via ReturnType
   // so we don't hand-write the banned identifier.
   private undoBlock: ReturnType<Penpot['history']['undoBlockBegin']> | null = null

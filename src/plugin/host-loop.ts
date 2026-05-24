@@ -33,6 +33,10 @@ export async function startHostLoop(adapter: HostAdapter, bridge: HostBridge): P
 
   bridge.on('loop:update', async (payload) => {
     const { config, commit } = payload as { config: LoopConfig; commit: boolean }
+    // Hosts that can't repaint a full regenerate per drag frame (Penpot) act on
+    // commits (mouseup) only; uncommitted live-drag frames are dropped, so the
+    // sliders stay smooth and the canvas catches up on release.
+    if (!commit && !adapter.liveUpdates) return
     const source = adapter.getSelectedNode()
     if (!source) return
     try {

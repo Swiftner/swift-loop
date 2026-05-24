@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { startHostLoop } from '../src/plugin/host-loop'
-import type { HostAdapter, HostBridge, NodeId, NodeSnapshot } from '../src/plugin/hosts/host'
+import type { HostAdapter, HostBridge, NodeSnapshot } from '../src/plugin/hosts/host'
+import { DEFAULT_CONFIG } from '../src/shared/defaults'
 
 // Records every bridge.send so we can assert the boot handshake. Methods not
 // exercised by these tests throw, to catch accidental reliance on them.
@@ -19,6 +20,8 @@ class FakeBridge implements HostBridge {
 
 function makeAdapter(overrides: Partial<HostAdapter> = {}): HostAdapter {
   const base: HostAdapter = {
+    liveUpdates: true,
+    maxCells: 10000,
     getSelectedNode: () => null,
     onSelectionChange: () => () => {},
     cloneNode: async () => 'clone',
@@ -99,5 +102,43 @@ describe('startHostLoop boot handshake', () => {
     await Promise.resolve()
     const ready = bridge.sent.find((s) => s.channel === 'loop:svg-ready')
     expect(ready?.payload).toEqual({ ok: false, reason: 'no-loop' })
+  })
+})
+
+describe('commit-only hosts (liveUpdates = false)', () => {
+  it('drops uncommitted live-drag updates, but generates on commit', async () => {
+    const bridge = new FakeBridge()
+    let clones = 0
+    const adapter = makeAdapter({
+      liveUpdates: false,
+      getSelectedNode: () => SNAPSHOT,
+      cloneNode: async () => `c${++clones}`,
+    })
+    await startHostLoop(adapter, bridge)
+    const update = bridge.handlers.get('loop:update') as ((p: unknown) => Promise<void>) | undefined
+    if (!update) throw new Error('no loop:update handler registered')
+
+    await update({ config: DEFAULT_CONFIG, commit: false })
+    expect(clones).toBe(0) // live-drag frame dropped — no regenerate
+
+    await update({ config: DEFAULT_CONFIG, commit: true })
+    expect(clones).toBeGreaterThan(0) // commit regenerates
+  })
+
+  it('caps a generate at maxCells regardless of the requested grid', async () => {
+    const bridge = new FakeBridge()
+    let clones = 0
+    const adapter = makeAdapter({
+      maxCells: 5,
+      getSelectedNode: () => SNAPSHOT,
+      cloneNode: async () => `c${++clones}`,
+    })
+    await startHostLoop(adapter, bridge)
+    const update = bridge.handlers.get('loop:update') as ((p: unknown) => Promise<void>) | undefined
+    if (!update) throw new Error('no loop:update handler registered')
+    // DEFAULT_CONFIG is 10×10 = 100 cells; maxCells 5 caps the run, so only
+    // clones for i=1..4 are created (i=0 is the source).
+    await update({ config: DEFAULT_CONFIG, commit: true })
+    expect(clones).toBe(4)
   })
 })
