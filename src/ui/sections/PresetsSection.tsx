@@ -2,6 +2,7 @@ import { DEFAULT_CONFIG } from '../../shared/defaults'
 import presetsJson from '../../shared/presets.json'
 import type { LoopConfig } from '../../shared/types'
 import { Section } from '../components/Section'
+import { sanitizePastedConfig } from '../config-ops'
 
 interface Props {
   config: LoopConfig
@@ -39,9 +40,8 @@ export function PresetsSection({ config, update, onOpenLibrary, onApplied }: Pro
   const pasteFromClipboard = async () => {
     try {
       const text = await navigator.clipboard.readText()
-      const parsed = JSON.parse(text) as LoopConfig
-      if (typeof parsed.cols !== 'number' || typeof parsed.rows !== 'number') return
-      update(parsed, true)
+      const next = sanitizePastedConfig(JSON.parse(text))
+      if (next) update(next, true)
     } catch {
       // ignore invalid clipboard
     }

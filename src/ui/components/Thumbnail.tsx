@@ -30,9 +30,9 @@ function evaluateEntry(entry: LibraryEntry): CellPoint[] {
   }
   const points: CellPoint[] = []
   const layers = entry.layers ?? 1
-  // Iterate all three axes back-to-front so 3D presets (layers > 1) render
-  // their depth in the thumbnail instead of a single flat layer-0 slice.
-  for (let l = 0; l < layers; l++) {
+  // Iterate far layers (high l) first so 3D presets (layers > 1) render their
+  // depth with the near layer on top, matching the live preview's paint order.
+  for (let l = layers - 1; l >= 0; l--) {
     for (let r = 0; r < entry.rows; r++) {
       for (let c = 0; c < entry.cols; c++) {
         const scope = buildScope(

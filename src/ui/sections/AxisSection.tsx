@@ -3,6 +3,7 @@ import { formulaForProperty } from '../../plugin/engine/compile'
 import type { FormulaProperty, LoopConfig, NumericProperty } from '../../shared/types'
 import { Section } from '../components/Section'
 import { SliderRow } from '../components/SliderRow'
+import { MAX_AXIS } from '../config-ops'
 import { rewriteTrailingScale } from '../formula-scale'
 import { randomMaxFor, sliderRangeFor } from '../slider-ranges'
 
@@ -70,7 +71,7 @@ export function AxisSection({
         label="Count"
         value={count}
         min={1}
-        max={50}
+        max={MAX_AXIS}
         step={1}
         onChange={(v, commit) => onCount(Math.max(1, Math.round(v)), commit)}
       />

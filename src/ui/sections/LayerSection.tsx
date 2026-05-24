@@ -2,6 +2,7 @@ import { DEFAULT_DEPTH_DIR } from '../../plugin/engine/cells'
 import type { LoopConfig } from '../../shared/types'
 import { Section } from '../components/Section'
 import { SliderRow } from '../components/SliderRow'
+import { MAX_AXIS } from '../config-ops'
 
 interface Props {
   config: LoopConfig
@@ -26,7 +27,7 @@ export function LayerSection({ config, update }: Props) {
         label="Count"
         value={config.layers ?? 1}
         min={1}
-        max={50}
+        max={MAX_AXIS}
         step={1}
         onChange={(v, commit) => update({ ...config, layers: Math.max(1, Math.round(v)) }, commit)}
       />

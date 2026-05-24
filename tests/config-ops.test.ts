@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { DEFAULT_CONFIG, RESET_CONFIG } from '../src/shared/defaults'
 import type { LoopConfig } from '../src/shared/types'
-import { clearPattern, resetKeepingPattern } from '../src/ui/config-ops'
+import {
+  MAX_AXIS,
+  clearPattern,
+  resetKeepingPattern,
+  sanitizePastedConfig,
+} from '../src/ui/config-ops'
 
 // Mimic a config after applying a library pattern: every animated property
 // has unlocked=true with a formula; fxMode is on; iteration grid was set.
@@ -133,5 +138,37 @@ describe('resetKeepingPattern', () => {
     const snapshot = JSON.stringify(before)
     resetKeepingPattern(before, true)
     expect(JSON.stringify(before)).toBe(snapshot)
+  })
+})
+
+describe('sanitizePastedConfig', () => {
+  it('rejects non-config input', () => {
+    expect(sanitizePastedConfig(null)).toBeNull()
+    expect(sanitizePastedConfig('nope')).toBeNull()
+    expect(sanitizePastedConfig({ cols: 5 })).toBeNull() // rows missing
+  })
+
+  it('fills missing fields from defaults so the engine never sees undefined', () => {
+    const out = sanitizePastedConfig({ cols: 5, rows: 5 })
+    expect(out).not.toBeNull()
+    // a partial paste gets every required property back from DEFAULT_CONFIG
+    expect(out?.x).toEqual(DEFAULT_CONFIG.x)
+    expect(out?.opacity).toEqual(DEFAULT_CONFIG.opacity)
+    expect(out?.easing).toBe(DEFAULT_CONFIG.easing)
+  })
+
+  it('clamps lattice dimensions to a sane integer range', () => {
+    const huge = sanitizePastedConfig({ cols: 9999, rows: 5, layers: 1000 })
+    expect(huge?.cols).toBe(MAX_AXIS)
+    expect(huge?.layers).toBe(MAX_AXIS)
+    const bad = sanitizePastedConfig({ cols: 5, rows: 5, layers: -3 })
+    expect(bad?.layers).toBe(1) // clamped up to the minimum
+    const fractional = sanitizePastedConfig({ cols: 5.7, rows: 5 })
+    expect(fractional?.cols).toBe(6) // rounded
+  })
+
+  it('replaces a malformed formula-bearing field with the default', () => {
+    const out = sanitizePastedConfig({ cols: 5, rows: 5, x: 'not-a-property' })
+    expect(out?.x).toEqual(DEFAULT_CONFIG.x)
   })
 })
