@@ -13,6 +13,7 @@ interface Props {
   formula?: string // expandable formula editor content
   onFormulaChange?: (next: string) => void
   onChange: (next: number, commit: boolean) => void
+  disabled?: boolean // dimmed + non-interactive (e.g. an axis with count 1)
 }
 
 export function SliderRow({
@@ -26,6 +27,7 @@ export function SliderRow({
   formula,
   onFormulaChange,
   onChange,
+  disabled,
 }: Props) {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(value.toString())
@@ -76,13 +78,17 @@ export function SliderRow({
   const hasFormula = formula !== undefined && onFormulaChange !== undefined
 
   return (
-    <div class={`slider-row${expanded ? ' is-expanded' : ''}`}>
+    <div
+      class={`slider-row${expanded ? ' is-expanded' : ''}${disabled ? ' is-disabled' : ''}`}
+      aria-disabled={disabled || undefined}
+    >
       <div class="slider-row-header">
         <span class="slider-row-label">{label}</span>
         {hasFormula ? (
           <button
             class={`slider-row-fx-toggle${formulaIndicator ? ' is-active' : ''}`}
             type="button"
+            disabled={disabled}
             onClick={() => setExpanded((x) => !x)}
             aria-label={expanded ? 'Hide formula' : 'Show formula'}
             aria-expanded={expanded}
@@ -112,6 +118,7 @@ export function SliderRow({
             class="slider-row-value"
             {...scrubHandlers}
             type="button"
+            disabled={disabled}
             aria-label={`${label}: ${value}${unit ?? ''}. Drag to scrub, click to type.`}
             title="Drag to scrub, click to type. Shift = fine, Alt = coarse."
           >
@@ -128,6 +135,7 @@ export function SliderRow({
         step={step}
         value={value}
         aria-label={label}
+        disabled={disabled}
         onInput={handleInput}
         onChange={handleChange}
         onPointerDown={onPointerDown}

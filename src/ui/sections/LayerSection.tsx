@@ -13,8 +13,15 @@ interface Props {
 // Fade, Random), plus depth-only extras — the offset Direction, a colour-by-
 // depth sweep, and the stacking order.
 export function LayerSection({ config, update }: Props) {
+  // With a single layer there's no depth, so the depth controls do nothing yet.
+  const noDepth = (config.layers ?? 1) <= 1
   return (
-    <Section id="layer" title="Layer" defaultOpen>
+    <Section
+      id="layer"
+      title="Layer"
+      hint="Stack copies of the grid into depth — raise Count to use these."
+      defaultOpen={false}
+    >
       <SliderRow
         label="Count"
         value={config.layers ?? 1}
@@ -24,12 +31,13 @@ export function LayerSection({ config, update }: Props) {
         onChange={(v, commit) => update({ ...config, layers: Math.max(1, Math.round(v)) }, commit)}
       />
       <SliderRow
-        label="Step"
+        label="Z step"
         value={config.layerStep ?? 0}
         min={-120}
         max={120}
         step={1}
         unit="px"
+        disabled={noDepth}
         onChange={(v, commit) => update({ ...config, layerStep: v }, commit)}
       />
       <SliderRow
@@ -39,6 +47,7 @@ export function LayerSection({ config, update }: Props) {
         max={360}
         step={1}
         unit="°"
+        disabled={noDepth}
         onChange={(v, commit) => update({ ...config, layerDirection: v }, commit)}
       />
       <SliderRow
@@ -48,6 +57,7 @@ export function LayerSection({ config, update }: Props) {
         max={90}
         step={0.5}
         unit="°"
+        disabled={noDepth}
         onChange={(v, commit) => update({ ...config, layerAngle: v }, commit)}
       />
       <SliderRow
@@ -57,6 +67,7 @@ export function LayerSection({ config, update }: Props) {
         max={100}
         step={1}
         unit="%"
+        disabled={noDepth}
         onChange={(v, commit) => update({ ...config, layerScale: v }, commit)}
       />
       <SliderRow
@@ -66,6 +77,7 @@ export function LayerSection({ config, update }: Props) {
         max={100}
         step={1}
         unit="%"
+        disabled={noDepth}
         onChange={(v, commit) => update({ ...config, layerFade: v }, commit)}
       />
       <SliderRow
@@ -75,22 +87,25 @@ export function LayerSection({ config, update }: Props) {
         max={120}
         step={0.5}
         unit="px"
+        disabled={noDepth}
         onChange={(v, commit) => update({ ...config, layerRandom: v }, commit)}
       />
-      <label class="layer-colour-toggle">
+      <label class={`toggle-row${noDepth ? ' is-disabled' : ''}`}>
         <input
           type="checkbox"
           checked={config.layerColour ?? false}
+          disabled={noDepth}
           onChange={(e) =>
             update({ ...config, layerColour: (e.target as HTMLInputElement).checked }, true)
           }
         />
-        Colour by depth
+        <span>Colour by depth</span>
       </label>
-      <label class="layer-colour-toggle">
+      <label class={`toggle-row${noDepth ? ' is-disabled' : ''}`}>
         <input
           type="checkbox"
           checked={(config.stackOrder ?? 'near-top') === 'far-top'}
+          disabled={noDepth}
           onChange={(e) =>
             update(
               {
@@ -101,7 +116,7 @@ export function LayerSection({ config, update }: Props) {
             )
           }
         />
-        Far layers in front
+        <span>Far layers in front</span>
       </label>
     </Section>
   )

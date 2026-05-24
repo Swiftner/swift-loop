@@ -18,6 +18,7 @@
     "build:penpot": "bun run build && node scripts/build-penpot.mjs",
     "build:all": "bun run build:penpot && bun run build:preview",
     "dev": "bun run build && bun run build:preview && bunx --bun serve -l 4173 .",
+    "dev:watch": "build-figma-plugin --watch & bun run watch:preview & bunx --bun serve -l 4173 .",
     "package": "bash scripts/package.sh"
   },
   "dependencies": {

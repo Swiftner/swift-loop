@@ -9,16 +9,29 @@ interface Props {
   sourceSize: { width: number; height: number } | null
 }
 
+// Human labels matching the Appearance section (scaleX/scaleY are "Size X/Y").
+const RANDOM_LABELS = {
+  rotation: 'Rotation',
+  scaleX: 'Size X',
+  scaleY: 'Size Y',
+  opacity: 'Opacity',
+} as const
+
 export function ModulationSection({ config, update, sourceSize }: Props) {
   const rotAmpMax = sinusoidalAmplitudeMaxFor('rotation', sourceSize)
   const scaleAmpMax = sinusoidalAmplitudeMaxFor('scale', sourceSize)
   return (
-    <Section id="modulation" title="Modulation" defaultOpen={false}>
+    <Section
+      id="modulation"
+      title="Modulation"
+      hint="Wobble and randomness layered on top of everything above."
+      defaultOpen={false}
+    >
       <h3 class="subsection-title">Random ±</h3>
       {(['rotation', 'scaleX', 'scaleY', 'opacity'] as const).map((k) => (
         <SliderRow
           key={k}
-          label={k}
+          label={RANDOM_LABELS[k]}
           value={config[k].random}
           min={0}
           max={randomMaxFor(k, sourceSize)}

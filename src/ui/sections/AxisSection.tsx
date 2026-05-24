@@ -26,6 +26,7 @@ interface Props {
   onScale: (v: number, commit: boolean) => void
   fade: number
   onFade: (v: number, commit: boolean) => void
+  hint?: string
   chip?: ComponentChildren
 }
 
@@ -56,12 +57,15 @@ export function AxisSection({
   onScale,
   fade,
   onFade,
+  hint,
   chip,
 }: Props) {
   const step = config[stepKey] as NumericProperty
   const range = sliderRangeFor(stepKey, sourceSize)
+  // A single column/row has nothing to spread, twist, scale or fade across.
+  const inactive = count <= 1
   return (
-    <Section id={id} title={title} chip={chip} defaultOpen>
+    <Section id={id} title={title} hint={hint} chip={chip} defaultOpen>
       <SliderRow
         label="Count"
         value={count}
@@ -76,6 +80,7 @@ export function AxisSection({
         min={range.min}
         max={range.max}
         step={range.step}
+        disabled={inactive}
         formulaIndicator={step.unlocked}
         formula={formulaForProperty(config, stepKey)}
         onFormulaChange={(text) => {
@@ -102,6 +107,7 @@ export function AxisSection({
         max={90}
         step={0.5}
         unit="°"
+        disabled={inactive}
         onChange={onAngle}
       />
       <SliderRow
@@ -111,15 +117,26 @@ export function AxisSection({
         max={100}
         step={1}
         unit="%"
+        disabled={inactive}
         onChange={onScale}
       />
-      <SliderRow label="Fade" value={fade} min={0} max={100} step={1} unit="%" onChange={onFade} />
+      <SliderRow
+        label="Fade"
+        value={fade}
+        min={0}
+        max={100}
+        step={1}
+        unit="%"
+        disabled={inactive}
+        onChange={onFade}
+      />
       <SliderRow
         label="Random"
         value={step.random}
         min={0}
         max={randomMaxFor(stepKey, sourceSize)}
         step={0.5}
+        disabled={inactive}
         onChange={(v, commit) => update({ ...config, [stepKey]: { ...step, random: v } }, commit)}
       />
     </Section>

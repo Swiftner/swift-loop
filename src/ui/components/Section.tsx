@@ -5,6 +5,8 @@ interface Props {
   /** Stable identifier — used as the localStorage key for persisting open state. */
   id: string
   title: string
+  /** One-line plain-language summary shown under the title when open. */
+  hint?: string
   /** Visual indicator in the right side of the header (read-only, like a cell-count). */
   chip?: ComponentChildren
   /** Interactive action buttons in the right of the header — clicks here do NOT toggle. */
@@ -20,6 +22,7 @@ const OPEN_KEY_PREFIX = 'swift-loop:section-open:'
 export function Section({
   id,
   title,
+  hint,
   chip,
   actions,
   defaultOpen = true,
@@ -94,7 +97,12 @@ export function Section({
           </span>
         )}
       </div>
-      {open && <div class="section-body">{children}</div>}
+      {open && (
+        <div class="section-body">
+          {hint ? <p class="section-hint">{hint}</p> : null}
+          {children}
+        </div>
+      )}
     </section>
   )
 }

@@ -417,6 +417,65 @@ body,
   outline: none;
   border-color: var(--accent);
 }
+/* Dimmed when the axis can't act yet (e.g. count 1). */
+.slider-row.is-disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* One-line plain-language summary under a section title. */
+.section-hint {
+  margin: -2px 0 8px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+/* Checkbox row (e.g. "Colour by depth"), styled to match the controls. */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 0;
+  font-size: 11px;
+  color: var(--fg);
+  cursor: pointer;
+}
+.toggle-row input {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  border: 1px solid var(--hairline);
+  border-radius: 3px;
+  background: var(--bg);
+  cursor: pointer;
+  position: relative;
+  flex: none;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+.toggle-row input:hover {
+  border-color: var(--fg);
+}
+.toggle-row input:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.toggle-row input:checked::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 3px;
+  height: 7px;
+  border: solid var(--bg);
+  border-width: 0 1.6px 1.6px 0;
+  transform: rotate(45deg);
+}
+.toggle-row.is-disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
 
 /* FormulaRow */
 .formula-row {

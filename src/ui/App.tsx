@@ -183,6 +183,7 @@ export function App() {
         <AxisSection
           id="column"
           title="Column"
+          hint="Repeats and ramps across columns."
           config={config}
           update={update}
           sourceSize={sourceSize}
@@ -213,6 +214,7 @@ export function App() {
         <AxisSection
           id="row"
           title="Row"
+          hint="Repeats and ramps down rows."
           config={config}
           update={update}
           sourceSize={sourceSize}

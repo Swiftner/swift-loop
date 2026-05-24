@@ -54,6 +54,7 @@ export function AppearanceSection({ config, update, sourceSize }: Props) {
     <Section
       id="appearance"
       title="Appearance"
+      hint="Each clone's base look — size, rotation, colour, opacity."
       defaultOpen
       chip={
         <EasingChip
