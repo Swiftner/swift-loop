@@ -28,6 +28,14 @@ If this is your first time:
 
 [Pattern authoring guide for LLMs](./llm-pattern-guide.md). A self-contained reference you can paste into Claude or ChatGPT to get help designing new library patterns from a plain-English description.
 
+## Related projects
+
+Swift Loop stands on the shoulders of the original Looper. If you're exploring the family:
+
+[Looper](https://github.com/kuldar/figma-looper). The original, by Kuldar Kalvik.
+
+[Looper Legacy](https://github.com/girafic/figma-looper). A fork by Stas Haas that kept it alive.
+
 ## Want to help?
 
 [Contributing a pattern](../CONTRIBUTING.md). Share your formula with everyone. One JSON file. No code.
