@@ -6,3 +6,9 @@ contact_links:
   - name: Try it in your browser
     url: https://swiftner.github.io/swift-loop/
     about: Play with the live preview before filing an issue — it might already do what you want.
+  - name: Looper (the original)
+    url: https://github.com/kuldar/figma-looper
+    about: Swift Loop is a modernized fork of Kuldar Kalvik's original Looper.
+  - name: Looper Legacy
+    url: https://github.com/girafic/figma-looper
+    about: A fork by Stas Haas that kept the original Looper alive.
