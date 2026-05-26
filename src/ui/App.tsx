@@ -157,13 +157,10 @@ export function App() {
           sourceSize={sourceSize}
           count={config.cols}
           onCount={(v, commit) => update({ ...config, cols: v }, commit)}
-          stepKey="x"
-          stepLabel="X step"
-          crossStepKey="columnStepY"
-          crossStepLabel="Y step"
           twistKey="columnAngle"
           fadeKey="columnFade"
           randomKey="columnRandom"
+          randomRangeKey="x"
         />
         <AxisSection
           id="row"
@@ -173,13 +170,10 @@ export function App() {
           sourceSize={sourceSize}
           count={config.rows}
           onCount={(v, commit) => update({ ...config, rows: v }, commit)}
-          stepKey="y"
-          stepLabel="Y step"
-          crossStepKey="rowStepX"
-          crossStepLabel="X step"
           twistKey="rowAngle"
           fadeKey="rowFade"
           randomKey="rowRandom"
+          randomRangeKey="y"
         />
         <LayerSection config={config} update={update} />
         <AppearanceSection config={config} update={update} sourceSize={sourceSize} />

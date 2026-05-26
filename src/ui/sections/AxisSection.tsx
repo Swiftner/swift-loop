@@ -1,13 +1,12 @@
-import { formulaForProperty } from '../../plugin/engine/compile'
-import type { FormulaProperty, LoopConfig, NumericProperty, NumericRamp } from '../../shared/types'
+import type { LoopConfig, NumericRamp } from '../../shared/types'
 import { CountChip } from '../components/CountChip'
 import { NumericRampRow } from '../components/NumericRampRow'
 import { PairedRampRow } from '../components/PairedRampRow'
 import { Section } from '../components/Section'
-import { SliderRow } from '../components/SliderRow'
+import { SkewPair } from '../components/SkewPair'
+import { StepPair } from '../components/StepPair'
 import { MAX_AXIS } from '../config-ops'
-import { rewriteTrailingScale } from '../formula-scale'
-import { randomMaxFor, sliderRangeFor } from '../slider-ranges'
+import { randomMaxFor } from '../slider-ranges'
 
 // The per-axis NumericRamp fields one AxisSection (or LayerSection) drives.
 export type AxisRampKey =
@@ -30,34 +29,19 @@ interface Props {
   config: LoopConfig
   update: (next: LoopConfig, commit?: boolean) => void
   sourceSize: { width: number; height: number } | null
-  // count
   count: number
   onCount: (v: number, commit: boolean) => void
-  // step (a NumericProperty, so it keeps its fx + modulation)
-  stepKey: FormulaProperty
-  stepLabel: string
-  // Cross-axis step: the other component of this axis's 2D step. A plain scalar.
-  crossStepKey: 'columnStepY' | 'rowStepX'
-  crossStepLabel: string
-  // Per-axis Twist (clone rotation), Fade (opacity) and Random — each a
-  // NumericRamp sampled along this axis. (Scale is a shared X·Y pair, below.)
+  // This axis's own per-axis ramps.
   twistKey: AxisRampKey
   fadeKey: AxisRampKey
   randomKey: AxisRampKey
+  // Slider-range key the Random max scales from ('x' for Column, 'y' for Row).
+  randomRangeKey: 'x' | 'y'
 }
 
-// Drives a slider value into a NumericProperty without destroying an active
-// library formula.
-function computeStepUpdate(cur: NumericProperty, v: number): NumericProperty {
-  if (!cur.unlocked) return { ...cur, value: v, unlocked: false, formula: null }
-  const rewritten = cur.formula ? rewriteTrailingScale(cur.formula, v) : null
-  if (rewritten) return { ...cur, value: v, formula: rewritten }
-  return { ...cur, value: v }
-}
-
-// One spatial axis (Column or Row): how many, the 2D step (X + Y), a shared
-// Scale pair, and its own Twist / Fade / Random. The collapsed header carries
-// the count and dims when the axis is inactive (count ≤ 1).
+// One spatial axis (Column or Row). The count lives in the header (drag to
+// scrub); the grid's Step / Skew / Scale are shared X·Y pairs shown in both
+// sections; Twist / Fade / Random are this axis's own.
 export function AxisSection({
   id,
   title,
@@ -66,61 +50,15 @@ export function AxisSection({
   sourceSize,
   count,
   onCount,
-  stepKey,
-  stepLabel,
-  crossStepKey,
-  crossStepLabel,
   twistKey,
   fadeKey,
   randomKey,
+  randomRangeKey,
 }: Props) {
-  const step = config[stepKey] as NumericProperty
   const setRamp = (key: AxisRampKey) => (next: NumericRamp, commit: boolean) =>
     update({ ...config, [key]: next }, commit)
-  const range = sliderRangeFor(stepKey, sourceSize)
-  const crossValue = (config[crossStepKey] as number | undefined) ?? 0
-  // The cross-axis step moves along the opposite axis from the primary step.
-  const crossStepAxis = stepKey === 'x' ? 'y' : 'x'
-  const crossRange = sliderRangeFor(crossStepAxis, sourceSize)
   // A single column/row has nothing to spread, twist, scale or fade across.
   const inactive = count <= 1
-  const primaryRow = (
-    <SliderRow
-      label={stepLabel}
-      value={step.value}
-      min={range.min}
-      max={range.max}
-      step={range.step}
-      disabled={inactive}
-      formulaIndicator={step.unlocked}
-      formula={formulaForProperty(config, stepKey)}
-      onFormulaChange={(text) => {
-        const trimmed = text.trim()
-        update(
-          {
-            ...config,
-            [stepKey]:
-              trimmed === ''
-                ? { ...step, unlocked: false, formula: null }
-                : { ...step, unlocked: true, formula: text },
-          },
-          false,
-        )
-      }}
-      onChange={(v, commit) => update({ ...config, [stepKey]: computeStepUpdate(step, v) }, commit)}
-    />
-  )
-  const crossRow = (
-    <SliderRow
-      label={crossStepLabel}
-      value={crossValue}
-      min={crossRange.min}
-      max={crossRange.max}
-      step={crossRange.step}
-      disabled={inactive}
-      onChange={(v, commit) => update({ ...config, [crossStepKey]: v }, commit)}
-    />
-  )
   return (
     <Section
       id={id}
@@ -129,9 +67,8 @@ export function AxisSection({
       muted={inactive}
       defaultOpen={false}
     >
-      {/* X step always renders above Y step in both sections. */}
-      {stepKey === 'x' ? primaryRow : crossRow}
-      {stepKey === 'x' ? crossRow : primaryRow}
+      <StepPair config={config} update={update} sourceSize={sourceSize} disabled={inactive} />
+      <SkewPair config={config} update={update} sourceSize={sourceSize} disabled={inactive} />
       <PairedRampRow
         label="Scale"
         x={{ axis: 'X', ramp: config.columnScale, onChange: setRamp('columnScale') }}
@@ -167,7 +104,7 @@ export function AxisSection({
         label="Random"
         ramp={config[randomKey]}
         min={0}
-        max={randomMaxFor(stepKey, sourceSize)}
+        max={randomMaxFor(randomRangeKey, sourceSize)}
         step={0.5}
         decimals={1}
         unit="px"
