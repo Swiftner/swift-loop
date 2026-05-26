@@ -316,6 +316,9 @@ body,
   align-items: center;
   font-size: 11px;
   margin-bottom: 2px;
+  /* Reserve the ramp-row caret gutter (18px icon + 6px gap) so step values line
+     up with the ramp value column. */
+  padding-right: 24px;
 }
 .slider-row-label {
   color: var(--muted);
@@ -418,15 +421,16 @@ body,
 }
 .numeric-ramp-head {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   font-size: 11px;
   margin-bottom: 4px;
 }
 .numeric-ramp-label {
   color: var(--muted);
   flex: none;
+  /* Push the value + caret cluster to the right, aligning every ramp row. */
+  margin-right: auto;
 }
 .numeric-ramp-readout {
   display: flex;
@@ -536,13 +540,13 @@ body,
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--figma-color-text-tertiary, #888);
+  color: var(--muted);
   cursor: pointer;
   border-radius: 4px;
 }
 .numeric-ramp-caret:hover {
-  background: var(--figma-color-bg-hover, rgba(0, 0, 0, 0.06));
-  color: var(--figma-color-text, #222);
+  background: var(--hairline);
+  color: var(--fg);
 }
 .numeric-ramp-caret svg {
   transition: transform 0.12s ease;
@@ -553,7 +557,7 @@ body,
 .numeric-ramp-range {
   border: 0;
   background: transparent;
-  color: var(--figma-color-text, #222);
+  color: var(--fg);
   font: inherit;
   cursor: pointer;
   padding: 0 2px;
@@ -1442,15 +1446,15 @@ input.appearance-num-input::-webkit-inner-spin-button {
   width: 100%;
   border: 0;
   background: transparent;
-  color: var(--figma-color-text-secondary, #555);
+  color: var(--muted);
   font: inherit;
   text-align: center;
   padding: 6px 0;
   cursor: pointer;
-  border-top: 1px solid var(--figma-color-border, rgba(0, 0, 0, 0.08));
+  border-top: 1px solid var(--hairline);
 }
 .more-disclosure-toggle:hover {
-  color: var(--figma-color-text, #222);
+  color: var(--fg);
 }
 .more-disclosure-body {
   display: flex;
@@ -1460,7 +1464,7 @@ input.appearance-num-input::-webkit-inner-spin-button {
 
 .pair-row-sides {
   display: flex;
-  flex: 1 1 auto;
+  justify-content: flex-end;
   gap: 10px;
 }
 .step-pair-side {
@@ -1469,7 +1473,7 @@ input.appearance-num-input::-webkit-inner-spin-button {
   gap: 4px;
 }
 .step-pair-axis {
-  color: var(--figma-color-text-tertiary, #888);
+  color: var(--muted);
 }
 .paired-strip {
   display: flex;
@@ -1480,7 +1484,7 @@ input.appearance-num-input::-webkit-inner-spin-button {
 .paired-strip-axis {
   flex: 0 0 auto;
   width: 12px;
-  color: var(--figma-color-text-tertiary, #888);
+  color: var(--muted);
 }
 .paired-strip-body {
   flex: 1 1 auto;
