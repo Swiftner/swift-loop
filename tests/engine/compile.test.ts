@@ -153,4 +153,14 @@ describe('cross-axis grid steps', () => {
     const c = { ...grid, rowStepX: -5 }
     expect(formulaForProperty(c, 'x')).toBe('x = c * 10 + r * -5')
   })
+
+  it('on a collapsed strip the primary fallback and raw cross-step both use the live index', () => {
+    // rows=1: the y primary borrows `c` (fallback) and columnStepY also uses raw
+    // `c`, so they merge — the documented caveat in types.ts.
+    const oneRow = { ...grid, rows: 1, columnStepY: 5 }
+    expect(formulaForProperty(oneRow, 'y')).toBe('y = c * 7 + c * 5')
+    // cols=1: symmetric case on x.
+    const oneCol = { ...grid, cols: 1, rowStepX: 3 }
+    expect(formulaForProperty(oneCol, 'x')).toBe('x = r * 10 + r * 3')
+  })
 })
