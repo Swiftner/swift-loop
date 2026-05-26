@@ -17,7 +17,7 @@ interface Props {
   children: ComponentChildren
 }
 
-const OPEN_KEY_PREFIX = 'swift-loop:section-open:'
+const OPEN_KEY_PREFIX = 'swift-loop:section-open:v2:'
 
 export function Section({
   id,

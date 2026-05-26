@@ -77,7 +77,7 @@ export function AppearanceSection({ config, update, sourceSize }: Props) {
       id="appearance"
       title="Appearance"
       hint="Each clone's look — ramps along the loop. Drag a dot, press to add a stop."
-      defaultOpen
+      defaultOpen={false}
       chip={
         <EasingChip
           value={config.easing}
