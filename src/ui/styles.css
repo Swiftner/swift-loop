@@ -544,6 +544,38 @@ body,
   box-shadow: 0 0 0 2px var(--accent);
 }
 
+.numeric-ramp-caret {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--figma-color-text-tertiary, #888);
+  cursor: pointer;
+  border-radius: 4px;
+}
+.numeric-ramp-caret:hover {
+  background: var(--figma-color-bg-hover, rgba(0, 0, 0, 0.06));
+  color: var(--figma-color-text, #222);
+}
+.numeric-ramp-caret svg {
+  transition: transform 0.12s ease;
+}
+.numeric-ramp-caret.is-open svg {
+  transform: rotate(180deg);
+}
+.numeric-ramp-range {
+  border: 0;
+  background: transparent;
+  color: var(--figma-color-text, #222);
+  font: inherit;
+  cursor: pointer;
+  padding: 0 2px;
+}
+
 /* fx escape hatch on a ramp row — mirrors the gradient editor's fx toggle. */
 .numeric-ramp-fx {
   font-family: var(--mono);
