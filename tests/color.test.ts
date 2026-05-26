@@ -1,5 +1,51 @@
 import { describe, expect, it } from 'vitest'
-import { hexToRgb, hslToRgb, lerpColorHsl, rgbToHex, rgbToHsl } from '../src/shared/color'
+import {
+  combineAxisColors,
+  hexToRgb,
+  hslToRgb,
+  lerpColorHsl,
+  multiplyColors,
+  rgbToHex,
+  rgbToHsl,
+} from '../src/shared/color'
+
+const WHITE = { r: 255, g: 255, b: 255 }
+const RED = { r: 255, g: 0, b: 0 }
+const BLUE = { r: 0, g: 0, b: 255 }
+
+describe('multiplyColors', () => {
+  it('white is the identity', () => {
+    expect(multiplyColors(RED, WHITE)).toEqual(RED)
+    expect(multiplyColors(WHITE, BLUE)).toEqual(BLUE)
+  })
+  it('red × blue is black (no shared channel)', () => {
+    expect(multiplyColors(RED, BLUE)).toEqual({ r: 0, g: 0, b: 0 })
+  })
+  it('halves a channel when multiplied by mid-grey', () => {
+    expect(multiplyColors({ r: 200, g: 200, b: 200 }, { r: 128, g: 128, b: 128 })).toEqual({
+      r: 100,
+      g: 100,
+      b: 100,
+    })
+  })
+})
+
+describe('combineAxisColors', () => {
+  it('returns null when no axis contributes a colour', () => {
+    expect(combineAxisColors([{ ramp: undefined, t: 0.5 }, { ramp: { stops: [] }, t: 0.2 }])).toBeNull()
+  })
+  it('passes a single contributing axis through unchanged', () => {
+    expect(combineAxisColors([{ ramp: { stops: [{ color: RED, position: 0 }] }, t: 0.5 }])).toEqual(RED)
+  })
+  it('multiplies contributing axes (red × blue = black)', () => {
+    expect(
+      combineAxisColors([
+        { ramp: { stops: [{ color: RED, position: 0 }] }, t: 0 },
+        { ramp: { stops: [{ color: BLUE, position: 0 }] }, t: 0 },
+      ]),
+    ).toEqual({ r: 0, g: 0, b: 0 })
+  })
+})
 
 describe('color', () => {
   it('hex 6-digit round-trips through rgb', () => {

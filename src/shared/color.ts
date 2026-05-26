@@ -120,6 +120,36 @@ export function sampleRamp(ramp: ColorRamp, t: number): Color | null {
   throw new Error('sampleRamp: unreachable — t outside sorted ramp range')
 }
 
+/**
+ * Per-channel multiply (normalized to 0..1). White (255,255,255) is the
+ * identity, so an empty/white tint leaves the other colour unchanged — which is
+ * what lets per-axis colour gradients stack: a clear gradient contributes nothing.
+ */
+export function multiplyColors(a: Color, b: Color): Color {
+  return {
+    r: Math.round((a.r * b.r) / 255),
+    g: Math.round((a.g * b.g) / 255),
+    b: Math.round((a.b * b.b) / 255),
+  }
+}
+
+/**
+ * Combine per-axis colour ramps into a single tint by sampling each at its axis
+ * position (tx / ty / tz) and multiplying. Empty ramps are skipped (identity).
+ * Returns null when no axis contributes a colour, so the clone keeps its source
+ * fill instead of being forced to a colour.
+ */
+export function combineAxisColors(samples: { ramp: ColorRamp | undefined; t: number }[]): Color | null {
+  let acc: Color | null = null
+  for (const { ramp, t } of samples) {
+    if (!ramp) continue
+    const c = sampleRamp(ramp, Math.max(0, Math.min(1, t)))
+    if (!c) continue
+    acc = acc ? multiplyColors(acc, c) : c
+  }
+  return acc
+}
+
 interface LegacyColorStop {
   color: Color | null
   end: Color | null
