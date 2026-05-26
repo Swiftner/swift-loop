@@ -35,6 +35,11 @@ interface Props {
   // step (a NumericProperty, so it keeps its fx + modulation)
   stepKey: FormulaProperty
   stepLabel: string
+  // Cross-axis step: the other component of this axis's 2D step. A plain scalar
+  // (no fx) on the config key below; ranged along the axis it moves.
+  crossStepKey: 'columnStepY' | 'rowStepX'
+  crossStepLabel: string
+  crossStepAxis: 'x' | 'y'
   // Twist (clone rotation), Scale (size), and Fade (opacity) — each a
   // NumericRamp sampled along this axis. Identified by config key.
   twistKey: AxisRampKey
@@ -66,6 +71,9 @@ export function AxisSection({
   onCount,
   stepKey,
   stepLabel,
+  crossStepKey,
+  crossStepLabel,
+  crossStepAxis,
   twistKey,
   scaleKey,
   fadeKey,
@@ -77,6 +85,8 @@ export function AxisSection({
   const setRamp = (key: AxisRampKey) => (next: NumericRamp, commit: boolean) =>
     update({ ...config, [key]: next }, commit)
   const range = sliderRangeFor(stepKey, sourceSize)
+  const crossValue = (config[crossStepKey] as number | undefined) ?? 0
+  const crossRange = sliderRangeFor(crossStepAxis, sourceSize)
   // A single column/row has nothing to spread, twist, scale or fade across.
   const inactive = count <= 1
   return (
@@ -89,32 +99,59 @@ export function AxisSection({
         step={1}
         onChange={(v, commit) => onCount(Math.max(1, Math.round(v)), commit)}
       />
-      <SliderRow
-        label={stepLabel}
-        value={step.value}
-        min={range.min}
-        max={range.max}
-        step={range.step}
-        disabled={inactive}
-        formulaIndicator={step.unlocked}
-        formula={formulaForProperty(config, stepKey)}
-        onFormulaChange={(text) => {
-          const trimmed = text.trim()
-          update(
-            {
-              ...config,
-              [stepKey]:
-                trimmed === ''
-                  ? { ...step, unlocked: false, formula: null }
-                  : { ...step, unlocked: true, formula: text },
-            },
-            false,
-          )
-        }}
-        onChange={(v, commit) =>
-          update({ ...config, [stepKey]: computeStepUpdate(step, v) }, commit)
-        }
-      />
+      {(() => {
+        const primaryRow = (
+          <SliderRow
+            label={stepLabel}
+            value={step.value}
+            min={range.min}
+            max={range.max}
+            step={range.step}
+            disabled={inactive}
+            formulaIndicator={step.unlocked}
+            formula={formulaForProperty(config, stepKey)}
+            onFormulaChange={(text) => {
+              const trimmed = text.trim()
+              update(
+                {
+                  ...config,
+                  [stepKey]:
+                    trimmed === ''
+                      ? { ...step, unlocked: false, formula: null }
+                      : { ...step, unlocked: true, formula: text },
+                },
+                false,
+              )
+            }}
+            onChange={(v, commit) =>
+              update({ ...config, [stepKey]: computeStepUpdate(step, v) }, commit)
+            }
+          />
+        )
+        const crossRow = (
+          <SliderRow
+            label={crossStepLabel}
+            value={crossValue}
+            min={crossRange.min}
+            max={crossRange.max}
+            step={crossRange.step}
+            disabled={inactive}
+            onChange={(v, commit) => update({ ...config, [crossStepKey]: v }, commit)}
+          />
+        )
+        // X step always renders above Y step in both sections.
+        return stepKey === 'x' ? (
+          <>
+            {primaryRow}
+            {crossRow}
+          </>
+        ) : (
+          <>
+            {crossRow}
+            {primaryRow}
+          </>
+        )
+      })()}
       <NumericRampRow
         label="Twist"
         ramp={config[twistKey]}

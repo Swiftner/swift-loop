@@ -160,6 +160,9 @@ export function App() {
           onCount={(v, commit) => update({ ...config, cols: v }, commit)}
           stepKey="x"
           stepLabel="X step"
+          crossStepKey="columnStepY"
+          crossStepLabel="Y step"
+          crossStepAxis="y"
           twistKey="columnAngle"
           scaleKey="columnScale"
           fadeKey="columnFade"
@@ -176,6 +179,9 @@ export function App() {
           onCount={(v, commit) => update({ ...config, rows: v }, commit)}
           stepKey="y"
           stepLabel="Y step"
+          crossStepKey="rowStepX"
+          crossStepLabel="X step"
+          crossStepAxis="x"
           twistKey="rowAngle"
           scaleKey="rowScale"
           fadeKey="rowFade"
