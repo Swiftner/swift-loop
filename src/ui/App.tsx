@@ -163,7 +163,6 @@ export function App() {
           crossStepKey="columnStepY"
           crossStepLabel="Y step"
           twistKey="columnAngle"
-          scaleKey="columnScale"
           fadeKey="columnFade"
           randomKey="columnRandom"
         />
@@ -181,7 +180,6 @@ export function App() {
           crossStepKey="rowStepX"
           crossStepLabel="X step"
           twistKey="rowAngle"
-          scaleKey="rowScale"
           fadeKey="rowFade"
           randomKey="rowRandom"
         />
