@@ -157,6 +157,9 @@ export function App() {
           sourceSize={sourceSize}
           count={config.cols}
           onCount={(v, commit) => update({ ...config, cols: v }, commit)}
+          xStepKey="x"
+          yStepKey="columnStepY"
+          scaleKey="columnScale"
           twistKey="columnAngle"
           fadeKey="columnFade"
           randomKey="columnRandom"
@@ -170,6 +173,9 @@ export function App() {
           sourceSize={sourceSize}
           count={config.rows}
           onCount={(v, commit) => update({ ...config, rows: v }, commit)}
+          xStepKey="rowStepX"
+          yStepKey="y"
+          scaleKey="rowScale"
           twistKey="rowAngle"
           fadeKey="rowFade"
           randomKey="rowRandom"

@@ -1,10 +1,8 @@
 import type { LoopConfig, NumericRamp } from '../../shared/types'
 import { CountChip } from '../components/CountChip'
 import { NumericRampRow } from '../components/NumericRampRow'
-import { PairedRampRow } from '../components/PairedRampRow'
 import { Section } from '../components/Section'
-import { SkewPair } from '../components/SkewPair'
-import { StepPair } from '../components/StepPair'
+import { type StepKey, StepPair } from '../components/StepPair'
 import { MAX_AXIS } from '../config-ops'
 import { randomMaxFor } from '../slider-ranges'
 
@@ -31,7 +29,11 @@ interface Props {
   sourceSize: { width: number; height: number } | null
   count: number
   onCount: (v: number, commit: boolean) => void
-  // This axis's own per-axis ramps.
+  // This axis's own 2D step (X and Y components) and ramps. Everything here
+  // affects only this axis — Column and Row never share controls.
+  xStepKey: StepKey
+  yStepKey: StepKey
+  scaleKey: AxisRampKey
   twistKey: AxisRampKey
   fadeKey: AxisRampKey
   randomKey: AxisRampKey
@@ -39,9 +41,9 @@ interface Props {
   randomRangeKey: 'x' | 'y'
 }
 
-// One spatial axis (Column or Row). The count lives in the header (drag to
-// scrub); the grid's Step / Skew / Scale are shared X·Y pairs shown in both
-// sections; Twist / Fade / Random are this axis's own.
+// One spatial axis (Column or Row), fully self-contained: its count (in the
+// header), its 2D Step, and its own Scale / Twist / Fade / Random. Nothing is
+// shared with the other axis.
 export function AxisSection({
   id,
   title,
@@ -50,6 +52,9 @@ export function AxisSection({
   sourceSize,
   count,
   onCount,
+  xStepKey,
+  yStepKey,
+  scaleKey,
   twistKey,
   fadeKey,
   randomKey,
@@ -67,17 +72,23 @@ export function AxisSection({
       muted={inactive}
       defaultOpen={false}
     >
-      <StepPair config={config} update={update} sourceSize={sourceSize} disabled={inactive} />
-      <SkewPair config={config} update={update} sourceSize={sourceSize} disabled={inactive} />
-      <PairedRampRow
+      <StepPair
+        config={config}
+        update={update}
+        sourceSize={sourceSize}
+        disabled={inactive}
+        xKey={xStepKey}
+        yKey={yStepKey}
+      />
+      <NumericRampRow
         label="Scale"
-        x={{ axis: 'X', ramp: config.columnScale, onChange: setRamp('columnScale') }}
-        y={{ axis: 'Y', ramp: config.rowScale, onChange: setRamp('rowScale') }}
+        ramp={config[scaleKey]}
         min={-100}
         max={100}
         step={1}
         unit="%"
         disabled={inactive}
+        onChange={setRamp(scaleKey)}
       />
       <NumericRampRow
         label="Twist"
