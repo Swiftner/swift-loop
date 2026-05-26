@@ -1,7 +1,5 @@
-import type { ComponentChildren } from 'preact'
 import { formulaForProperty } from '../../plugin/engine/compile'
 import type { FormulaProperty, LoopConfig, NumericProperty, NumericRamp } from '../../shared/types'
-import { MoreDisclosure } from '../components/MoreDisclosure'
 import { NumericRampRow } from '../components/NumericRampRow'
 import { PairedRampRow } from '../components/PairedRampRow'
 import { Section } from '../components/Section'
@@ -45,8 +43,6 @@ interface Props {
   twistKey: AxisRampKey
   fadeKey: AxisRampKey
   randomKey: AxisRampKey
-  hint?: string
-  chip?: ComponentChildren
 }
 
 // Drives a slider value into a NumericProperty without destroying an active
@@ -59,7 +55,8 @@ function computeStepUpdate(cur: NumericProperty, v: number): NumericProperty {
 }
 
 // One spatial axis (Column or Row): how many, the 2D step (X + Y), a shared
-// Scale pair, and — behind More — its own Twist / Fade / Random.
+// Scale pair, and its own Twist / Fade / Random. The collapsed header carries
+// the count and dims when the axis is inactive (count ≤ 1).
 export function AxisSection({
   id,
   title,
@@ -75,8 +72,6 @@ export function AxisSection({
   twistKey,
   fadeKey,
   randomKey,
-  hint,
-  chip,
 }: Props) {
   const step = config[stepKey] as NumericProperty
   const setRamp = (key: AxisRampKey) => (next: NumericRamp, commit: boolean) =>
@@ -126,7 +121,7 @@ export function AxisSection({
     />
   )
   return (
-    <Section id={id} title={title} hint={hint} chip={chip} defaultOpen={false}>
+    <Section id={id} title={title} chip={count} muted={inactive} defaultOpen={false}>
       <SliderRow
         label="Count"
         value={count}
@@ -148,40 +143,38 @@ export function AxisSection({
         unit="%"
         disabled={inactive}
       />
-      <MoreDisclosure id={id}>
-        <NumericRampRow
-          label="Twist"
-          ramp={config[twistKey]}
-          min={-90}
-          max={90}
-          step={0.5}
-          decimals={1}
-          unit="°"
-          disabled={inactive}
-          onChange={setRamp(twistKey)}
-        />
-        <NumericRampRow
-          label="Fade"
-          ramp={config[fadeKey]}
-          min={0}
-          max={100}
-          step={1}
-          unit="%"
-          disabled={inactive}
-          onChange={setRamp(fadeKey)}
-        />
-        <NumericRampRow
-          label="Random"
-          ramp={config[randomKey]}
-          min={0}
-          max={randomMaxFor(stepKey, sourceSize)}
-          step={0.5}
-          decimals={1}
-          unit="px"
-          disabled={inactive}
-          onChange={setRamp(randomKey)}
-        />
-      </MoreDisclosure>
+      <NumericRampRow
+        label="Twist"
+        ramp={config[twistKey]}
+        min={-90}
+        max={90}
+        step={0.5}
+        decimals={1}
+        unit="°"
+        disabled={inactive}
+        onChange={setRamp(twistKey)}
+      />
+      <NumericRampRow
+        label="Fade"
+        ramp={config[fadeKey]}
+        min={0}
+        max={100}
+        step={1}
+        unit="%"
+        disabled={inactive}
+        onChange={setRamp(fadeKey)}
+      />
+      <NumericRampRow
+        label="Random"
+        ramp={config[randomKey]}
+        min={0}
+        max={randomMaxFor(stepKey, sourceSize)}
+        step={0.5}
+        decimals={1}
+        unit="px"
+        disabled={inactive}
+        onChange={setRamp(randomKey)}
+      />
     </Section>
   )
 }

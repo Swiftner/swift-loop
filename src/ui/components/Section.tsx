@@ -14,6 +14,8 @@ interface Props {
   defaultOpen?: boolean
   /** If true, the section is always open and no disclosure caret is shown. */
   alwaysOpen?: boolean
+  /** Dim the header (title + chip) to signal the section is inactive. */
+  muted?: boolean
   children: ComponentChildren
 }
 
@@ -27,6 +29,7 @@ export function Section({
   actions,
   defaultOpen = true,
   alwaysOpen = false,
+  muted = false,
   children,
 }: Props) {
   const [open, setOpen] = useState<boolean>(() => {
@@ -61,7 +64,7 @@ export function Section({
 
   return (
     <section
-      class={`section${open ? ' is-open' : ' is-closed'}${alwaysOpen ? ' is-always-open' : ''}`}
+      class={`section${open ? ' is-open' : ' is-closed'}${alwaysOpen ? ' is-always-open' : ''}${muted ? ' is-muted' : ''}`}
     >
       <div
         class="section-head"

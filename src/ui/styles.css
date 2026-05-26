@@ -218,6 +218,11 @@ body,
   color: var(--fg);
   flex: 1;
 }
+/* Inactive axis (count ≤ 1): dim the header so it reads as "off". */
+.section.is-muted .section-title,
+.section.is-muted .section-head-chip {
+  opacity: 0.45;
+}
 .section-chip {
   font-family: var(--mono);
   font-size: 10px;
@@ -1437,29 +1442,6 @@ input.appearance-num-input::-webkit-inner-spin-button {
 .library-open-btn:hover {
   border-color: var(--accent);
   color: var(--accent);
-}
-
-.more-disclosure {
-  margin-top: 4px;
-}
-.more-disclosure-toggle {
-  width: 100%;
-  border: 0;
-  background: transparent;
-  color: var(--muted);
-  font: inherit;
-  text-align: center;
-  padding: 6px 0;
-  cursor: pointer;
-  border-top: 1px solid var(--hairline);
-}
-.more-disclosure-toggle:hover {
-  color: var(--fg);
-}
-.more-disclosure-body {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
 }
 
 .pair-row-sides {
