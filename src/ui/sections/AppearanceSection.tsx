@@ -117,8 +117,10 @@ export function AppearanceSection({ config, update, sourceSize }: Props) {
       })}
       {rampRow('opacity', 'Opacity', { min: 0, max: 100, step: 1 }, { unit: '%' })}
 
-      {colorRow('fill', 'Fill')}
-      {colorRow('stroke', 'Stroke')}
+      <div class="appearance-colors">
+        {colorRow('fill', 'Fill')}
+        {colorRow('stroke', 'Stroke')}
+      </div>
 
       {rampRow('strokeWeight', 'Stroke width', { min: 0, max: 50, step: 0.5 }, { decimals: 1 })}
     </Section>
@@ -147,7 +149,9 @@ interface EasingChipProps {
 }
 function EasingChip({ value, onChange }: EasingChipProps) {
   return (
-    <label class="easing-chip">
+    // Stop clicks reaching the section header (which would toggle it collapsed)
+    // so the easing dropdown actually opens.
+    <label class="easing-chip" onClick={(e) => e.stopPropagation()}>
       <EasingGlyph easing={value} />
       <select
         value={value}

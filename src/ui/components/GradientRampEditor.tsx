@@ -139,8 +139,10 @@ function onStripPointerDown(
   if (!el) return
   const rect = el.getBoundingClientRect()
   const t = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
+  // Adding the first stop to an empty ramp has nothing to sample, so seed a
+  // neutral mid-grey rather than black (which would black out every clone).
   const sampled = sampleRamp(ramp, t)
-  const color: Color = sampled ?? { r: 0, g: 0, b: 0 }
+  const color: Color = sampled ?? { r: 128, g: 128, b: 128 }
   const nextStops = [...sorted, { color, position: t }].sort((a, b) => a.position - b.position)
   onChange({ ...ramp, stops: nextStops }, true)
 }

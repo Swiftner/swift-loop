@@ -1199,6 +1199,20 @@ body,
   padding: 0;
 }
 
+/* Fill and Stroke sit side by side, each taking half the width. */
+.appearance-colors {
+  display: flex;
+  gap: 10px;
+}
+.appearance-colors > .appearance-strip {
+  flex: 1 1 0;
+  min-width: 0;
+}
+/* In the narrow half-width column, let the colour readout wrap instead of
+   overflowing. */
+.appearance-colors .gradient-ramp-readout {
+  flex-wrap: wrap;
+}
 .gradient-ramp-hex-pair {
   display: inline-flex;
   align-items: center;
