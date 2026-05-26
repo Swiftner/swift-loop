@@ -1,5 +1,6 @@
 import { DEFAULT_DEPTH_DIR } from '../../plugin/engine/cells'
 import type { LoopConfig, NumericRamp } from '../../shared/types'
+import { CountChip } from '../components/CountChip'
 import { NumericRampRow } from '../components/NumericRampRow'
 import { Section } from '../components/Section'
 import { SliderRow } from '../components/SliderRow'
@@ -22,15 +23,19 @@ export function LayerSection({ config, update }: Props) {
     (next: NumericRamp, commit: boolean) =>
       update({ ...config, [key]: next }, commit)
   return (
-    <Section id="layer" title="Layer" chip={layers} muted={noDepth} defaultOpen={false}>
-      <SliderRow
-        label="Count"
-        value={layers}
-        min={1}
-        max={MAX_AXIS}
-        step={1}
-        onChange={(v, commit) => update({ ...config, layers: Math.max(1, Math.round(v)) }, commit)}
-      />
+    <Section
+      id="layer"
+      title="Layer"
+      chip={
+        <CountChip
+          value={layers}
+          max={MAX_AXIS}
+          onChange={(v, commit) => update({ ...config, layers: v }, commit)}
+        />
+      }
+      muted={noDepth}
+      defaultOpen={false}
+    >
       <SliderRow
         label="Z step"
         value={config.layerStep ?? 0}

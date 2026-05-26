@@ -1,5 +1,6 @@
 import { formulaForProperty } from '../../plugin/engine/compile'
 import type { FormulaProperty, LoopConfig, NumericProperty, NumericRamp } from '../../shared/types'
+import { CountChip } from '../components/CountChip'
 import { NumericRampRow } from '../components/NumericRampRow'
 import { PairedRampRow } from '../components/PairedRampRow'
 import { Section } from '../components/Section'
@@ -121,15 +122,13 @@ export function AxisSection({
     />
   )
   return (
-    <Section id={id} title={title} chip={count} muted={inactive} defaultOpen={false}>
-      <SliderRow
-        label="Count"
-        value={count}
-        min={1}
-        max={MAX_AXIS}
-        step={1}
-        onChange={(v, commit) => onCount(Math.max(1, Math.round(v)), commit)}
-      />
+    <Section
+      id={id}
+      title={title}
+      chip={<CountChip value={count} max={MAX_AXIS} onChange={onCount} />}
+      muted={inactive}
+      defaultOpen={false}
+    >
       {/* X step always renders above Y step in both sections. */}
       {stepKey === 'x' ? primaryRow : crossRow}
       {stepKey === 'x' ? crossRow : primaryRow}
