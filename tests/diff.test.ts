@@ -120,4 +120,10 @@ describe('cross-axis steps', () => {
   it('no cross-step change is a noop', () => {
     expect(diffConfig(base, { ...base }, null).mode).toBe('noop')
   })
+
+  it('rowStepX back to 0 is in-place and marks x dirty', () => {
+    const res = diffConfig({ ...base, rowStepX: 5 }, { ...base, rowStepX: 0 }, null)
+    expect(res.mode).toBe('in-place')
+    expect(res.dirty).toContain('x')
+  })
 })
