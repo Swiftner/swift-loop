@@ -28,9 +28,9 @@ export function LayerSection({ config, update }: Props) {
       title="Layer"
       chip={
         <CountChip
-          value={layers}
-          max={MAX_AXIS}
-          onChange={(v, commit) => update({ ...config, layers: v }, commit)}
+          value={layers - 1}
+          max={MAX_AXIS - 1}
+          onChange={(v, commit) => update({ ...config, layers: v + 1 }, commit)}
         />
       }
       muted={noDepth}

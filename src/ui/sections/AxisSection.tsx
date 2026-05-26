@@ -63,7 +63,13 @@ export function AxisSection({
     <Section
       id={id}
       title={title}
-      chip={<CountChip value={count} max={MAX_AXIS} onChange={onCount} />}
+      chip={
+        <CountChip
+          value={count - 1}
+          max={MAX_AXIS - 1}
+          onChange={(v, commit) => onCount(v + 1, commit)}
+        />
+      }
       muted={inactive}
       defaultOpen={false}
     >
