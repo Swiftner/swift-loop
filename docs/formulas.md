@@ -6,7 +6,7 @@ That's what `fx` mode is for. And honestly? If you've ever written a CSS animati
 
 ## Turning it on
 
-Every Appearance row — and the colour gradients, and the X / Y step fields in Column and Row — has its own little `fx` button. Click it and that property's curve is replaced by a text field where the formula lives.
+Every Appearance row — and the colour gradients — has its own little `fx` button. Click it and that property's curve is replaced by a text field where the formula lives. The primary step on each axis (Column's X step, Row's Y step) has `fx` too; the cross-axis steps (Column's Y step, Row's X step) are plain sliders. If you need to describe a lattice entirely in math, the `x` / `y` formula fields are the full escape hatch.
 
 Each property is independent: you can drive Rotation with a formula while Size stays a hand-drawn curve. The curve isn't thrown away either — clear the formula and your stops come right back.
 

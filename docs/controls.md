@@ -30,7 +30,9 @@ The first section. This is where you set the count.
 
 ## Position (X step / Y step)
 
-How far each clone moves from the previous one lives inside the **Column** and **Row** sections as **X step** and **Y step**. Drag X step right to spread the loop horizontally, Y step down to spread it vertically. Both are scaled to your selection (±2x the shape's width/height), so a 16-px icon and a 1200-px illustration get the same slider feel.
+Both the **Column** and **Row** sections carry an **X step** and a **Y step** — how far each clone moves along each direction. For a plain grid, a column moves along X and a row along Y. But give a column some **Y step** (or a row some **X step**) and the whole grid shears into an oblique or isometric lattice. Steps are scaled to your selection (±2× the shape's width/height), so a 16-px icon and a 1200-px illustration get the same slider feel. Try the **Isometric** pattern in the library to see it in action.
+
+Each axis's primary step (Column's X step, Row's Y step) has its own **`fx`** button for formula-driven positioning. The cross-axis step (Column's Y step, Row's X step) is a plain slider — and if you need to write the full position by hand, the `x` / `y` formula in `fx` mode is the escape hatch for any lattice you can describe.
 
 Rotation and size used to live here as per-step sliders. They now live in **Appearance** as ramps — see below.
 
