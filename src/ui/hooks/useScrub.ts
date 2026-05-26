@@ -40,6 +40,11 @@ export function useScrub({
   const state = useRef<{ startX: number; startV: number; scrubbed: boolean } | null>(null)
 
   const onPointerDown = (e: PointerEvent) => {
+    // Commit any field being edited elsewhere before we hijack the pointer:
+    // preventDefault suppresses the default focus shift, which would otherwise
+    // stop that input's blur (and its commit) from firing.
+    const active = document.activeElement
+    if (active instanceof HTMLElement && active !== e.currentTarget) active.blur()
     e.preventDefault()
     const target = e.currentTarget as HTMLElement
     target.setPointerCapture(e.pointerId)

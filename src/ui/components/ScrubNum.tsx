@@ -60,6 +60,12 @@ export function ScrubNum({
   }
 
   const onPointerDown = (e: PointerEvent) => {
+    // If another field is mid-edit, commit it first by blurring it. The
+    // preventDefault below suppresses the default focus shift, which would
+    // otherwise stop that input's blur from firing — silently dropping the
+    // value the user just typed.
+    const active = document.activeElement
+    if (active instanceof HTMLElement && active !== e.currentTarget) active.blur()
     e.preventDefault()
     const target = e.currentTarget as HTMLElement
     target.setPointerCapture(e.pointerId)
