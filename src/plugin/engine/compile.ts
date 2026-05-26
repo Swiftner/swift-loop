@@ -30,10 +30,14 @@ function baseSugarFor(property: FormulaProperty, config: LoopConfig): string {
   const xIdx = config.cols > 1 ? 'c' : 'r'
   const yIdx = config.rows > 1 ? 'r' : 'c'
   switch (property) {
-    case 'x':
-      return `${xIdx} * ${p.value}`
-    case 'y':
-      return `${yIdx} * ${p.value}`
+    case 'x': {
+      const cross = config.rowStepX ? ` + r * ${config.rowStepX}` : ''
+      return `${xIdx} * ${p.value}${cross}`
+    }
+    case 'y': {
+      const cross = config.columnStepY ? ` + c * ${config.columnStepY}` : ''
+      return `${yIdx} * ${p.value}${cross}`
+    }
     // rotation / scaleX / scaleY / opacity carry a multi-stop ramp now; their
     // sugar value is sampled directly in cells.ts (along with the sinusoidal
     // layer). The compiled formula is only consulted when the property is

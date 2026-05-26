@@ -89,6 +89,14 @@ export interface LoopConfig {
   rowAngle?: NumericRamp // across rows
   layerStep?: number // px depth offset per layer (× l), along layerDirection
   layerDirection?: number // deg, direction of the depth offset (default 35 = up-right)
+  // Cross-axis step: the second component of each axis's 2D step vector. Column's
+  // primary step is `x` (× c); columnStepY adds a Y drift per column (× c). Row's
+  // primary step is `y` (× r); rowStepX adds an X drift per row (× r). Together
+  // they make the grid an arbitrary lattice (oblique / isometric / diamond).
+  // Absent = 0 = a plain rectangular grid, byte-identical to pre-existing configs.
+  // Plain scalars, like layerStep — the x/y `fx` formula is the escape hatch.
+  columnStepY?: number
+  rowStepX?: number
   layerAngle?: NumericRamp // clone rotation (deg) across layers
   // Z-order of overlapping depth layers. 'near-top' (default) keeps the front
   // layer (l=0) on top — the natural reading of a receding stack. 'far-top'

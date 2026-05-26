@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { compileConfig, formulaForProperty } from '../../src/plugin/engine/compile'
 import { buildScope } from '../../src/plugin/engine/scope'
 import type { LoopConfig } from '../../src/shared/types'
+import { DEFAULT_CONFIG } from '../../src/shared/defaults'
 
 const baseConfig = (): LoopConfig => ({
   cols: 5,
@@ -110,5 +111,35 @@ describe('compileConfig', () => {
     const c = baseConfig()
     c.x = { value: 0, end: null, random: 0, unlocked: true, formula: '1 ++ 2' }
     expect(() => compileConfig(c)).toThrow()
+  })
+})
+
+describe('cross-axis grid steps', () => {
+  const grid = { ...DEFAULT_CONFIG, cols: 4, rows: 4, x: { ...DEFAULT_CONFIG.x, value: 10 }, y: { ...DEFAULT_CONFIG.y, value: 7 } }
+
+  it('rowStepX adds r * value to the x sugar', () => {
+    const c = { ...grid, rowStepX: 3 }
+    expect(formulaForProperty(c, 'x')).toBe('x = c * 10 + r * 3')
+  })
+
+  it('columnStepY adds c * value to the y sugar', () => {
+    const c = { ...grid, columnStepY: 5 }
+    expect(formulaForProperty(c, 'y')).toBe('y = r * 7 + c * 5')
+  })
+
+  it('absent cross-step emits no extra term (byte-identical to today)', () => {
+    expect(formulaForProperty(grid, 'x')).toBe('x = c * 10')
+    expect(formulaForProperty(grid, 'y')).toBe('y = r * 7')
+  })
+
+  it('zero cross-step emits no extra term', () => {
+    const c = { ...grid, rowStepX: 0, columnStepY: 0 }
+    expect(formulaForProperty(c, 'x')).toBe('x = c * 10')
+    expect(formulaForProperty(c, 'y')).toBe('y = r * 7')
+  })
+
+  it('fx on x subsumes the cross term', () => {
+    const c = { ...grid, rowStepX: 3, x: { ...grid.x, unlocked: true, formula: 'x = c * 2' } }
+    expect(formulaForProperty(c, 'x')).toBe('x = c * 2')
   })
 })
