@@ -1457,3 +1457,35 @@ input.appearance-num-input::-webkit-inner-spin-button {
   flex-direction: column;
   gap: 8px;
 }
+
+.pair-row-sides {
+  display: flex;
+  flex: 1 1 auto;
+  gap: 10px;
+}
+.step-pair-side {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.step-pair-axis {
+  color: var(--figma-color-text-tertiary, #888);
+}
+.paired-strip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+.paired-strip-axis {
+  flex: 0 0 auto;
+  width: 12px;
+  color: var(--figma-color-text-tertiary, #888);
+}
+.paired-strip-body {
+  flex: 1 1 auto;
+}
+.pair-row.is-disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
