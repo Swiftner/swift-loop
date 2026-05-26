@@ -19,4 +19,16 @@ describe('applyEntry — fx pattern', () => {
     expect(next.x.formula).toBe('x = c * 5')
     expect(next.cols).toBe(6)
   })
+
+  it('clears unlocked for properties absent from formulas', () => {
+    const next = applyEntry(DEFAULT_CONFIG, fxEntry)
+    // rotation/scaleX/scaleY/opacity are not in fxEntry.formulas
+    expect(next.rotation.unlocked).toBe(false)
+    expect(next.rotation.formula).toBeNull()
+  })
+
+  it('seeds the slider value from a trailing scale in the formula', () => {
+    const next = applyEntry(DEFAULT_CONFIG, fxEntry)
+    expect(next.x.value).toBe(5)
+  })
 })
