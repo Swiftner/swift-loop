@@ -345,23 +345,6 @@ body,
   border: 1px solid var(--accent);
   border-radius: 2px;
 }
-.slider-row-track {
-  width: 100%;
-  appearance: none;
-  height: 2px;
-  background: var(--hairline);
-  border-radius: 1px;
-  outline: none;
-  cursor: pointer;
-}
-.slider-row-track::-webkit-slider-thumb {
-  appearance: none;
-  width: 3px;
-  height: 14px;
-  background: var(--fg);
-  border-radius: 1px;
-  cursor: pointer;
-}
 .slider-row-fx-indicator {
   font-style: italic;
   color: var(--accent);

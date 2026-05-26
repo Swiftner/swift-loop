@@ -1,5 +1,5 @@
 // src/ui/components/SliderRow.tsx
-import { useCallback, useRef, useState } from 'preact/hooks'
+import { useCallback, useState } from 'preact/hooks'
 import { useScrub } from '../hooks/useScrub'
 
 interface Props {
@@ -32,28 +32,6 @@ export function SliderRow({
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(value.toString())
   const [expanded, setExpanded] = useState(false)
-  const dragging = useRef(false)
-
-  const handleInput = useCallback(
-    (e: Event) => {
-      const v = Number.parseFloat((e.target as HTMLInputElement).value)
-      if (!Number.isNaN(v)) onChange(v, false)
-    },
-    [onChange],
-  )
-
-  const handleChange = useCallback(
-    (e: Event) => {
-      const v = Number.parseFloat((e.target as HTMLInputElement).value)
-      if (!Number.isNaN(v)) onChange(v, true)
-      dragging.current = false
-    },
-    [onChange],
-  )
-
-  const onPointerDown = () => {
-    dragging.current = true
-  }
 
   const submitDraft = () => {
     const v = Number.parseFloat(draft)
@@ -74,6 +52,26 @@ export function SliderRow({
       setEditing(true)
     },
   })
+
+  // Arrow keys nudge the value (the native range input used to provide this).
+  const nudge = useCallback(
+    (e: KeyboardEvent) => {
+      const dir =
+        e.key === 'ArrowUp' || e.key === 'ArrowRight'
+          ? 1
+          : e.key === 'ArrowDown' || e.key === 'ArrowLeft'
+            ? -1
+            : 0
+      if (dir === 0) return
+      e.preventDefault()
+      let mult = 1
+      if (e.shiftKey) mult = 0.1
+      if (e.altKey || e.metaKey) mult = 10
+      const next = Math.min(max, Math.max(min, value + dir * step * mult))
+      onChange(next, true)
+    },
+    [value, min, max, step, onChange],
+  )
 
   const hasFormula = formula !== undefined && onFormulaChange !== undefined
 
@@ -119,27 +117,15 @@ export function SliderRow({
             {...scrubHandlers}
             type="button"
             disabled={disabled}
-            aria-label={`${label}: ${value}${unit ?? ''}. Drag to scrub, click to type.`}
-            title="Drag to scrub, click to type. Shift = fine, Alt = coarse."
+            onKeyDown={nudge}
+            aria-label={`${label}: ${value}${unit ?? ''}. Drag or arrow keys to change, click to type.`}
+            title="Drag or arrow keys to change, click to type. Shift = fine, Alt = coarse."
           >
             {value.toFixed(step < 1 ? 1 : 0)}
             {unit ?? ''}
           </button>
         )}
       </div>
-      <input
-        class="slider-row-track"
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        aria-label={label}
-        disabled={disabled}
-        onInput={handleInput}
-        onChange={handleChange}
-        onPointerDown={onPointerDown}
-      />
       {hasFormula && expanded && (
         <textarea
           class="slider-row-formula"
