@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest'
 import {
   isFlatZero,
   isNumericRamp,
+  rampDisplayStops,
   rampFromTo,
+  rampIsFlat,
   sampleNumericRamp,
 } from '../src/shared/numeric-ramp'
 
@@ -67,5 +69,67 @@ describe('helpers', () => {
     expect(isFlatZero({ stops: [] })).toBe(true)
     expect(isFlatZero(rampFromTo(0, 0))).toBe(true)
     expect(isFlatZero(rampFromTo(0, 1))).toBe(false)
+  })
+})
+
+describe('rampDisplayStops', () => {
+  it('returns two endpoints at 0 for an absent or empty ramp', () => {
+    expect(rampDisplayStops(undefined)).toEqual([
+      { value: 0, position: 0 },
+      { value: 0, position: 1 },
+    ])
+    expect(rampDisplayStops({ stops: [] })).toEqual([
+      { value: 0, position: 0 },
+      { value: 0, position: 1 },
+    ])
+  })
+
+  it('expands a single constant stop into two endpoints at that value', () => {
+    expect(rampDisplayStops({ stops: [{ value: 30, position: 0.4 }] })).toEqual([
+      { value: 30, position: 0 },
+      { value: 30, position: 1 },
+    ])
+  })
+
+  it('passes through and sorts 2+ stops', () => {
+    const ramp = {
+      stops: [
+        { value: 5, position: 1 },
+        { value: 1, position: 0 },
+      ],
+    }
+    expect(rampDisplayStops(ramp)).toEqual([
+      { value: 1, position: 0 },
+      { value: 5, position: 1 },
+    ])
+  })
+})
+
+describe('rampIsFlat', () => {
+  it('treats absent and single-stop ramps as flat', () => {
+    expect(rampIsFlat(undefined)).toBe(true)
+    expect(rampIsFlat({ stops: [{ value: 9, position: 0 }] })).toBe(true)
+  })
+
+  it('is flat when all stop values are equal', () => {
+    expect(
+      rampIsFlat({
+        stops: [
+          { value: 0, position: 0 },
+          { value: 0, position: 1 },
+        ],
+      }),
+    ).toBe(true)
+  })
+
+  it('is not flat when stop values differ', () => {
+    expect(
+      rampIsFlat({
+        stops: [
+          { value: 0, position: 0 },
+          { value: 40, position: 1 },
+        ],
+      }),
+    ).toBe(false)
   })
 })
