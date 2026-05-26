@@ -22,4 +22,13 @@ describe('evaluateEntry', () => {
     expect(w).toBeGreaterThan(0)
     expect(h).toBeGreaterThan(0)
   })
+
+  it('sugar coordinates match the lattice basis', () => {
+    const e: LibraryEntry = { id: 's2', name: 'S2', cols: 4, rows: 4, steps: { x: 40, y: 30 } }
+    const pts = evaluateEntry(e)
+    // The cell at c=3, r=3 (last in the single-layer iteration) lands at (3*40, 3*30).
+    const last = pts[pts.length - 1]
+    expect(last.x).toBe(120)
+    expect(last.y).toBe(90)
+  })
 })
