@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { diffConfig } from '../src/plugin/loop/diff'
-import type { LoopConfig } from '../src/shared/types'
 import { DEFAULT_CONFIG } from '../src/shared/defaults'
+import type { LoopConfig } from '../src/shared/types'
 
 const base = (): LoopConfig => ({
   cols: 5,

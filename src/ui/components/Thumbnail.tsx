@@ -1,7 +1,7 @@
 // src/ui/components/Thumbnail.tsx
 import { useMemo } from 'preact/hooks'
-import type { LibraryEntry } from '../library/types'
 import { evaluateEntry } from '../library/thumbnail-points'
+import type { LibraryEntry } from '../library/types'
 
 interface Props {
   entry: LibraryEntry

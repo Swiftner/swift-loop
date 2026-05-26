@@ -112,9 +112,7 @@ export function AxisSection({
           false,
         )
       }}
-      onChange={(v, commit) =>
-        update({ ...config, [stepKey]: computeStepUpdate(step, v) }, commit)
-      }
+      onChange={(v, commit) => update({ ...config, [stepKey]: computeStepUpdate(step, v) }, commit)}
     />
   )
   const crossRow = (

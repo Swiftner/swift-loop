@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { compileConfig, formulaForProperty } from '../../src/plugin/engine/compile'
 import { buildScope } from '../../src/plugin/engine/scope'
-import type { LoopConfig } from '../../src/shared/types'
 import { DEFAULT_CONFIG } from '../../src/shared/defaults'
+import type { LoopConfig } from '../../src/shared/types'
 
 const baseConfig = (): LoopConfig => ({
   cols: 5,
@@ -115,7 +115,13 @@ describe('compileConfig', () => {
 })
 
 describe('cross-axis grid steps', () => {
-  const grid = { ...DEFAULT_CONFIG, cols: 4, rows: 4, x: { ...DEFAULT_CONFIG.x, value: 10 }, y: { ...DEFAULT_CONFIG.y, value: 7 } }
+  const grid = {
+    ...DEFAULT_CONFIG,
+    cols: 4,
+    rows: 4,
+    x: { ...DEFAULT_CONFIG.x, value: 10 },
+    y: { ...DEFAULT_CONFIG.y, value: 7 },
+  }
 
   it('rowStepX adds r * value to the x sugar', () => {
     const c = { ...grid, rowStepX: 3 }
