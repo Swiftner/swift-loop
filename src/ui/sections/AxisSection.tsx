@@ -126,7 +126,7 @@ export function AxisSection({
     />
   )
   return (
-    <Section id={id} title={title} hint={hint} chip={chip}>
+    <Section id={id} title={title} hint={hint} chip={chip} defaultOpen={false}>
       <SliderRow
         label="Count"
         value={count}
