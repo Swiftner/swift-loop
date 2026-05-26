@@ -95,6 +95,8 @@ export interface LoopConfig {
   // they make the grid an arbitrary lattice (oblique / isometric / diamond).
   // Absent = 0 = a plain rectangular grid, byte-identical to pre-existing configs.
   // Plain scalars, like layerStep — the x/y `fx` formula is the escape hatch.
+  // Note: cross-steps are independent only in a true 2D grid; on a collapsed
+  // strip (cols=1 or rows=1) the primary step's fallback index merges them.
   columnStepY?: number
   rowStepX?: number
   layerAngle?: NumericRamp // clone rotation (deg) across layers

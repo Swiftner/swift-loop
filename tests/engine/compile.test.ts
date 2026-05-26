@@ -142,4 +142,9 @@ describe('cross-axis grid steps', () => {
     const c = { ...grid, rowStepX: 3, x: { ...grid.x, unlocked: true, formula: 'x = c * 2' } }
     expect(formulaForProperty(c, 'x')).toBe('x = c * 2')
   })
+
+  it('serializes a negative cross-step', () => {
+    const c = { ...grid, rowStepX: -5 }
+    expect(formulaForProperty(c, 'x')).toBe('x = c * 10 + r * -5')
+  })
 })
