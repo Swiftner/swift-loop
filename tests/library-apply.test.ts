@@ -59,4 +59,20 @@ describe('applyEntry — sugar pattern', () => {
     expect(next.columnStepY).toBeUndefined()
     expect(next.rowStepX).toBeUndefined()
   })
+
+  it('lets a formula win over a step for the same property', () => {
+    const mixed: LibraryEntry = {
+      id: 'mixed',
+      name: 'Mixed',
+      cols: 6,
+      rows: 6,
+      formulas: { x: 'x = c * 7' },
+      steps: { x: 99, y: 40 },
+    }
+    const next = applyEntry(DEFAULT_CONFIG, mixed)
+    expect(next.x.unlocked).toBe(true)
+    expect(next.x.formula).toBe('x = c * 7')
+    // y has no formula, so its step value applies
+    expect(next.y.value).toBe(40)
+  })
 })
