@@ -9,9 +9,10 @@ import {
   rgbToHsl,
 } from '../src/shared/color'
 
-const WHITE = { r: 255, g: 255, b: 255 }
-const RED = { r: 255, g: 0, b: 0 }
-const BLUE = { r: 0, g: 0, b: 255 }
+// Color channels are 0..1 in this codebase.
+const WHITE = { r: 1, g: 1, b: 1 }
+const RED = { r: 1, g: 0, b: 0 }
+const BLUE = { r: 0, g: 0, b: 1 }
 
 describe('multiplyColors', () => {
   it('white is the identity', () => {
@@ -21,11 +22,11 @@ describe('multiplyColors', () => {
   it('red × blue is black (no shared channel)', () => {
     expect(multiplyColors(RED, BLUE)).toEqual({ r: 0, g: 0, b: 0 })
   })
-  it('halves a channel when multiplied by mid-grey', () => {
-    expect(multiplyColors({ r: 200, g: 200, b: 200 }, { r: 128, g: 128, b: 128 })).toEqual({
-      r: 100,
-      g: 100,
-      b: 100,
+  it('halves a channel when multiplied by mid-grey (0.5)', () => {
+    expect(multiplyColors({ r: 0.8, g: 0.8, b: 0.8 }, { r: 0.5, g: 0.5, b: 0.5 })).toEqual({
+      r: 0.4,
+      g: 0.4,
+      b: 0.4,
     })
   })
 })

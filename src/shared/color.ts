@@ -126,11 +126,8 @@ export function sampleRamp(ramp: ColorRamp, t: number): Color | null {
  * what lets per-axis colour gradients stack: a clear gradient contributes nothing.
  */
 export function multiplyColors(a: Color, b: Color): Color {
-  return {
-    r: Math.round((a.r * b.r) / 255),
-    g: Math.round((a.g * b.g) / 255),
-    b: Math.round((a.b * b.b) / 255),
-  }
+  // Color channels are 0..1 here, so white (1,1,1) is the multiply identity.
+  return { r: a.r * b.r, g: a.g * b.g, b: a.b * b.b }
 }
 
 /**
