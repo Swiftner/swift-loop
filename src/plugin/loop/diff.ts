@@ -81,8 +81,10 @@ export function diffConfig(
   const angleChanged = (prev.angle ?? 0) !== (next.angle ?? 0)
 
   const dirty: DirtyProperty[] = []
-  if (!eqNumericProperty(prev.x, next.x) || angleChanged) dirty.push('x')
-  if (!eqNumericProperty(prev.y, next.y) || angleChanged) dirty.push('y')
+  const rowStepXChanged = (prev.rowStepX ?? 0) !== (next.rowStepX ?? 0)
+  const columnStepYChanged = (prev.columnStepY ?? 0) !== (next.columnStepY ?? 0)
+  if (!eqNumericProperty(prev.x, next.x) || angleChanged || rowStepXChanged) dirty.push('x')
+  if (!eqNumericProperty(prev.y, next.y) || angleChanged || columnStepYChanged) dirty.push('y')
   if (!eqNumericProperty(prev.rotation, next.rotation)) dirty.push('rotation')
   if (!eqNumericProperty(prev.scaleX, next.scaleX)) dirty.push('scaleX')
   if (!eqNumericProperty(prev.scaleY, next.scaleY)) dirty.push('scaleY')

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { diffConfig } from '../src/plugin/loop/diff'
 import type { LoopConfig } from '../src/shared/types'
+import { DEFAULT_CONFIG } from '../src/shared/defaults'
 
 const base = (): LoopConfig => ({
   cols: 5,
@@ -96,5 +97,27 @@ describe('diffConfig', () => {
     const d = diffConfig(a, b, null)
     expect(d.mode).toBe('in-place')
     expect(d.dirty).toContain('fill')
+  })
+})
+
+describe('cross-axis steps', () => {
+  const base = { ...DEFAULT_CONFIG, cols: 4, rows: 4 }
+
+  it('rowStepX change is in-place and marks x dirty', () => {
+    const res = diffConfig(base, { ...base, rowStepX: 5 }, null)
+    expect(res.mode).toBe('in-place')
+    expect(res.dirty).toContain('x')
+    expect(res.dirty).not.toContain('y')
+  })
+
+  it('columnStepY change is in-place and marks y dirty', () => {
+    const res = diffConfig(base, { ...base, columnStepY: 5 }, null)
+    expect(res.mode).toBe('in-place')
+    expect(res.dirty).toContain('y')
+    expect(res.dirty).not.toContain('x')
+  })
+
+  it('no cross-step change is a noop', () => {
+    expect(diffConfig(base, { ...base }, null).mode).toBe('noop')
   })
 })
