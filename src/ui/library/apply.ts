@@ -17,6 +17,7 @@ function extractPlaceholderDefault(formula: string, property: FormulaProperty): 
 }
 
 export function applyEntry(config: LoopConfig, entry: LibraryEntry): LoopConfig {
+  const usesFormula = APPLIED_PROPS.some((k) => entry.formulas?.[k] !== undefined)
   const next: LoopConfig = {
     ...config,
     cols: entry.cols,
@@ -24,11 +25,11 @@ export function applyEntry(config: LoopConfig, entry: LibraryEntry): LoopConfig 
     layers: entry.layers ?? 1,
     angle: entry.angle ?? 0,
     angleRamp: entry.angleRamp,
-    fxMode: true,
+    fxMode: usesFormula,
     showFirst: entry.showFirst ?? true,
   }
   for (const k of APPLIED_PROPS) {
-    const src = entry.formulas[k]
+    const src = entry.formulas?.[k]
     if (src === undefined) {
       next[k] = { ...next[k], unlocked: false, formula: null }
       continue
@@ -47,9 +48,19 @@ export function applyEntry(config: LoopConfig, entry: LibraryEntry): LoopConfig 
     for (const key of Object.keys(entry.ramps) as RampProperty[]) {
       const ramp = entry.ramps[key]
       if (!ramp) continue
-      if (key !== 'strokeWeight' && entry.formulas[key]) continue
+      if (key !== 'strokeWeight' && entry.formulas?.[key]) continue
       next[key] = { ...next[key], ramp, unlocked: false, formula: null }
     }
+  }
+  // Sugar position: reset cross-steps to this entry's (undefined clears a prior
+  // oblique pick), and seed the primary step values when given as sugar.
+  next.columnStepY = entry.steps?.columnStepY
+  next.rowStepX = entry.steps?.rowStepX
+  if (entry.steps?.x !== undefined && entry.formulas?.x === undefined) {
+    next.x = { ...next.x, unlocked: false, formula: null, value: entry.steps.x }
+  }
+  if (entry.steps?.y !== undefined && entry.formulas?.y === undefined) {
+    next.y = { ...next.y, unlocked: false, formula: null, value: entry.steps.y }
   }
   return next
 }

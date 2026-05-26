@@ -22,7 +22,13 @@ export interface LibraryEntry {
    *  every x/y formula. Omit (or 0) for unrotated patterns. */
   angle?: number
   showFirst?: boolean
-  formulas: Partial<Record<FormulaProperty, string>>
+  /** fx formulas per property. Optional: a pure-sugar pattern uses `steps` instead. */
+  formulas?: Partial<Record<FormulaProperty, string>>
+  /** Pure-sugar position: applied with fx OFF, so the X/Y step sliders (and the
+   *  new cross-steps) drive the lattice directly. `x`/`y` are the primary step
+   *  values; columnStepY / rowStepX are the cross-axis drifts. A property given
+   *  in `formulas` still wins (fx). Patterns without `steps` behave as before. */
+  steps?: { x?: number; y?: number; columnStepY?: number; rowStepX?: number }
   /** Pre-built multi-stop curves the pattern ships with — the "sugar" for the
    *  appearance properties. Applied with fx off, so the curve drives the value:
    *  a pattern can come with a hand-drawn opacity fade or size taper, no formula
