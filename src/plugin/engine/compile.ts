@@ -6,6 +6,7 @@ import type {
   FormulaProperty,
   LoopConfig,
   NumericProperty,
+  NumericRamp,
 } from '../../shared/types'
 import { compileFormula } from './evaluate'
 
@@ -97,6 +98,24 @@ export interface CompiledFactors {
   fill: CompiledFormula | null
   stroke: CompiledFormula | null
   strokeWeight: CompiledFormula | null
+  // Per-axis Scale / Fade: a compiled formula when the ramp is `unlocked`
+  // (e.g. `c * 1.1`), else null so cells.ts samples the ramp's stops as before.
+  columnScale: CompiledFormula | null
+  rowScale: CompiledFormula | null
+  layerScale: CompiledFormula | null
+  columnFade: CompiledFormula | null
+  rowFade: CompiledFormula | null
+  layerFade: CompiledFormula | null
+}
+
+// A per-axis ramp compiles to a formula only when it's in fx mode; otherwise it
+// stays a sampled curve (null here). The formula already carries its literal
+// coefficient (e.g. `r * 1.1`), so no placeholder expansion is needed.
+function compileAxisRamp(ramp: NumericRamp | undefined, key: string): CompiledFormula | null {
+  if (ramp?.unlocked && ramp.formula != null && ramp.formula.trim() !== '') {
+    return compileFormula(ramp.formula, key)
+  }
+  return null
 }
 
 export function compileFactors(config: LoopConfig): CompiledFactors {
@@ -113,6 +132,12 @@ export function compileFactors(config: LoopConfig): CompiledFactors {
       config.strokeWeight.unlocked && config.strokeWeight.formula != null
         ? compileFormula(config.strokeWeight.formula, 'strokeWeight')
         : null,
+    columnScale: compileAxisRamp(config.columnScale, 'columnScale'),
+    rowScale: compileAxisRamp(config.rowScale, 'rowScale'),
+    layerScale: compileAxisRamp(config.layerScale, 'layerScale'),
+    columnFade: compileAxisRamp(config.columnFade, 'columnFade'),
+    rowFade: compileAxisRamp(config.rowFade, 'rowFade'),
+    layerFade: compileAxisRamp(config.layerFade, 'layerFade'),
   }
 }
 

@@ -6,6 +6,7 @@
 
 import { sampleNumericRamp } from '../../shared/numeric-ramp'
 import type {
+  CompiledFormula,
   CompiledFormulas,
   LoopConfig,
   NumericProperty,
@@ -160,11 +161,19 @@ export function evaluateCell(i: number, input: EvaluateCellInput): CellValues {
     sampleNumericRamp(config.rowAngle, scope.ty) +
     sampleNumericRamp(config.layerAngle, scope.tz) +
     modJitter(config.rotationRandom, 'rotationRandom')
+  // A per-axis ramp resolves to its fx formula when unlocked, else its sampled
+  // curve — so Scale/Fade can grow with the axis index (e.g. `r * 1.1`).
+  const axisRamp = (
+    ramp: NumericRamp | undefined,
+    t: number,
+    compiled: CompiledFormula | null,
+    key: string,
+  ): number => (compiled ? compiled.evaluate(scope, key) : sampleNumericRamp(ramp, t))
   const opacity =
     appearance('opacity') -
-    sampleNumericRamp(config.columnFade, scope.tx) -
-    sampleNumericRamp(config.rowFade, scope.ty) -
-    sampleNumericRamp(config.layerFade, scope.tz) +
+    axisRamp(config.columnFade, scope.tx, factors.columnFade, 'columnFade') -
+    axisRamp(config.rowFade, scope.ty, factors.rowFade, 'rowFade') -
+    axisRamp(config.layerFade, scope.tz, factors.layerFade, 'layerFade') +
     modJitter(config.opacityRandom, 'opacityRandom')
   const strokeWeight =
     config.strokeWeight.unlocked && factors.strokeWeight
@@ -177,9 +186,9 @@ export function evaluateCell(i: number, input: EvaluateCellInput): CellValues {
   // end can vanish but not flip inside-out.
   const scaleMul = Math.max(
     0,
-    (1 + sampleNumericRamp(config.columnScale, scope.tx) / 100) *
-      (1 + sampleNumericRamp(config.rowScale, scope.ty) / 100) *
-      (1 + sampleNumericRamp(config.layerScale, scope.tz) / 100),
+    (1 + axisRamp(config.columnScale, scope.tx, factors.columnScale, 'columnScale') / 100) *
+      (1 + axisRamp(config.rowScale, scope.ty, factors.rowScale, 'rowScale') / 100) *
+      (1 + axisRamp(config.layerScale, scope.tz, factors.layerScale, 'layerScale') / 100),
   )
   // scaleX/scaleY are size *deltas* added to the source size downstream
   // (renderedW = sourceWidth + scaleX). So fold the per-axis multiplier through

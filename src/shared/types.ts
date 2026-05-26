@@ -27,6 +27,13 @@ export interface NumericStop {
 // 1 stop = constant; 2+ = interpolated. Sorted by position when read.
 export interface NumericRamp {
   stops: NumericStop[]
+  // Formula mode (per-axis Scale / Fade): when `unlocked`, the engine evaluates
+  // `formula` (e.g. `c * 1.1`, using the axis index c/r/l) instead of sampling
+  // the stops. `value` is the single-number coefficient the field edits and the
+  // default `unit * value` formula multiplies. Absent on plain ramps → sampled.
+  value?: number
+  unlocked?: boolean
+  formula?: string | null
 }
 
 export type EasingKind = 'linear' | 'ease' | 'easeIn' | 'easeOut'
