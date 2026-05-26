@@ -12,6 +12,34 @@
 
 ---
 
+## ⚠️ Revision (cross-axis basis) — read before executing
+
+This branch is now based on the finished `cross-axis-grid-steps` feature, which
+already gives each axis a 2D step and renders **X step + Y step in both Column and
+Row** (Column: `x` / `columnStepY`; Row: `rowStepX` / `y`). That changes two tasks
+from the original text below:
+
+- **Task 6 — drop `StepPair`.** Step is NOT a shared `x·y` pair. The cross-axis
+  per-axis X/Y step rows stay as they are; Task 5 (scrub-only `SliderRow`) makes
+  them compact automatically. Task 6 builds **only `PairedRampRow`** (for Scale).
+  Skip the `StepPair.tsx` file and its step entirely.
+- **Task 7 — adapt to cross-axis `AxisSection`.** Do NOT rewrite from the
+  original's prop shape. The current `AxisSection` already has `stepKey`,
+  `crossStepKey`, `twistKey`, `scaleKey`, `fadeKey`, `randomKey` and renders Count
+  + X step + Y step. The declutter changes are: (a) remove `defaultOpen` so it
+  starts closed; (b) replace the single Scale `NumericRampRow` with
+  `PairedRampRow` using `x={{axis:'X', ramp: config.columnScale, …}}`
+  `y={{axis:'Y', ramp: config.rowScale, …}}` (same in both sections — so the
+  `scaleKey` prop is removed and Scale is no longer per-axis); (c) wrap Twist /
+  Fade / Random in `<MoreDisclosure id={id}>`. Leave the Count and the two step
+  rows exactly as cross-axis has them. In `App.tsx`, remove the `scaleKey` prop
+  from both `<AxisSection>` usages; keep `stepKey`/`crossStepKey`/etc.
+
+Everything else (Tasks 1–5, 8–10) is unchanged. `rampDisplayStops`/`rampIsFlat`
+(Task 1) are already present on this branch.
+
+---
+
 ## File structure
 
 - `src/shared/numeric-ramp.ts` — **modify**: add `rampDisplayStops`, `rampIsFlat`.
