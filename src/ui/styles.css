@@ -1451,3 +1451,26 @@ input.appearance-num-input::-webkit-inner-spin-button {
   border-color: var(--accent);
   color: var(--accent);
 }
+
+.more-disclosure {
+  margin-top: 4px;
+}
+.more-disclosure-toggle {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--figma-color-text-secondary, #555);
+  font: inherit;
+  text-align: center;
+  padding: 6px 0;
+  cursor: pointer;
+  border-top: 1px solid var(--figma-color-border, rgba(0, 0, 0, 0.08));
+}
+.more-disclosure-toggle:hover {
+  color: var(--figma-color-text, #222);
+}
+.more-disclosure-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
