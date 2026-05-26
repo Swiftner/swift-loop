@@ -567,6 +567,19 @@ body,
   cursor: pointer;
   padding: 0 2px;
 }
+/* Unit-connected Scale/Fade readout: "r × <value>" — the prefix shows the value
+   is multiplied by the axis index. */
+.axis-formula-readout {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  margin-left: auto;
+}
+.axis-formula-unit {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+}
 
 /* fx escape hatch on a ramp row — mirrors the gradient editor's fx toggle. */
 .numeric-ramp-fx {
@@ -1207,6 +1220,11 @@ body,
 .appearance-colors > .appearance-strip {
   flex: 1 1 0;
   min-width: 0;
+}
+/* The stacked-row separator (.appearance-strip + .appearance-strip) would draw a
+   stray border above the second column here — cancel it for the side-by-side pair. */
+.appearance-colors > .appearance-strip + .appearance-strip {
+  border-top: 0;
 }
 /* In the narrow half-width column, let the colour readout wrap instead of
    overflowing. */

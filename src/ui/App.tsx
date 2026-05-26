@@ -164,6 +164,7 @@ export function App() {
           fadeKey="columnFade"
           randomKey="columnRandom"
           randomRangeKey="x"
+          axisVar="c"
         />
         <AxisSection
           id="row"
@@ -180,6 +181,7 @@ export function App() {
           fadeKey="rowFade"
           randomKey="rowRandom"
           randomRangeKey="y"
+          axisVar="r"
         />
         <LayerSection config={config} update={update} />
         <AppearanceSection config={config} update={update} sourceSize={sourceSize} />

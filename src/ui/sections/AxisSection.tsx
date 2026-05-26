@@ -1,4 +1,5 @@
 import type { LoopConfig, NumericRamp } from '../../shared/types'
+import { AxisFormulaRow } from '../components/AxisFormulaRow'
 import { CountChip } from '../components/CountChip'
 import { NumericRampRow } from '../components/NumericRampRow'
 import { Section } from '../components/Section'
@@ -39,6 +40,8 @@ interface Props {
   randomKey: AxisRampKey
   // Slider-range key the Random max scales from ('x' for Column, 'y' for Row).
   randomRangeKey: 'x' | 'y'
+  // Axis index the unit-connected Scale/Fade formulas multiply ('c' / 'r').
+  axisVar: 'c' | 'r'
 }
 
 // One spatial axis (Column or Row), fully self-contained: its count (in the
@@ -59,6 +62,7 @@ export function AxisSection({
   fadeKey,
   randomKey,
   randomRangeKey,
+  axisVar,
 }: Props) {
   const setRamp = (key: AxisRampKey) => (next: NumericRamp, commit: boolean) =>
     update({ ...config, [key]: next }, commit)
@@ -80,13 +84,14 @@ export function AxisSection({
         xKey={xStepKey}
         yKey={yStepKey}
       />
-      <NumericRampRow
+      <AxisFormulaRow
         label="Scale"
         ramp={config[scaleKey]}
+        axisVar={axisVar}
         min={-100}
         max={100}
         step={1}
-        unit="%"
+        suffix="%"
         disabled={inactive}
         onChange={setRamp(scaleKey)}
       />
@@ -101,13 +106,14 @@ export function AxisSection({
         disabled={inactive}
         onChange={setRamp(twistKey)}
       />
-      <NumericRampRow
+      <AxisFormulaRow
         label="Fade"
         ramp={config[fadeKey]}
+        axisVar={axisVar}
         min={0}
         max={100}
         step={1}
-        unit="%"
+        suffix="%"
         disabled={inactive}
         onChange={setRamp(fadeKey)}
       />

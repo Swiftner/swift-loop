@@ -1,5 +1,6 @@
 import { DEFAULT_DEPTH_DIR } from '../../plugin/engine/cells'
 import type { LoopConfig, NumericRamp } from '../../shared/types'
+import { AxisFormulaRow } from '../components/AxisFormulaRow'
 import { CountChip } from '../components/CountChip'
 import { NumericRampRow } from '../components/NumericRampRow'
 import { Section } from '../components/Section'
@@ -56,13 +57,14 @@ export function LayerSection({ config, update }: Props) {
         disabled={noDepth}
         onChange={(v, commit) => update({ ...config, layerDirection: v }, commit)}
       />
-      <NumericRampRow
+      <AxisFormulaRow
         label="Scale"
         ramp={config.layerScale}
+        axisVar="l"
         min={-100}
         max={100}
         step={1}
-        unit="%"
+        suffix="%"
         disabled={noDepth}
         onChange={setRamp('layerScale')}
       />
@@ -77,13 +79,14 @@ export function LayerSection({ config, update }: Props) {
         disabled={noDepth}
         onChange={setRamp('layerAngle')}
       />
-      <NumericRampRow
+      <AxisFormulaRow
         label="Fade"
         ramp={config.layerFade}
+        axisVar="l"
         min={0}
         max={100}
         step={1}
-        unit="%"
+        suffix="%"
         disabled={noDepth}
         onChange={setRamp('layerFade')}
       />
