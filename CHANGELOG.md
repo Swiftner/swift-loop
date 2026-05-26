@@ -4,8 +4,31 @@ All notable changes to Swift Loop. Versions follow SemVer; the [v0.x.y] anchor l
 
 ## [Unreleased]
 
+## [v0.3.0] — 2026-05-26
+
 ### Added
-- **Layers (3D lattice).** The Iterations section gains a **Layers** count: the grid becomes a Columns × Rows × Layers cube of clones. Each cell's layer index `l` (plus `layers` and `tz`) is exposed to formulas, which own the projection to 2D — the 3D look lives in formulas and library presets, not a built-in projection. New **Cube** library preset shows it off (oblique projection, near layers larger/brighter). Defaults to 1, so existing patterns are byte-identical.
+- **Layers (3D lattice).** The Iterations section gains a **Layers** count: the grid becomes a Columns × Rows × Layers cube of clones. Each cell's layer index `l` (plus `layers` and `tz`) is exposed to formulas, which own the projection to 2D — the 3D look lives in formulas and library presets, not a built-in projection. Defaults to 1, so existing patterns are byte-identical.
+- **Multi-stop ramps on every appearance row.** Rotation, Size X/Y, Opacity, Stroke width and Spiral now use the same multi-stop curve editor as the per-axis ramps — drop, drag, and delete stops to shape how a value travels along the loop. Each row keeps an **fx** toggle as a formula escape hatch, and the ramp and formula coexist (toggling fx never drops either). Fresh ramps start as a single constant stop.
+- **Per-axis ramps.** Twist, Scale, Fade and Random are now ramp curves across Column / Row / Layer instead of single values, so each axis shapes its own falloff. Older configs migrate automatically on load.
+- **Pre-built ramps in library patterns.** A preset can ship ready-made curves (rotation, size, opacity, stroke, spiral) and lean on a ramp instead of a formula. A shipped formula for the same property still wins.
+- **12 new library patterns**, most using the new Z axis: **Cube**, **Sphere**, **Helix**, **Cylinder**, **Torus**, **Truchet**, **Concentric Squares**, **Square Spiral**, **Spiral Tower**, **Ring Tunnel**, **Wave Field** and **Whirl**. The library now ships 37 patterns, with a new **Three Dimensions** section in the gallery.
+- **History section.** The seed control and recent-seed history move into a collapsible History panel (up to 48 recent seeds, wrapping onto new lines).
+- **Plain-language section hints.** A one-line hint sits under each section title (e.g. Column "Repeats and ramps across columns.", Appearance "Each clone's base look.").
+
+### Changed
+- **Panel reorganized around one mental model.** Column / Row / Layer say *where* clones go and how each axis ramps them; **Appearance** says what each clone looks like (Rotation, Size X/Y, Opacity, Fill, Stroke, Stroke width, Easing); Modulation oscillates. Per-clone rotation is renamed **Twist** so it no longer collides with the global grid Angle, and Scale X/Y is now **Size X/Y**.
+- **Library button moved to the top bar**; the per-column library chip is gone.
+- **Penpot is usable now (still experimental).** On Penpot the canvas regenerates once on release instead of on every drag frame, so sliders stay smooth, and a conservative per-host cell cap (1,000 on Penpot, 10,000 on Figma) guards against the render engine crashing. Figma's live preview is unchanged.
+- An axis's Step / Twist / Scale / Fade / Random are dimmed and disabled while its Count is 1, so the controls visibly wait on Count. Layer collapses by default as the advanced axis.
+- A single **MAX_AXIS = 120** governs the Count sliders, paste-clamping, and the library schema, so high-count presets load without being clamped away.
+
+### Fixed
+- **Penpot drag crash.** Live regeneration on every drag frame drove Penpot into a "max update depth" loop and, at higher counts, a hard Internal Error — resolved by the commit-only regeneration above.
+- **Library thumbnails for 3D presets** paint far layers first, so the near layer sits on top, matching the live preview.
+- **Hardened config paste.** A partial pasted config now fills missing fields from the defaults (it can no longer crash the compiler) and clamps cols/rows/layers to a safe range.
+
+### Removed
+- The SVG download/export button and its dead host plumbing.
 
 ## [v0.2.0] — 2026-05-22
 
