@@ -1,12 +1,10 @@
 {
   "id": "diamond",
   "name": "Diamond",
-  "description": "Isometric rotated grid — rows and columns project at 45°.",
-  "tags": ["grid", "tiling", "isometric"],
+  "description": "A 45° lattice — equal down-right and down-left steps — reading as a diamond tiling.",
+  "tags": ["grid", "diamond", "oblique"],
   "author": "@swiftner",
-  "cols": 8, "rows": 8,
-  "formulas": {
-    "x": "x = (c + r) * w / 2",
-    "y": "y = (c - r) * h / 2"
-  }
+  "cols": 8,
+  "rows": 8,
+  "steps": { "x": 45, "columnStepY": 45, "rowStepX": -45, "y": 45 }
 }

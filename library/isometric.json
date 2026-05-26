@@ -1,0 +1,10 @@
+{
+  "id": "isometric",
+  "name": "Isometric",
+  "description": "An oblique grid — columns lean down-right, rows down-left — for that isometric look.",
+  "tags": ["grid", "isometric", "oblique"],
+  "author": "@swiftner",
+  "cols": 8,
+  "rows": 8,
+  "steps": { "x": 60, "columnStepY": 35, "rowStepX": -60, "y": 35 }
+}

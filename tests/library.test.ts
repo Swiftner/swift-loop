@@ -33,7 +33,9 @@ describe('library entries', () => {
         expect(entry.name).toBeTruthy()
         expect(entry.cols).toBeGreaterThan(0)
         expect(entry.rows).toBeGreaterThan(0)
-        expect(typeof entry.formulas).toBe('object')
+        const hasFormulas = typeof entry.formulas === 'object'
+        const hasSteps = typeof entry.steps === 'object'
+        expect(hasFormulas || hasSteps, `${entry.id} has formulas or steps`).toBe(true)
       })
 
       it('angle, if present, is a finite number in [-360, 360]', () => {
@@ -45,7 +47,7 @@ describe('library entries', () => {
 
       it('every formula parses', () => {
         for (const k of FORMULA_PROPS) {
-          const src = entry.formulas[k]
+          const src = entry.formulas?.[k]
           if (!src) continue
           expect(() => compileFormula(expandPlaceholders(src, k, null), k)).not.toThrow()
         }
@@ -67,13 +69,21 @@ describe('library entries', () => {
         }
       })
 
+      it('steps, if present, are finite numbers', () => {
+        if (!entry.steps) return
+        for (const v of Object.values(entry.steps)) {
+          if (v === undefined) continue
+          expect(Number.isFinite(v)).toBe(true)
+        }
+      })
+
       it('every formula evaluates to a finite number across cells and layers', () => {
         const cols = Math.min(entry.cols, 5)
         const rows = Math.min(entry.rows, 5)
         // Exercise the depth axis for 3D presets (Cube etc.) — not just layer 0.
         const layers = Math.min(entry.layers ?? 1, 5)
         for (const k of FORMULA_PROPS) {
-          const src = entry.formulas[k]
+          const src = entry.formulas?.[k]
           if (!src) continue
           const compiled = compileFormula(expandPlaceholders(src, k, null), k)
           for (let l = 0; l < layers; l++) {
