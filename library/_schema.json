@@ -2,7 +2,8 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Swift Loop Formula Library Entry",
   "type": "object",
-  "required": ["id", "name", "formulas", "cols", "rows"],
+  "required": ["id", "name", "cols", "rows"],
+  "anyOf": [{ "required": ["formulas"] }, { "required": ["steps"] }],
   "additionalProperties": false,
   "definitions": {
     "numericRamp": {
@@ -61,6 +62,17 @@
         "scaleX": { "type": "string" },
         "scaleY": { "type": "string" },
         "opacity": { "type": "string" }
+      }
+    },
+    "steps": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Pure-sugar position, applied with fx off so the X/Y step sliders drive the lattice. `x`/`y` are the primary column/row steps; columnStepY / rowStepX are the cross-axis drifts that shear the grid into oblique/isometric lattices.",
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "columnStepY": { "type": "number" },
+        "rowStepX": { "type": "number" }
       }
     },
     "ramps": {
