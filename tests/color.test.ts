@@ -32,10 +32,17 @@ describe('multiplyColors', () => {
 
 describe('combineAxisColors', () => {
   it('returns null when no axis contributes a colour', () => {
-    expect(combineAxisColors([{ ramp: undefined, t: 0.5 }, { ramp: { stops: [] }, t: 0.2 }])).toBeNull()
+    expect(
+      combineAxisColors([
+        { ramp: undefined, t: 0.5 },
+        { ramp: { stops: [] }, t: 0.2 },
+      ]),
+    ).toBeNull()
   })
   it('passes a single contributing axis through unchanged', () => {
-    expect(combineAxisColors([{ ramp: { stops: [{ color: RED, position: 0 }] }, t: 0.5 }])).toEqual(RED)
+    expect(combineAxisColors([{ ramp: { stops: [{ color: RED, position: 0 }] }, t: 0.5 }])).toEqual(
+      RED,
+    )
   })
   it('multiplies contributing axes (red × blue = black)', () => {
     expect(

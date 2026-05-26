@@ -139,7 +139,9 @@ export function multiplyColors(a: Color, b: Color): Color {
  * Returns null when no axis contributes a colour, so the clone keeps its source
  * fill instead of being forced to a colour.
  */
-export function combineAxisColors(samples: { ramp: ColorRamp | undefined; t: number }[]): Color | null {
+export function combineAxisColors(
+  samples: { ramp: ColorRamp | undefined; t: number }[],
+): Color | null {
   let acc: Color | null = null
   for (const { ramp, t } of samples) {
     if (!ramp) continue
