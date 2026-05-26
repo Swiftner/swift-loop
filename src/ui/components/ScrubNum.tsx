@@ -7,6 +7,9 @@ interface Props {
   step?: number
   decimals?: number
   unit?: string
+  /** Base scrub speed in value-units per pixel. Defaults to step/2. Lower it for
+   *  controls (like counts) where a fast scrub overshoots. */
+  sensitivity?: number
   onChange: (next: number, commit: boolean) => void
 }
 
@@ -28,11 +31,13 @@ export function ScrubNum({
   step = 1,
   decimals = 0,
   unit,
+  sensitivity,
   onChange,
 }: Props) {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(value.toString())
   const scrubState = useRef<{ startX: number; startV: number; scrubbed: boolean } | null>(null)
+  const baseSensitivity = sensitivity ?? step / 2
 
   const commit = () => {
     const n = Number.parseFloat(draft)
@@ -81,12 +86,37 @@ export function ScrubNum({
       ;(e.currentTarget as HTMLElement).classList.add('is-scrubbing')
     }
     if (!s.scrubbed) return
-    let sensitivity = step / 2
-    if (e.shiftKey) sensitivity *= 0.1
-    if (e.altKey || e.metaKey) sensitivity *= 10
-    const raw = s.startV + dx * sensitivity
+    let sens = baseSensitivity
+    if (e.shiftKey) sens *= 0.1
+    if (e.altKey || e.metaKey) sens *= 10
+    const raw = s.startV + dx * sens
     const snapped = Math.round(raw / step) * step
     onChange(clamp(snapped, min, max), false)
+  }
+
+  const onKeyDown = (e: KeyboardEvent) => {
+    const k = e.key
+    if (k === 'ArrowUp' || k === 'ArrowRight' || k === 'ArrowDown' || k === 'ArrowLeft') {
+      e.preventDefault()
+      const dir = k === 'ArrowUp' || k === 'ArrowRight' ? 1 : -1
+      let mult = 1
+      if (e.shiftKey) mult = 0.1
+      if (e.altKey || e.metaKey) mult = 10
+      onChange(clamp(value + dir * step * mult, min, max), true)
+      return
+    }
+    if (k === 'Enter') {
+      e.preventDefault()
+      setDraft(value.toString())
+      setEditing(true)
+      return
+    }
+    // Typing a digit (or - / .) on a focused field starts editing, seeded with
+    // that character — so Tab-to-field then type works without a click.
+    if (k.length === 1 && /[0-9.-]/.test(k)) {
+      setDraft(k)
+      setEditing(true)
+    }
   }
 
   const onPointerUp = (e: PointerEvent) => {
@@ -112,6 +142,7 @@ export function ScrubNum({
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
+      onKeyDown={onKeyDown}
       aria-label={`${value}${unit ?? ''}`}
     >
       {value.toFixed(decimals)}

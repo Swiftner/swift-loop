@@ -22,6 +22,8 @@ export function CountChip({ value, max, onChange }: Props) {
         min={1}
         max={max}
         step={1}
+        // Slower than the default step/2: counts overshoot with a fast scrub.
+        sensitivity={0.2}
         onChange={(v, commit) => onChange(Math.max(1, Math.round(v)), commit)}
       />
     </span>
