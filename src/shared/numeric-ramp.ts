@@ -3,7 +3,7 @@
 // position} stops sampled along one axis. Drives the per-axis Twist / Scale /
 // Fade controls.
 
-import type { NumericRamp, NumericStop } from './types'
+import type { NumericRamp } from './types'
 
 export function isNumericRamp(v: unknown): v is NumericRamp {
   return !!v && typeof v === 'object' && Array.isArray((v as NumericRamp).stops)
@@ -57,26 +57,4 @@ export function rampConstant(value: number): NumericRamp {
 // the engine and migration treat it as "unset".
 export function isFlatZero(ramp: NumericRamp | undefined): boolean {
   return !ramp || ramp.stops.length === 0 || ramp.stops.every((s) => s.value === 0)
-}
-
-/**
- * Stops to render for editing. A ramp with fewer than two stops is shown as two
- * endpoints at its constant value (positions 0 and 1) so either side can be
- * dragged into a progression. Two-plus stops are returned sorted by position.
- */
-export function rampDisplayStops(ramp: NumericRamp | undefined): NumericStop[] {
-  const stops = ramp?.stops ?? []
-  if (stops.length >= 2) return [...stops].sort((a, b) => a.position - b.position)
-  const value = stops[0]?.value ?? 0
-  return [
-    { value, position: 0 },
-    { value, position: 1 },
-  ]
-}
-
-/** True when every stop holds the same value (a flat line / constant). */
-export function rampIsFlat(ramp: NumericRamp | undefined): boolean {
-  const stops = ramp?.stops ?? []
-  if (stops.length <= 1) return true
-  return stops.every((s) => s.value === stops[0].value)
 }
