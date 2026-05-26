@@ -19,10 +19,10 @@ export function CountChip({ value, max, onChange }: Props) {
     >
       <ScrubNum
         value={value}
-        min={0}
+        min={1}
         max={max}
         step={1}
-        onChange={(v, commit) => onChange(Math.max(0, Math.round(v)), commit)}
+        onChange={(v, commit) => onChange(Math.max(1, Math.round(v)), commit)}
       />
     </span>
   )
