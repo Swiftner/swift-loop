@@ -1226,20 +1226,53 @@ body,
 .appearance-colors > .appearance-strip + .appearance-strip {
   border-top: 0;
 }
-/* Narrow half-width colour columns: keep each colour's hex stops on ONE line
-   (never split a gradient's stops across lines). If they can't sit beside the
-   label, the whole readout drops below it as a unit. */
-.appearance-colors .appearance-strip-head {
-  flex-wrap: wrap;
+/* Fill and Stroke columns match height so they stay aligned; the gradient strip
+   sits right under the label at a fixed spot, and the hex stops list flows below
+   it — so adding a stop never moves the strip. */
+.appearance-colors > .appearance-strip {
+  display: flex;
+  flex-direction: column;
 }
 .appearance-colors .gradient-ramp-readout {
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
+  gap: 3px 6px;
+  margin-top: 6px;
   font-size: 10px;
 }
 .gradient-ramp-hex-pair {
   display: inline-flex;
   align-items: center;
   gap: 2px;
+}
+/* Typeable hex: a small swatch (opens the OS picker) + an editable hex field. */
+.appearance-hex.is-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.appearance-hex-swatch {
+  position: relative;
+  width: 12px;
+  height: 12px;
+  flex: none;
+  padding: 0;
+  border: 1px solid var(--hairline);
+  border-radius: 3px;
+  background: var(--chip, #888);
+  cursor: pointer;
+}
+.appearance-hex-text {
+  width: 50px;
+  font-family: var(--mono);
+  font-size: inherit;
+  color: var(--fg);
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+.appearance-hex-text:focus {
+  outline: none;
+  color: var(--accent);
 }
 .gradient-ramp-hex-remove {
   font-family: var(--mono);

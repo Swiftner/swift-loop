@@ -52,23 +52,6 @@ export function GradientRampEditor({
     >
       <div class="appearance-strip-head">
         <span class="appearance-strip-label">{label}</span>
-        <span class="appearance-strip-readout gradient-ramp-readout">
-          {sorted.length === 0 ? <span class="appearance-hex is-empty">—</span> : null}
-          {sorted.map((s, i) => (
-            <span key={`hex-${i}`} class="gradient-ramp-hex-pair">
-              <HexButton color={s.color} onColor={(c) => setStopColor(i, c)} />
-              <button
-                type="button"
-                class="gradient-ramp-hex-remove"
-                onClick={() => removeStop(i)}
-                aria-label={`Remove stop ${i + 1}`}
-                title="Remove stop"
-              >
-                ×
-              </button>
-            </span>
-          ))}
-        </span>
         {hasFx && (
           <button
             class="appearance-strip-fx"
@@ -104,6 +87,25 @@ export function GradientRampEditor({
           ))}
         </div>
       </div>
+      {/* Hex stops live below the strip so adding one never shifts the strip,
+          keeping Fill and Stroke aligned across the two columns. */}
+      <span class="appearance-strip-readout gradient-ramp-readout">
+        {sorted.length === 0 ? <span class="appearance-hex is-empty">—</span> : null}
+        {sorted.map((s, i) => (
+          <span key={`hex-${i}`} class="gradient-ramp-hex-pair">
+            <HexButton color={s.color} onColor={(c) => setStopColor(i, c)} />
+            <button
+              type="button"
+              class="gradient-ramp-hex-remove"
+              onClick={() => removeStop(i)}
+              aria-label={`Remove stop ${i + 1}`}
+              title="Remove stop"
+            >
+              ×
+            </button>
+          </span>
+        ))}
+      </span>
       {showFormula && (
         <textarea
           class="appearance-strip-formula"
@@ -285,29 +287,55 @@ interface HexButtonProps {
 function HexButton({ color, onColor }: HexButtonProps) {
   const pickerRef = useRef<HTMLInputElement>(null)
   const hex = rgbToHex(color)
-  const onInput = (e: Event) => {
-    const v = (e.target as HTMLInputElement).value.replace('#', '')
-    const c = hexToRgb(v)
+  // `draft` is the in-progress typed text; null = showing the live hex.
+  const [draft, setDraft] = useState<string | null>(null)
+  const commitDraft = () => {
+    if (draft != null) {
+      const c = hexToRgb(draft.replace('#', '').trim())
+      if (c) onColor(c)
+    }
+    setDraft(null)
+  }
+  const onPickerInput = (e: Event) => {
+    const c = hexToRgb((e.target as HTMLInputElement).value.replace('#', ''))
     if (c) onColor(c)
   }
   return (
-    <button
-      type="button"
-      class="appearance-hex is-button"
-      onClick={() => pickerRef.current?.click()}
-      aria-label={`Edit color ${hex}`}
-      title="Edit color"
-    >
-      {hex}
+    <span class="appearance-hex is-field">
+      {/* Swatch opens the OS colour picker (for humans); the hex field types one. */}
+      <button
+        type="button"
+        class="appearance-hex-swatch"
+        style={`--chip: #${hex}`}
+        onClick={() => pickerRef.current?.click()}
+        aria-label={`Pick colour, currently ${hex}`}
+        title="Open colour picker"
+      >
+        <input
+          ref={pickerRef}
+          type="color"
+          class="appearance-hex-picker"
+          value={`#${hex}`}
+          onInput={onPickerInput}
+          aria-hidden="true"
+          tabIndex={-1}
+        />
+      </button>
       <input
-        ref={pickerRef}
-        type="color"
-        class="appearance-hex-picker"
-        value={`#${hex}`}
-        onInput={onInput}
-        aria-hidden="true"
-        tabIndex={-1}
+        class="appearance-hex-text"
+        type="text"
+        spellcheck={false}
+        value={draft ?? hex}
+        aria-label={`Hex colour ${hex}`}
+        onFocus={() => setDraft(hex)}
+        onInput={(e) => setDraft((e.target as HTMLInputElement).value)}
+        onBlur={commitDraft}
+        onKeyDown={(e) => {
+          const k = (e as KeyboardEvent).key
+          if (k === 'Enter') commitDraft()
+          else if (k === 'Escape') setDraft(null)
+        }}
       />
-    </button>
+    </span>
   )
 }
