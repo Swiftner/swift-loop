@@ -1,5 +1,5 @@
 import { useRef, useState } from 'preact/hooks'
-import { hexToRgb, rgbToHex, sampleRamp } from '../../shared/color'
+import { hexToRgb, rgbToHex, rgbaToHex, sampleRamp } from '../../shared/color'
 import type { Color, ColorRamp } from '../../shared/types'
 
 interface Props {
@@ -127,11 +127,11 @@ export function GradientRampEditor({
 function stripBackground(stops: { color: Color; position: number }[]): string {
   if (stops.length === 0) return 'none'
   if (stops.length === 1) {
-    const hex = `#${rgbToHex(stops[0].color)}`
+    const hex = `#${rgbaToHex(stops[0].color)}`
     return `linear-gradient(to right, ${hex}, ${hex})`
   }
   const segs = stops
-    .map((s) => `#${rgbToHex(s.color)} ${(s.position * 100).toFixed(1)}%`)
+    .map((s) => `#${rgbaToHex(s.color)} ${(s.position * 100).toFixed(1)}%`)
     .join(', ')
   return `linear-gradient(to right, ${segs})`
 }
@@ -253,13 +253,14 @@ function StopChip({ stop, index, sorted, stripRef, ramp, onChange, setColor }: S
   const onColorInput = (e: Event) => {
     const v = (e.target as HTMLInputElement).value.replace('#', '')
     const c = hexToRgb(v)
-    if (c) setColor(c)
+    // The native picker is RGB-only, so keep the stop's existing alpha.
+    if (c) setColor(stop.color.a != null ? { ...c, a: stop.color.a } : c)
   }
 
   return (
     <span
       class="gradient-ramp-stop"
-      style={`left: ${(stop.position * 100).toFixed(2)}%; --chip: #${rgbToHex(stop.color)}`}
+      style={`left: ${(stop.position * 100).toFixed(2)}%; --chip: #${rgbaToHex(stop.color)}`}
       onPointerDown={onPointerDown}
       onContextMenu={onContextMenu}
       role="slider"
@@ -288,7 +289,10 @@ interface HexButtonProps {
 
 function HexButton({ color, onColor }: HexButtonProps) {
   const pickerRef = useRef<HTMLInputElement>(null)
-  const hex = rgbToHex(color)
+  // Field + swatch show alpha (#rrggbbaa when translucent); the native OS picker
+  // only speaks #rrggbb, so it gets the RGB-only form.
+  const display = rgbaToHex(color)
+  const pickerHex = rgbToHex(color)
   // `draft` is the in-progress typed text; null = showing the live hex.
   const [draft, setDraft] = useState<string | null>(null)
   const commitDraft = () => {
@@ -300,24 +304,26 @@ function HexButton({ color, onColor }: HexButtonProps) {
   }
   const onPickerInput = (e: Event) => {
     const c = hexToRgb((e.target as HTMLInputElement).value.replace('#', ''))
-    if (c) onColor(c)
+    // The picker can't express alpha, so preserve whatever the stop already had.
+    if (c) onColor(color.a != null ? { ...c, a: color.a } : c)
   }
+  const text = draft ?? display
   return (
     <span class="appearance-hex is-field">
       {/* Swatch opens the OS colour picker (for humans); the hex field types one. */}
       <button
         type="button"
         class="appearance-hex-swatch"
-        style={`--chip: #${hex}`}
+        style={`--chip: #${display}`}
         onClick={() => pickerRef.current?.click()}
-        aria-label={`Pick colour, currently ${hex}`}
+        aria-label={`Pick colour, currently ${display}`}
         title="Open colour picker"
       >
         <input
           ref={pickerRef}
           type="color"
           class="appearance-hex-picker"
-          value={`#${hex}`}
+          value={`#${pickerHex}`}
           onInput={onPickerInput}
           aria-hidden="true"
           tabIndex={-1}
@@ -327,9 +333,12 @@ function HexButton({ color, onColor }: HexButtonProps) {
         class="appearance-hex-text"
         type="text"
         spellcheck={false}
-        value={draft ?? hex}
-        aria-label={`Hex colour ${hex}`}
-        onFocus={() => setDraft(hex)}
+        // Width tracks the hex length so #rrggbb stays compact (two per row) and
+        // only #rrggbbaa grows — no fixed dead space before the ×.
+        style={`width: calc(${text.length}ch + 2px)`}
+        value={text}
+        aria-label={`Hex colour ${display}`}
+        onFocus={() => setDraft(display)}
         onInput={(e) => setDraft((e.target as HTMLInputElement).value)}
         onBlur={commitDraft}
         onKeyDown={(e) => {

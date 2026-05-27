@@ -37,19 +37,20 @@ describe('formulaForProperty (sugar generation)', () => {
     expect(formulaForProperty(c, 'y')).toBe('y = r * 7')
   })
 
-  it('y step falls back to c when rows = 1 so a 1-row line still spreads diagonally', () => {
+  it('y step stays inert (r * v) when rows = 1 — a single row is flat, not diagonal', () => {
     const c = baseConfig()
-    // baseConfig has rows = 1, cols = 5
+    // baseConfig has rows = 1, cols = 5: r is pinned at 0, so the Row Y step
+    // contributes nothing. columnStepY is the explicit way to slant a row.
     c.y.value = 7
-    expect(formulaForProperty(c, 'y')).toBe('y = c * 7')
+    expect(formulaForProperty(c, 'y')).toBe('y = r * 7')
   })
 
-  it('x step falls back to r when cols = 1 so a 1-column line still spreads diagonally', () => {
+  it('x step stays inert (c * v) when cols = 1 — a single column is straight', () => {
     const c = baseConfig()
     c.cols = 1
     c.rows = 5
     c.x.value = 7
-    expect(formulaForProperty(c, 'x')).toBe('x = r * 7')
+    expect(formulaForProperty(c, 'x')).toBe('x = c * 7')
   })
 
   // rotation / scaleX / scaleY / opacity now carry a multi-stop ramp sampled in
@@ -154,13 +155,13 @@ describe('cross-axis grid steps', () => {
     expect(formulaForProperty(c, 'x')).toBe('x = c * 10 + r * -5')
   })
 
-  it('on a collapsed strip the primary fallback and raw cross-step both use the live index', () => {
-    // rows=1: the y primary borrows `c` (fallback) and columnStepY also uses raw
-    // `c`, so they merge — the documented caveat in types.ts.
+  it('on a collapsed strip the primary step is inert; only the cross-step drives drift', () => {
+    // rows=1: the Row's primary Y (r * 7) is pinned at 0, so a single row slants
+    // only via columnStepY (c * 5). The primary no longer borrows `c`.
     const oneRow = { ...grid, rows: 1, columnStepY: 5 }
-    expect(formulaForProperty(oneRow, 'y')).toBe('y = c * 7 + c * 5')
-    // cols=1: symmetric case on x.
+    expect(formulaForProperty(oneRow, 'y')).toBe('y = r * 7 + c * 5')
+    // cols=1: symmetric — the Column's primary X is inert, rowStepX drives drift.
     const oneCol = { ...grid, cols: 1, rowStepX: 3 }
-    expect(formulaForProperty(oneCol, 'x')).toBe('x = r * 10 + r * 3')
+    expect(formulaForProperty(oneCol, 'x')).toBe('x = c * 10 + r * 3')
   })
 })

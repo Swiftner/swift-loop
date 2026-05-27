@@ -1,25 +1,44 @@
 // src/shared/color.ts
 import type { Color, ColorRamp, ColorStopPoint } from './types'
 
-const HEX_RE = /^([0-9a-f]{6}|[0-9a-f]{3})$/i
+// 3/6-digit forms are RGB; 4/8-digit forms carry a trailing alpha nibble/byte.
+const HEX_RE = /^([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i
 
 export function hexToRgb(hex: string): Color | null {
   const m = HEX_RE.exec(hex.trim())
   if (!m) return null
   const h = m[1]
-  const expand = h.length === 3
-  const r = Number.parseInt(expand ? h[0] + h[0] : h.slice(0, 2), 16) / 255
-  const g = Number.parseInt(expand ? h[1] + h[1] : h.slice(2, 4), 16) / 255
-  const b = Number.parseInt(expand ? h[2] + h[2] : h.slice(4, 6), 16) / 255
-  return { r, g, b }
+  const short = h.length <= 4
+  // Channel i (0=r,1=g,2=b,3=a): for short forms each nibble doubles (f → ff).
+  const chan = (i: number) =>
+    Number.parseInt(short ? h[i] + h[i] : h.slice(i * 2, i * 2 + 2), 16) / 255
+  const r = chan(0)
+  const g = chan(1)
+  const b = chan(2)
+  if (h.length !== 4 && h.length !== 8) return { r, g, b }
+  const a = chan(3)
+  // Fully opaque collapses back to a plain RGB colour (absent alpha = opaque).
+  return a >= 1 ? { r, g, b } : { r, g, b, a }
 }
 
+const hex2 = (v: number) =>
+  Math.max(0, Math.min(255, Math.round(v * 255)))
+    .toString(16)
+    .padStart(2, '0')
+
+// RGB only — drops any alpha. Used where the consumer carries opacity separately
+// (Figma SolidPaint.opacity, Penpot fillOpacity) or only accepts #rrggbb (the
+// native <input type="color">).
 export function rgbToHex({ r, g, b }: Color): string {
-  const c = (v: number) =>
-    Math.max(0, Math.min(255, Math.round(v * 255)))
-      .toString(16)
-      .padStart(2, '0')
-  return `${c(r)}${c(g)}${c(b)}`
+  return `${hex2(r)}${hex2(g)}${hex2(b)}`
+}
+
+// Includes the alpha byte (#rrggbbaa) when the colour is translucent, otherwise
+// stays #rrggbb. For display in the hex field and the CSS gradient/swatch.
+export function rgbaToHex(c: Color): string {
+  const base = rgbToHex(c)
+  const a = c.a ?? 1
+  return a >= 1 ? base : base + hex2(a)
 }
 
 export interface Hsl {
@@ -83,7 +102,10 @@ export function lerpColorHsl(a: Color, b: Color, t: number): Color {
   const h = (ha.h + dh * t + 1) % 1
   const s = ha.s + (hb.s - ha.s) * t
   const l = ha.l + (hb.l - ha.l) * t
-  return hslToRgb({ h, s, l })
+  const rgb = hslToRgb({ h, s, l })
+  // Alpha lerps linearly, independent of the HSL colour arc.
+  const alpha = (a.a ?? 1) + ((b.a ?? 1) - (a.a ?? 1)) * t
+  return alpha >= 1 ? rgb : { ...rgb, a: alpha }
 }
 
 /**
@@ -127,7 +149,10 @@ export function sampleRamp(ramp: ColorRamp, t: number): Color | null {
  */
 export function multiplyColors(a: Color, b: Color): Color {
   // Color channels are 0..1 here, so white (1,1,1) is the multiply identity.
-  return { r: a.r * b.r, g: a.g * b.g, b: a.b * b.b }
+  const rgb = { r: a.r * b.r, g: a.g * b.g, b: a.b * b.b }
+  // Alpha multiplies too: two half-transparent tints compound to a quarter.
+  const alpha = (a.a ?? 1) * (b.a ?? 1)
+  return alpha >= 1 ? rgb : { ...rgb, a: alpha }
 }
 
 /**

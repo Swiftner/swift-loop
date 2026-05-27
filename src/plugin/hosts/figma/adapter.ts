@@ -143,7 +143,10 @@ export class FigmaAdapter implements HostAdapter {
     const node = await figma.getNodeByIdAsync(id)
     if (!node || node.removed) return
     if ('fills' in node) {
-      ;(node as GeometryMixin).fills = [{ type: 'SOLID', color }]
+      const { r, g, b } = color
+      ;(node as GeometryMixin).fills = [
+        { type: 'SOLID', color: { r, g, b }, opacity: color.a ?? 1 },
+      ]
     }
   }
 
@@ -153,7 +156,10 @@ export class FigmaAdapter implements HostAdapter {
     const node = await figma.getNodeByIdAsync(id)
     if (!node || node.removed) return
     if ('strokes' in node) {
-      ;(node as GeometryMixin).strokes = [{ type: 'SOLID', color }]
+      const { r, g, b } = color
+      ;(node as GeometryMixin).strokes = [
+        { type: 'SOLID', color: { r, g, b }, opacity: color.a ?? 1 },
+      ]
     }
   }
 

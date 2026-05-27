@@ -1258,11 +1258,21 @@ body,
   padding: 0;
   border: 1px solid var(--hairline);
   border-radius: 3px;
-  background: var(--chip, #888);
+  /* The chip colour sits over a small checker so a translucent --chip
+     (#rrggbbaa) shows its transparency rather than reading as a solid. */
+  background-image: linear-gradient(var(--chip, #888), var(--chip, #888)),
+    linear-gradient(45deg, var(--checker-fg) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--checker-fg) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--checker-fg) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--checker-fg) 75%);
+  background-color: var(--checker-bg);
+  background-size: auto, 6px 6px, 6px 6px, 6px 6px, 6px 6px;
+  background-position: 0 0, 0 0, 0 3px, 3px -3px, -3px 0;
   cursor: pointer;
 }
-/* Sized to its 6 hex chars (+2px for the caret) so there's no dead space before
-   the × — and so two stops fit on one row in the half-width colour column. */
+/* Width is set inline to track the hex length (6ch for #rrggbb, 8ch for
+   #rrggbbaa) so there's no dead space before the × and two opaque stops still
+   fit on one row. This is the opaque fallback before the component applies it. */
 .appearance-hex-text {
   width: calc(6ch + 2px);
   font-family: var(--mono);

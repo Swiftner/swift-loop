@@ -161,7 +161,7 @@ export class PenpotAdapter implements HostAdapter {
     if (color == null) return
     const shape = this.getShape(id)
     if (!shape) return
-    shape.fills = [{ fillColor: rgbToHex(color), fillOpacity: 1 }]
+    shape.fills = [{ fillColor: rgbToHex(color), fillOpacity: color.a ?? 1 }]
   }
 
   async setSolidStroke(id: NodeId, color: ColorRGB | null): Promise<void> {
@@ -176,7 +176,7 @@ export class PenpotAdapter implements HostAdapter {
     const prevWidth = shape.strokes?.[0]?.strokeWidth
     const stroke: { strokeColor: string; strokeOpacity: number; strokeWidth?: number } = {
       strokeColor: rgbToHex(color),
-      strokeOpacity: 1,
+      strokeOpacity: color.a ?? 1,
     }
     if (prevWidth != null) stroke.strokeWidth = prevWidth
     shape.strokes = [stroke]

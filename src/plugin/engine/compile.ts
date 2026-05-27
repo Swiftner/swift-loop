@@ -24,20 +24,20 @@ function interpFactor(config: LoopConfig): string {
 
 function baseSugarFor(property: FormulaProperty, config: LoopConfig): string {
   const p = config[property] as NumericProperty
-  // X normally varies with column (`c`) and Y with row (`r`), but when one
-  // dimension is collapsed (cols=1 or rows=1) the corresponding index is
-  // stuck at 0, which would make that slider do nothing. Fall back to the
-  // other axis so a row of cells with both X and Y set produces a diagonal.
-  const xIdx = config.cols > 1 ? 'c' : 'r'
-  const yIdx = config.rows > 1 ? 'r' : 'c'
+  // Each axis's primary step indexes its own axis — X with column (`c`), Y with
+  // row (`r`). When an axis is collapsed (cols=1 or rows=1) its index is pinned
+  // at 0, so the primary step is inert — matching the UI, which greys out that
+  // axis's controls. Slanting a single strip is the cross-step's job: columnStepY
+  // (× c) drifts a one-row layout down, rowStepX (× r) drifts a one-column layout
+  // across.
   switch (property) {
     case 'x': {
       const cross = config.rowStepX ? ` + r * ${config.rowStepX}` : ''
-      return `${xIdx} * ${p.value}${cross}`
+      return `c * ${p.value}${cross}`
     }
     case 'y': {
       const cross = config.columnStepY ? ` + c * ${config.columnStepY}` : ''
-      return `${yIdx} * ${p.value}${cross}`
+      return `r * ${p.value}${cross}`
     }
     // rotation / scaleX / scaleY / opacity carry a multi-stop ramp now; their
     // sugar value is sampled directly in cells.ts (along with the sinusoidal

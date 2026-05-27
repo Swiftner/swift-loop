@@ -69,7 +69,9 @@ function colorAt(ramp: ColorRamp, t: number): string | null {
 
 function rgbToCss(c: Color): string {
   const v = (n: number) => Math.max(0, Math.min(255, Math.round(n * 255)))
-  return `rgb(${v(c.r)}, ${v(c.g)}, ${v(c.b)})`
+  const a = c.a ?? 1
+  if (a >= 1) return `rgb(${v(c.r)}, ${v(c.g)}, ${v(c.b)})`
+  return `rgba(${v(c.r)}, ${v(c.g)}, ${v(c.b)}, ${+a.toFixed(3)})`
 }
 
 function makeClone(

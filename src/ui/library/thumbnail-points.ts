@@ -48,12 +48,11 @@ export function evaluateEntry(entry: LibraryEntry): CellPoint[] {
           l,
         )
         try {
-          // Mirror compile.ts baseSugarFor: the primary step borrows the other
-          // index when its own dimension is collapsed; cross terms use raw c/r.
-          const xi = entry.cols > 1 ? c : r
-          const yi = entry.rows > 1 ? r : c
-          const x = compiled.x ? compiled.x.evaluate(scope, 'x') : xi * sx + r * sxr
-          const y = compiled.y ? compiled.y.evaluate(scope, 'y') : c * syc + yi * sy
+          // Mirror compile.ts baseSugarFor: each primary step indexes its own
+          // axis (x→c, y→r); the cross terms (rowStepX × r, columnStepY × c) add
+          // the oblique drift.
+          const x = compiled.x ? compiled.x.evaluate(scope, 'x') : c * sx + r * sxr
+          const y = compiled.y ? compiled.y.evaluate(scope, 'y') : r * sy + c * syc
           const opacity = compiled.opacity ? compiled.opacity.evaluate(scope, 'opacity') / 100 : 0.8
           points.push({ x, y, opacity: Math.max(0.35, Math.min(1, opacity)) })
         } catch {

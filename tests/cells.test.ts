@@ -91,8 +91,8 @@ describe('evaluateCell', () => {
   })
 
   it('applies the per-column X offset on a horizontal strip', () => {
-    // Zero Y so we isolate X. (With rows=1, a nonzero Y would fall back to
-    // varying with the column too — the documented diagonal behavior.)
+    // rows=1 already pins the Row Y step at 0, so X is isolated; the explicit
+    // y: 0 just makes that obvious.
     const config: LoopConfig = {
       ...DEFAULT_CONFIG,
       cols: 4,

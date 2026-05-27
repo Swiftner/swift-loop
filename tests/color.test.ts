@@ -7,6 +7,7 @@ import {
   multiplyColors,
   rgbToHex,
   rgbToHsl,
+  rgbaToHex,
 } from '../src/shared/color'
 
 // Color channels are 0..1 in this codebase.
@@ -119,5 +120,52 @@ describe('color', () => {
     expect(e.r).toBeCloseTo(b.r, 3)
     expect(e.g).toBeCloseTo(b.g, 3)
     expect(e.b).toBeCloseTo(b.b, 3)
+  })
+})
+
+describe('alpha', () => {
+  it('parses 8-digit hex into an alpha channel', () => {
+    const c = hexToRgb('80808080')
+    expect(c).not.toBeNull()
+    if (!c) return
+    expect(c.r).toBeCloseTo(0.502, 3)
+    expect(c.a).toBeCloseTo(0.502, 3)
+  })
+
+  it('parses 4-digit short rgba (each nibble doubles)', () => {
+    const c = hexToRgb('f008')
+    expect(c).toEqual({ r: 1, g: 0, b: 0, a: hexToRgb('880000')?.r })
+    expect(c?.a).toBeCloseTo(0x88 / 255, 5)
+  })
+
+  it('fully-opaque alpha collapses to plain rgb (no a key)', () => {
+    expect(hexToRgb('808080ff')).toEqual({ r: 0x80 / 255, g: 0x80 / 255, b: 0x80 / 255 })
+    expect(hexToRgb('808080')).toEqual({ r: 0x80 / 255, g: 0x80 / 255, b: 0x80 / 255 })
+  })
+
+  it('rgbaToHex emits 8 digits only when translucent', () => {
+    expect(rgbaToHex({ r: 0.5, g: 0.5, b: 0.5 })).toBe('808080')
+    expect(rgbaToHex({ r: 0.5, g: 0.5, b: 0.5, a: 1 })).toBe('808080')
+    expect(rgbaToHex({ r: 0.5, g: 0.5, b: 0.5, a: 0x80 / 255 })).toBe('80808080')
+    // rgbToHex always drops alpha (for native pickers / Penpot).
+    expect(rgbToHex({ r: 0.5, g: 0.5, b: 0.5, a: 0.5 })).toBe('808080')
+  })
+
+  it('multiplyColors compounds alpha; opaque stays sparse', () => {
+    expect(multiplyColors({ r: 1, g: 1, b: 1, a: 0.5 }, { r: 1, g: 1, b: 1, a: 0.5 })).toEqual({
+      r: 1,
+      g: 1,
+      b: 1,
+      a: 0.25,
+    })
+    // two opaque colours → no alpha key
+    expect(multiplyColors(RED, BLUE)).toEqual({ r: 0, g: 0, b: 0 })
+  })
+
+  it('lerpColorHsl interpolates alpha linearly', () => {
+    const mid = lerpColorHsl({ r: 1, g: 0, b: 0, a: 0 }, { r: 1, g: 0, b: 0, a: 1 }, 0.5)
+    expect(mid.a).toBeCloseTo(0.5, 5)
+    // both opaque → result carries no alpha key
+    expect(lerpColorHsl(RED, BLUE, 0.5).a).toBeUndefined()
   })
 })
