@@ -1,6 +1,6 @@
 {
   "name": "swift-loop",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Turn one shape into a hundred. A Figma plugin for spirals, grids, waves, and anything else you can describe with a little math. Modernized fork of Looper.",
   "license": "ISC",
   "type": "module",
