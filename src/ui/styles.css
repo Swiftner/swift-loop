@@ -1235,25 +1235,25 @@ body,
 }
 .appearance-colors .gradient-ramp-readout {
   flex-wrap: wrap;
-  gap: 3px 6px;
+  gap: 4px 5px;
   margin-top: 6px;
   font-size: 10px;
 }
 .gradient-ramp-hex-pair {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
+  gap: 1px;
 }
 /* Typeable hex: a small swatch (opens the OS picker) + an editable hex field. */
 .appearance-hex.is-field {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
 }
 .appearance-hex-swatch {
   position: relative;
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   flex: none;
   padding: 0;
   border: 1px solid var(--hairline);
@@ -1261,8 +1261,10 @@ body,
   background: var(--chip, #888);
   cursor: pointer;
 }
+/* Sized to its 6 hex chars (+2px for the caret) so there's no dead space before
+   the × — and so two stops fit on one row in the half-width colour column. */
 .appearance-hex-text {
-  width: 50px;
+  width: calc(6ch + 2px);
   font-family: var(--mono);
   font-size: inherit;
   color: var(--fg);
@@ -1276,12 +1278,12 @@ body,
 }
 .gradient-ramp-hex-remove {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 11px;
   line-height: 1;
   color: var(--muted);
   background: transparent;
   border: 0;
-  padding: 0 2px;
+  padding: 0 1px;
   cursor: pointer;
 }
 .gradient-ramp-hex-remove:hover {
