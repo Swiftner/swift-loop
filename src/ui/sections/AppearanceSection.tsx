@@ -1,7 +1,5 @@
-import { factorForColorStop } from '../../plugin/engine/compile'
 import { rampConstant } from '../../shared/numeric-ramp'
 import type { EasingKind, LoopConfig, NumericProperty, NumericRamp } from '../../shared/types'
-import { GradientRampEditor } from '../components/GradientRampEditor'
 import { NumericRampRow } from '../components/NumericRampRow'
 import { Section } from '../components/Section'
 import { sliderRangeFor } from '../slider-ranges'
@@ -27,7 +25,7 @@ export function AppearanceSection({ config, update, sourceSize }: Props) {
 
   // fx: an empty formula clears back to the ramp/stops; any text takes over the
   // value. The ramp/stops are left untouched so toggling fx loses nothing.
-  const setFormula = (key: RampKey | 'fill' | 'stroke') => (text: string) =>
+  const setFormula = (key: RampKey) => (text: string) =>
     update({ ...config, [key]: withFormula(config[key], text) }, false)
 
   const rampRow = (
@@ -58,19 +56,6 @@ export function AppearanceSection({ config, update, sourceSize }: Props) {
       />
     )
   }
-
-  // Fill / Stroke colour gradient: stops define the colours, the fx formula
-  // returns the 0..1 position to sample along them (default = loop progress).
-  const colorRow = (key: 'fill' | 'stroke', label: string) => (
-    <GradientRampEditor
-      label={label}
-      ramp={config[key]}
-      onChange={(next, commit) => update({ ...config, [key]: next }, commit)}
-      formulaActive={!!config[key].unlocked}
-      formula={factorForColorStop(config, config[key])}
-      onFormulaChange={setFormula(key)}
-    />
-  )
 
   return (
     <Section
@@ -117,11 +102,7 @@ export function AppearanceSection({ config, update, sourceSize }: Props) {
       })}
       {rampRow('opacity', 'Opacity', { min: 0, max: 100, step: 1 }, { unit: '%' })}
 
-      <div class="appearance-colors">
-        {colorRow('fill', 'Fill')}
-        {colorRow('stroke', 'Stroke')}
-      </div>
-
+      {/* Fill / Stroke colour now live per-axis in the Column/Row/Layer sections. */}
       {rampRow('strokeWeight', 'Stroke width', { min: 0, max: 50, step: 0.5 }, { decimals: 1 })}
     </Section>
   )

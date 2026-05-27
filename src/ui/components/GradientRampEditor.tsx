@@ -6,9 +6,11 @@ interface Props {
   label: string
   ramp: ColorRamp
   onChange: (next: ColorRamp, commit: boolean) => void
-  formulaActive: boolean
-  formula: string
-  onFormulaChange: (next: string) => void
+  // The fx escape hatch is optional — per-axis colour gradients sample directly
+  // (no factor formula), so they omit these and the fx button is hidden.
+  formulaActive?: boolean
+  formula?: string
+  onFormulaChange?: (next: string) => void
 }
 
 // Drag must exceed this radius before a press is treated as a move rather
@@ -30,7 +32,8 @@ export function GradientRampEditor({
   const [expanded, setExpanded] = useState(false)
   const sorted = [...ramp.stops].sort((a, b) => a.position - b.position)
   const background = stripBackground(sorted)
-  const showFormula = expanded || formulaActive
+  const hasFx = onFormulaChange !== undefined
+  const showFormula = hasFx && (expanded || !!formulaActive)
 
   const setStopColor = (index: number, color: Color) => {
     const nextStops = sorted.map((s, i) => (i === index ? { ...s, color } : s))
@@ -66,15 +69,17 @@ export function GradientRampEditor({
             </span>
           ))}
         </span>
-        <button
-          class="appearance-strip-fx"
-          type="button"
-          onClick={() => setExpanded((x) => !x)}
-          aria-label={showFormula ? 'Hide formula' : 'Show formula'}
-          aria-expanded={showFormula}
-        >
-          fx
-        </button>
+        {hasFx && (
+          <button
+            class="appearance-strip-fx"
+            type="button"
+            onClick={() => setExpanded((x) => !x)}
+            aria-label={showFormula ? 'Hide formula' : 'Show formula'}
+            aria-expanded={showFormula}
+          >
+            fx
+          </button>
+        )}
       </div>
       <div class="gradient-ramp-row">
         <div
@@ -106,7 +111,7 @@ export function GradientRampEditor({
           value={formula}
           spellcheck={false}
           aria-label={`${label} formula`}
-          onInput={(e) => onFormulaChange((e.target as HTMLTextAreaElement).value)}
+          onInput={(e) => onFormulaChange?.((e.target as HTMLTextAreaElement).value)}
         />
       )}
     </article>

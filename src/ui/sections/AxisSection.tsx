@@ -1,6 +1,7 @@
-import type { LoopConfig, NumericRamp } from '../../shared/types'
+import type { ColorRamp, LoopConfig, NumericRamp } from '../../shared/types'
 import { AxisFormulaRow } from '../components/AxisFormulaRow'
 import { CountChip } from '../components/CountChip'
+import { GradientRampEditor } from '../components/GradientRampEditor'
 import { NumericRampRow } from '../components/NumericRampRow'
 import { Section } from '../components/Section'
 import { type StepKey, StepPair } from '../components/StepPair'
@@ -22,6 +23,15 @@ export type AxisRampKey =
   | 'rowRandom'
   | 'layerRandom'
 
+// The per-axis colour gradients (Fill / Stroke) one section drives.
+export type AxisColorKey =
+  | 'columnFill'
+  | 'rowFill'
+  | 'layerFill'
+  | 'columnStroke'
+  | 'rowStroke'
+  | 'layerStroke'
+
 interface Props {
   id: string
   title: string
@@ -35,6 +45,8 @@ interface Props {
   xStepKey: StepKey
   yStepKey: StepKey
   scaleKey: AxisRampKey
+  fillKey: AxisColorKey
+  strokeKey: AxisColorKey
   twistKey: AxisRampKey
   fadeKey: AxisRampKey
   randomKey: AxisRampKey
@@ -58,6 +70,8 @@ export function AxisSection({
   xStepKey,
   yStepKey,
   scaleKey,
+  fillKey,
+  strokeKey,
   twistKey,
   fadeKey,
   randomKey,
@@ -65,6 +79,8 @@ export function AxisSection({
   axisVar,
 }: Props) {
   const setRamp = (key: AxisRampKey) => (next: NumericRamp, commit: boolean) =>
+    update({ ...config, [key]: next }, commit)
+  const setColor = (key: AxisColorKey) => (next: ColorRamp, commit: boolean) =>
     update({ ...config, [key]: next }, commit)
   // A single column/row has nothing to spread, twist, scale or fade across.
   const inactive = count <= 1
@@ -95,6 +111,18 @@ export function AxisSection({
         disabled={inactive}
         onChange={setRamp(scaleKey)}
       />
+      <div class="appearance-colors">
+        <GradientRampEditor
+          label="Fill"
+          ramp={config[fillKey] ?? { stops: [] }}
+          onChange={setColor(fillKey)}
+        />
+        <GradientRampEditor
+          label="Stroke"
+          ramp={config[strokeKey] ?? { stops: [] }}
+          onChange={setColor(strokeKey)}
+        />
+      </div>
       <NumericRampRow
         label="Twist"
         ramp={config[twistKey]}

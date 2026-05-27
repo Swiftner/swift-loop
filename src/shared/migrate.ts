@@ -69,13 +69,31 @@ export function normalizeConfig(config: LoopConfig): LoopConfig {
   const opacityRandom = migrateRandomField(config.opacityRandom, config.opacity?.random)
   // Per-step accumulation reached `value × span` at the last clone (c + r max).
   const span = Math.max(0, cols - 1) + Math.max(0, rows - 1)
+  // Colour moved from a single loop-level fill/stroke to per-axis gradients.
+  // Move an existing loop colour into the Column slot (unless a per-axis colour
+  // is already set) so saved colours survive, then clear the loop-level ramp.
+  const loopFill = legacyColorStopToRamp(config.fill as never)
+  const loopStroke = legacyColorStopToRamp(config.stroke as never)
+  const columnFill = config.columnFill?.stops?.length
+    ? config.columnFill
+    : loopFill.stops.length
+      ? loopFill
+      : config.columnFill
+  const columnStroke = config.columnStroke?.stops?.length
+    ? config.columnStroke
+    : loopStroke.stops.length
+      ? loopStroke
+      : config.columnStroke
   return {
     ...config,
     // Keep a well-formed Spiral ramp; drop anything malformed so the engine
     // falls back to the constant `angle`.
     angleRamp: isNumericRamp(config.angleRamp) ? config.angleRamp : undefined,
-    fill: legacyColorStopToRamp(config.fill as never),
-    stroke: legacyColorStopToRamp(config.stroke as never),
+    // Loop-level fill/stroke are superseded by per-axis colour; clear them.
+    fill: { stops: [] },
+    stroke: { stops: [] },
+    columnFill,
+    columnStroke,
     x: { ...config.x, random: 0 },
     y: { ...config.y, random: 0 },
     rotation: {

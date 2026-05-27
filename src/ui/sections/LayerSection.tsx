@@ -1,7 +1,8 @@
 import { DEFAULT_DEPTH_DIR } from '../../plugin/engine/cells'
-import type { LoopConfig, NumericRamp } from '../../shared/types'
+import type { ColorRamp, LoopConfig, NumericRamp } from '../../shared/types'
 import { AxisFormulaRow } from '../components/AxisFormulaRow'
 import { CountChip } from '../components/CountChip'
+import { GradientRampEditor } from '../components/GradientRampEditor'
 import { NumericRampRow } from '../components/NumericRampRow'
 import { Section } from '../components/Section'
 import { SliderRow } from '../components/SliderRow'
@@ -23,6 +24,8 @@ export function LayerSection({ config, update }: Props) {
     (key: 'layerAngle' | 'layerScale' | 'layerFade' | 'layerRandom') =>
     (next: NumericRamp, commit: boolean) =>
       update({ ...config, [key]: next }, commit)
+  const setColor = (key: 'layerFill' | 'layerStroke') => (next: ColorRamp, commit: boolean) =>
+    update({ ...config, [key]: next }, commit)
   return (
     <Section
       id="layer"
@@ -68,6 +71,18 @@ export function LayerSection({ config, update }: Props) {
         disabled={noDepth}
         onChange={setRamp('layerScale')}
       />
+      <div class="appearance-colors">
+        <GradientRampEditor
+          label="Fill"
+          ramp={config.layerFill ?? { stops: [] }}
+          onChange={setColor('layerFill')}
+        />
+        <GradientRampEditor
+          label="Stroke"
+          ramp={config.layerStroke ?? { stops: [] }}
+          onChange={setColor('layerStroke')}
+        />
+      </div>
       <NumericRampRow
         label="Twist"
         ramp={config.layerAngle}
