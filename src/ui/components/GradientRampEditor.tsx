@@ -88,23 +88,26 @@ export function GradientRampEditor({
         </div>
       </div>
       {/* Hex stops live below the strip so adding one never shifts the strip,
-          keeping Fill and Stroke aligned across the two columns. */}
-      <span class="appearance-strip-readout gradient-ramp-readout">
-        {sorted.map((s, i) => (
-          <span key={`hex-${i}`} class="gradient-ramp-hex-pair">
-            <HexButton color={s.color} onColor={(c) => setStopColor(i, c)} />
-            <button
-              type="button"
-              class="gradient-ramp-hex-remove"
-              onClick={() => removeStop(i)}
-              aria-label={`Remove stop ${i + 1}`}
-              title="Remove stop"
-            >
-              ×
-            </button>
-          </span>
-        ))}
-      </span>
+          keeping Fill and Stroke aligned across the two columns. Omitted entirely
+          when empty so there's no gap under an unused colour. */}
+      {sorted.length > 0 && (
+        <span class="appearance-strip-readout gradient-ramp-readout">
+          {sorted.map((s, i) => (
+            <span key={`hex-${i}`} class="gradient-ramp-hex-pair">
+              <HexButton color={s.color} onColor={(c) => setStopColor(i, c)} />
+              <button
+                type="button"
+                class="gradient-ramp-hex-remove"
+                onClick={() => removeStop(i)}
+                aria-label={`Remove stop ${i + 1}`}
+                title="Remove stop"
+              >
+                ×
+              </button>
+            </span>
+          ))}
+        </span>
+      )}
       {showFormula && (
         <textarea
           class="appearance-strip-formula"
