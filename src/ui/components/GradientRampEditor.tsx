@@ -90,7 +90,6 @@ export function GradientRampEditor({
       {/* Hex stops live below the strip so adding one never shifts the strip,
           keeping Fill and Stroke aligned across the two columns. */}
       <span class="appearance-strip-readout gradient-ramp-readout">
-        {sorted.length === 0 ? <span class="appearance-hex is-empty">—</span> : null}
         {sorted.map((s, i) => (
           <span key={`hex-${i}`} class="gradient-ramp-hex-pair">
             <HexButton color={s.color} onColor={(c) => setStopColor(i, c)} />
