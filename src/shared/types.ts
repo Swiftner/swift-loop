@@ -117,6 +117,16 @@ export interface LoopConfig {
   columnScale?: NumericRamp // % size change across columns; -100 = vanishes
   rowScale?: NumericRamp // across rows
   layerScale?: NumericRamp // across layers; negative = perspective falloff
+  // Per-axis colour: each axis tints the clone with its own gradient, sampled
+  // along that axis (column→tx, row→ty, layer→tz) and combined by RGB-multiply.
+  // White/empty = identity, so a clear axis contributes nothing; all empty =
+  // the clone keeps its source colour. These supersede the loop-level fill.
+  columnFill?: ColorRamp
+  rowFill?: ColorRamp
+  layerFill?: ColorRamp
+  columnStroke?: ColorRamp
+  rowStroke?: ColorRamp
+  layerStroke?: ColorRamp
   layerColour?: boolean // sweep the fill/stroke ramp by depth (factor = tz)
   // Seeded ± position jitter (px), amount sampled along the axis. Column jitters
   // x, Row jitters y, Layer jitters both. A flat ramp = uniform jitter.

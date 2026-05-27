@@ -92,6 +92,15 @@ export function diffConfig(
   if (JSON.stringify(prev.fill) !== JSON.stringify(next.fill)) dirty.push('fill')
   if (JSON.stringify(prev.stroke) !== JSON.stringify(next.stroke)) dirty.push('stroke')
   if (!eqNumericProperty(prev.strokeWeight, next.strokeWeight)) dirty.push('strokeWeight')
+  // Per-axis colour tints feed the fill/stroke colour too.
+  for (const k of ['columnFill', 'rowFill', 'layerFill'] as const) {
+    if (JSON.stringify(prev[k]) !== JSON.stringify(next[k]) && !dirty.includes('fill'))
+      dirty.push('fill')
+  }
+  for (const k of ['columnStroke', 'rowStroke', 'layerStroke'] as const) {
+    if (JSON.stringify(prev[k]) !== JSON.stringify(next[k]) && !dirty.includes('stroke'))
+      dirty.push('stroke')
+  }
 
   // sinusoidal layers affect rotation / scale
   if (JSON.stringify(prev.rotationSinusoidal) !== JSON.stringify(next.rotationSinusoidal)) {

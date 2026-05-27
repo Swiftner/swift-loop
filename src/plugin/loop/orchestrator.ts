@@ -137,6 +137,8 @@ async function fullRegen(
       strokeWeight: cell.strokeWeight,
       fillFactor: cell.fillFactor,
       strokeFactor: cell.strokeFactor,
+      fillColor: cell.fillColor,
+      strokeColor: cell.strokeColor,
       dirty: new Set<string>([
         'x',
         'y',
@@ -214,6 +216,8 @@ async function inPlaceMutation(
       strokeWeight: cell.strokeWeight,
       fillFactor: cell.fillFactor,
       strokeFactor: cell.strokeFactor,
+      fillColor: cell.fillColor,
+      strokeColor: cell.strokeColor,
       dirty,
     })
   }

@@ -15,6 +15,10 @@ export interface ApplyInput {
   // Colour lerp factors in [0, 1] — already eased / formula-resolved upstream.
   fillFactor: number
   strokeFactor: number
+  // Per-axis colour tints (column×row×layer multiplied), or null to fall back to
+  // the loop-level fill/stroke ramp + factor above.
+  fillColor: Color | null
+  strokeColor: Color | null
   dirty: Set<string>
 }
 
@@ -29,6 +33,8 @@ export async function applyToClone(input: ApplyInput): Promise<void> {
     strokeWeight,
     fillFactor,
     strokeFactor,
+    fillColor,
+    strokeColor,
     dirty,
   } = input
 
@@ -61,14 +67,15 @@ export async function applyToClone(input: ApplyInput): Promise<void> {
     if (o < 1) await adapter.setOpacity(cloneId, o)
   }
   if (dirty.has('fill')) {
-    const c = fillColorAt(fill, fillFactor)
+    // Per-axis tint wins; otherwise sample the loop-level fill ramp at its factor.
+    const c = fillColor ?? fillColorAt(fill, fillFactor)
     if (c) await adapter.setSolidFill(cloneId, c)
   }
-  const strokeColor = fillColorAt(stroke, strokeFactor)
-  if (dirty.has('stroke') && strokeColor) {
-    await adapter.setSolidStroke(cloneId, strokeColor)
+  const resolvedStroke = strokeColor ?? fillColorAt(stroke, strokeFactor)
+  if (dirty.has('stroke') && resolvedStroke) {
+    await adapter.setSolidStroke(cloneId, resolvedStroke)
   }
-  if (dirty.has('strokeWeight') && strokeColor) {
+  if (dirty.has('strokeWeight') && resolvedStroke) {
     await adapter.setStrokeWeight(cloneId, Math.max(0, strokeWeight))
   }
 }

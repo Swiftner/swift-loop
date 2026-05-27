@@ -4,8 +4,10 @@
 // for one cell of a loop. Consumers decide what to do with them (mutate a
 // Figma node, build an SVG element, etc.).
 
+import { combineAxisColors } from '../../shared/color'
 import { sampleNumericRamp } from '../../shared/numeric-ramp'
 import type {
+  Color,
   CompiledFormula,
   CompiledFormulas,
   LoopConfig,
@@ -71,6 +73,10 @@ export interface CellValues {
   // Fill / stroke lerp factors in [0, 1] (formula-resolved or eased fallback).
   fillFactor: number
   strokeFactor: number
+  // Per-axis colour tint (column×row×layer, RGB-multiplied), or null when no axis
+  // sets one — then the loop-level fill/factor fallback applies.
+  fillColor: Color | null
+  strokeColor: Color | null
 }
 
 export interface EvaluateCellInput {
@@ -217,6 +223,16 @@ export function evaluateCell(i: number, input: EvaluateCellInput): CellValues {
     strokeWeight,
     fillFactor: factors.fill ? factors.fill.evaluate(scope, 'fillFactor') : colourFactor,
     strokeFactor: factors.stroke ? factors.stroke.evaluate(scope, 'strokeFactor') : colourFactor,
+    fillColor: combineAxisColors([
+      { ramp: config.columnFill, t: scope.tx },
+      { ramp: config.rowFill, t: scope.ty },
+      { ramp: config.layerFill, t: scope.tz },
+    ]),
+    strokeColor: combineAxisColors([
+      { ramp: config.columnStroke, t: scope.tx },
+      { ramp: config.rowStroke, t: scope.ty },
+      { ramp: config.layerStroke, t: scope.tz },
+    ]),
   }
 }
 

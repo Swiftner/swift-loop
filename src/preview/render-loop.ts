@@ -50,8 +50,11 @@ export function renderLoop(opts: RenderLoopOptions): SVGGElement {
     const y = cell.y - cell.scaleY / 2
     const op = Math.max(0, Math.min(1, cell.opacity / 100))
 
-    const fill = colorAt(config.fill, cell.fillFactor)
-    const stroke = colorAt(config.stroke, cell.strokeFactor)
+    // Per-axis tint wins; otherwise the loop-level fill ramp at its factor.
+    const fill = cell.fillColor ? rgbToCss(cell.fillColor) : colorAt(config.fill, cell.fillFactor)
+    const stroke = cell.strokeColor
+      ? rgbToCss(cell.strokeColor)
+      : colorAt(config.stroke, cell.strokeFactor)
     const sw = stroke != null ? Math.max(0, cell.strokeWeight) : 0
 
     g.appendChild(makeClone(x, y, w, h, cell.rotation, op, fill, stroke, sw, shape, keepColors))

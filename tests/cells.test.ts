@@ -65,6 +65,9 @@ function reference(
         : sampleNumericRamp(config.strokeWeight.ramp, interp, config.strokeWeight.value),
     fillFactor: factors.fill ? factors.fill.evaluate(scope, 'fillFactor') : baseEased,
     strokeFactor: factors.stroke ? factors.stroke.evaluate(scope, 'strokeFactor') : baseEased,
+    // DEFAULT_CONFIG sets no per-axis colour, so no tint.
+    fillColor: null,
+    strokeColor: null,
   }
 }
 
@@ -119,6 +122,21 @@ describe('evaluateCell', () => {
     // strokeWeight is now a resolved value, not a factor: the default flat ramp
     // at 1 yields 1 everywhere.
     expect(cell.strokeWeight).toBeCloseTo(1, 6)
+  })
+
+  it('leaves fillColor null when no axis sets a colour', () => {
+    expect(run(DEFAULT_CONFIG, 0).fillColor).toBeNull()
+  })
+
+  it('multiplies per-axis fill colours into the cell tint (red × blue = black)', () => {
+    const config: LoopConfig = {
+      ...DEFAULT_CONFIG,
+      cols: 2,
+      rows: 2,
+      columnFill: { stops: [{ color: { r: 1, g: 0, b: 0 }, position: 0 }] },
+      rowFill: { stops: [{ color: { r: 0, g: 0, b: 1 }, position: 0 }] },
+    }
+    expect(run(config, 0).fillColor).toEqual({ r: 0, g: 0, b: 0 })
   })
 
   it('maps the flat index to a 3D (layer, row, column) address', () => {
