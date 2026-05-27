@@ -1226,10 +1226,15 @@ body,
 .appearance-colors > .appearance-strip + .appearance-strip {
   border-top: 0;
 }
-/* In the narrow half-width column, let the colour readout wrap instead of
-   overflowing. */
-.appearance-colors .gradient-ramp-readout {
+/* Narrow half-width colour columns: keep each colour's hex stops on ONE line
+   (never split a gradient's stops across lines). If they can't sit beside the
+   label, the whole readout drops below it as a unit. */
+.appearance-colors .appearance-strip-head {
   flex-wrap: wrap;
+}
+.appearance-colors .gradient-ramp-readout {
+  flex-wrap: nowrap;
+  font-size: 10px;
 }
 .gradient-ramp-hex-pair {
   display: inline-flex;
