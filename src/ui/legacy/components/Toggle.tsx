@@ -15,7 +15,7 @@ export function Toggle({ checked, onChange, label, variant = 'checkbox' }: Props
         checked={checked}
         onChange={(e) => onChange((e.target as HTMLInputElement).checked)}
       />
-      <span class="lp-toggle-box" aria-hidden="true" />
+      <span class={`lp-toggle-box${checked ? ' is-on' : ''}`} aria-hidden="true" />
       <span class="lp-toggle-label">{label}</span>
     </label>
   )

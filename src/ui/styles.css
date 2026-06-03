@@ -231,10 +231,26 @@ body {
 }
 
 .lp-toggle-switch input:checked + .lp-toggle-box {
-  background: var(--fg);
+  background: var(--accent);
 }
 
 .lp-toggle-switch input:checked + .lp-toggle-box::after {
+  transform: translateX(12px);
+}
+
+/* State-driven (class) fallbacks — the `checked` prop sets `is-on` directly, so
+   the switch/checkbox visual never relies on the :checked pseudo reflecting a
+   programmatically-set property. */
+.lp-toggle-checkbox .lp-toggle-box.is-on {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.lp-toggle-switch .lp-toggle-box.is-on {
+  background: var(--accent);
+}
+
+.lp-toggle-switch .lp-toggle-box.is-on::after {
   transform: translateX(12px);
 }
 
