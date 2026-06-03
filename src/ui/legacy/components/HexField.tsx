@@ -17,7 +17,8 @@ export function HexField({ value, onChange, ariaLabel }: Props) {
 
   const commit = () => {
     const clean = draft.trim().replace(/^#/, '').toUpperCase()
-    if (HEX6.test(clean)) onChange(clean)
+    // Only commit a real change — avoid duplicate/no-op undo entries (Enter blurs).
+    if (HEX6.test(clean) && clean !== value) onChange(clean)
     setEditing(false)
   }
 
@@ -43,7 +44,6 @@ export function HexField({ value, onChange, ariaLabel }: Props) {
         onKeyDown={(e) => {
           const k = (e as KeyboardEvent).key
           if (k === 'Enter') {
-            commit()
             ;(e.target as HTMLInputElement).blur()
           } else if (k === 'Escape') {
             setEditing(false)

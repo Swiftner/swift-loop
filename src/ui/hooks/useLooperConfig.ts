@@ -94,5 +94,21 @@ export function useLooperConfig() {
     dispatchUpdate(next, true)
   }, [dispatchUpdate])
 
-  return { config, update, undo, redo }
+  // Replace the committed baseline outright (no undo entry) and render it. Used
+  // when the panel coerces a loaded/default config into the shape it edits — e.g.
+  // Legacy flattening a grid to a chain. Without this, a commit:false update
+  // leaves `lastCommitted` pointing at the pre-coercion config, so the first real
+  // edit's undo jumps back to that stale shape instead of reverting the edit.
+  const setBaseline = useCallback(
+    (next: LoopConfig) => {
+      lastCommitted.current = next
+      undoStack.current = []
+      redoStack.current = []
+      setConfig(next)
+      dispatchUpdate(next, true)
+    },
+    [dispatchUpdate],
+  )
+
+  return { config, update, undo, redo, setBaseline }
 }

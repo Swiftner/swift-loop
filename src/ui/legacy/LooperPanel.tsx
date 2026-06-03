@@ -15,9 +15,12 @@ import { type LooperParams, applyPreset, fromConfig, toConfig } from './looper-p
 interface Props {
   config: LoopConfig
   update: (next: LoopConfig, commit?: boolean) => void
+  undo: () => void
+  redo: () => void
+  setBaseline: (next: LoopConfig) => void
 }
 
-export function LooperPanel({ config, update }: Props) {
+export function LooperPanel({ config, update, undo, redo, setBaseline }: Props) {
   const [draft, setDraft] = useState<LooperParams>(() => fromConfig(config))
   const [autoUpdate, setAutoUpdate] = useState(true)
 
@@ -29,9 +32,9 @@ export function LooperPanel({ config, update }: Props) {
   useEffect(() => {
     setDraft(fromConfig(config))
     if (config.rows > 1 || (config.layers ?? 1) > 1) {
-      update(toConfig(fromConfig(config)), false)
+      setBaseline(toConfig(fromConfig(config)))
     }
-  }, [config, update])
+  }, [config, setBaseline])
 
   // Apply a draft edit. Always a commit from the fields' POV; whether it reaches
   // the host now depends on Auto-update.
@@ -215,9 +218,29 @@ export function LooperPanel({ config, update }: Props) {
 
       <footer class="lp-footer">
         <Toggle variant="switch" checked={autoUpdate} onChange={onAutoUpdate} label="Auto update" />
-        <button type="button" class="lp-create" onClick={() => commitNow(draft)}>
-          Create
-        </button>
+        <div class="lp-footer-actions">
+          <button
+            type="button"
+            class="lp-icon-btn"
+            title="Undo (⌘Z)"
+            aria-label="Undo"
+            onClick={() => undo()}
+          >
+            ↶
+          </button>
+          <button
+            type="button"
+            class="lp-icon-btn"
+            title="Redo (⇧⌘Z)"
+            aria-label="Redo"
+            onClick={() => redo()}
+          >
+            ↷
+          </button>
+          <button type="button" class="lp-create" onClick={() => commitNow(draft)}>
+            Create
+          </button>
+        </div>
       </footer>
     </div>
   )

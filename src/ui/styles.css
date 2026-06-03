@@ -325,6 +325,32 @@ body {
   filter: brightness(1.05);
 }
 
+.lp-footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lp-icon-btn {
+  background: transparent;
+  border: 1px solid var(--field-border);
+  border-radius: 5px;
+  color: var(--fg);
+  width: 28px;
+  height: 28px;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lp-icon-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 /* resize handle */
 .app-resize-handle {
   position: fixed;

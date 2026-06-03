@@ -30,7 +30,9 @@ export function NumberField({
 
   const commit = () => {
     const n = Number.parseFloat(draft)
-    if (Number.isFinite(n)) onChange(clamp(n), true)
+    // Only commit a real change — a focus/blur with no edit must not push an
+    // undo entry, and Enter (which blurs) must not double-commit.
+    if (Number.isFinite(n) && clamp(n) !== value) onChange(clamp(n), true)
     setEditing(false)
   }
 
@@ -51,17 +53,21 @@ export function NumberField({
         onKeyDown={(e) => {
           const k = (e as KeyboardEvent).key
           if (k === 'Enter') {
-            commit()
+            // Blur triggers the single commit via onBlur — don't also commit here.
             ;(e.target as HTMLInputElement).blur()
           } else if (k === 'Escape') {
             setEditing(false)
             setDraft(String(value))
           } else if (k === 'ArrowUp') {
             e.preventDefault()
-            onChange(clamp(value + step), true)
+            const nv = clamp(value + step)
+            setDraft(String(nv))
+            onChange(nv, true)
           } else if (k === 'ArrowDown') {
             e.preventDefault()
-            onChange(clamp(value - step), true)
+            const nv = clamp(value - step)
+            setDraft(String(nv))
+            onChange(nv, true)
           }
         }}
       />

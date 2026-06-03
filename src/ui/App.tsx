@@ -5,7 +5,7 @@ import { useLooperConfig } from './hooks/useLooperConfig'
 import { LooperPanel } from './legacy/LooperPanel'
 
 export function App() {
-  const { config, update, undo, redo } = useLooperConfig()
+  const { config, update, undo, redo, setBaseline } = useLooperConfig()
   const [selectionValid, setSelectionValid] = useState(true)
 
   useEffect(() => {
@@ -55,7 +55,13 @@ export function App() {
       {!selectionValid && (
         <div class="selection-warning">Select a single Vector, Shape, Text, or Group</div>
       )}
-      <LooperPanel config={config} update={update} />
+      <LooperPanel
+        config={config}
+        update={update}
+        undo={undo}
+        redo={redo}
+        setBaseline={setBaseline}
+      />
       <ResizeHandle />
     </div>
   )
