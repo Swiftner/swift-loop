@@ -6,15 +6,15 @@ Work validated: the Looper-Legacy panel rebuild · branch `looper-legacy-rebuild
 
 ## Summary
 
-**1 critical · 0 serious · 3 moderate (1 already fixed).** The panel nails the core job — both personas built faithful Looper patterns (grow, fade, diagonal, gradient) by typing values, live, with "Position" naming and no slider-fighting. The one issue that still needs work is the headline one: **undo doesn't reach the panel** (the exact thing Mia reported). The Auto-update switch's unreadable ON-state was found and fixed during the run.
+**1 critical (root-caused & largely fixed) · 0 serious · 3 moderate (1 fixed).** The panel nails the core job — both personas built faithful Looper patterns (grow, fade, diagonal, gradient) by typing values, live, with "Position" naming and no slider-fighting. The run's biggest catch — **"undo does nothing," Mia's exact bug** — was root-caused (a double-commit polluting the undo history) and fixed: a single undo now reverts, plus visible Undo/Redo buttons. The Auto-update switch's unreadable ON-state was also fixed. One undo sub-case (canvas Cmd+Z syncing the panel) remains for a real-Figma session.
 
 ## Recommendations (prioritized)
 
-### 1. CRITICAL — Undo doesn't drive the panel; canvas Cmd+Z and the panel drift
-- **Evidence:** Maja T3. First Ctrl+Z (focus on canvas) did **nothing** — panel and canvas both unchanged. After clicking *into* the panel, Ctrl+Z worked (reverted Opacity 10→100, Scale-H 12→0). **Confirmed in code:** `App.tsx:45` listens for `host:undo`/`host:redo` but **nothing ever emits them** (`grep` across `src` = only the listener). So in real Figma a canvas Cmd+Z reverts the generated nodes (via `figma.commitUndo`) while the panel's `useLooperConfig` state stays put — the sliders and the canvas disagree.
-- **Why it matters:** This is Mia's reported bug ("Jeg kan ikke undo dette"). A designer's focus lives on the canvas, not the panel, so the panel-only Ctrl+Z almost never fires for them.
-- **Fix:** Bridge Figma → panel. Figma doesn't fire undo events, so the panel must re-derive state when the document changes under it: persist the loop config in the group's `pluginData` on each commit, and on `figma.on('documentchange')` / selection change re-read it into `useLooperConfig`. Minimum bar: make panel undo work without requiring panel focus.
-- **Blocks:** Maja/Mia — "undo freely." **Verify in real Figma first.**
+### 1. CRITICAL — "Undo does nothing" — root-caused & FIXED (one part still needs Figma)
+- **Evidence:** Maja T3 + follow-up. A single undo (button or Ctrl+Z) appeared to do nothing. Root cause found by instrumenting: **`NumberField`/`HexField` double-committed** — Enter called `commit()` *and* `blur()`, and `onBlur` committed again, so every edit pushed a **duplicate** undo entry. One undo reverted to the identical duplicate → no visible change. This is almost certainly Mia's "Jeg kan ikke undo dette."
+- **Fix (done, verified in playground):** Enter now only blurs (single commit); fields commit only on a real change. Verified: one Undo reverts Iterations 20→10. Also added **visible Undo/Redo buttons** (undo without needing panel focus) and a `setBaseline` path so flattening a grid→chain doesn't leave a stale undo target.
+- **Still open (needs Figma):** the deeper drift — a Cmd+Z on the *canvas* triggers Figma's native undo (reverts nodes) but the panel doesn't follow, because `App.tsx` listens for `host:undo`/`host:redo` that **nothing emits**. The browser playground mocks canvas undo, so this can only be built/verified in real Figma (persist config in the group's `pluginData`, resync on `documentchange`).
+- **Blocks:** Maja/Mia "undo freely" — the common case (panel undo) now works; canvas-Cmd+Z sync remains for a Figma session.
 
 ### 2. MODERATE — Auto-update switch ON-state was unreadable (low contrast) — FIXED
 - **Evidence:** Maja T1 + Sander T1. The switch *looked* OFF on load, yet typing/chips updated the canvas live. DOM inspection corrected the initial read: `inputChecked: true`, box `is-on`, knob translated right — the toggle **did** reflect state, but in dark theme the ON style was a **light track + white knob** (near-invisible), easily misread as off. (My first-pass "the toggle lies" was a misread of the low-contrast render — corrected here.)
