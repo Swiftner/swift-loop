@@ -24,7 +24,8 @@ export function App() {
       const isTextEntry =
         tag === 'TEXTAREA' ||
         t?.isContentEditable ||
-        (tag === 'INPUT' && /^(text|number|search|email|url|tel|password)$/.test((t as HTMLInputElement).type))
+        (tag === 'INPUT' &&
+          /^(text|number|search|email|url|tel|password)$/.test((t as HTMLInputElement).type))
       if (isTextEntry) return
       if (key === 'z' && !e.shiftKey) {
         e.preventDefault()

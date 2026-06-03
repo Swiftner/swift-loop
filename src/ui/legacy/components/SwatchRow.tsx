@@ -23,7 +23,17 @@ interface Props {
 
 // Fill / Stroke section: an enable toggle, a from→to hex pair, and (for stroke)
 // a start→end weight pair. Mirrors Looper's Fill (HEX) and Stroke (HEX / px) rows.
-export function SwatchRow({ label, hint, enabled, onEnabled, from, to, onFrom, onTo, weights }: Props) {
+export function SwatchRow({
+  label,
+  hint,
+  enabled,
+  onEnabled,
+  from,
+  to,
+  onFrom,
+  onTo,
+  weights,
+}: Props) {
   return (
     <section class="lp-section">
       <div class="lp-section-head">
@@ -36,8 +46,18 @@ export function SwatchRow({ label, hint, enabled, onEnabled, from, to, onFrom, o
       </div>
       {weights && (
         <div class="lp-weights">
-          <NumberField value={weights.start} min={0} onChange={(v) => weights.onStart(v)} ariaLabel="Stroke weight start" />
-          <NumberField value={weights.end} min={0} onChange={(v) => weights.onEnd(v)} ariaLabel="Stroke weight end" />
+          <NumberField
+            value={weights.start}
+            min={0}
+            onChange={(v) => weights.onStart(v)}
+            ariaLabel="Stroke weight start"
+          />
+          <NumberField
+            value={weights.end}
+            min={0}
+            onChange={(v) => weights.onEnd(v)}
+            ariaLabel="Stroke weight end"
+          />
         </div>
       )}
     </section>

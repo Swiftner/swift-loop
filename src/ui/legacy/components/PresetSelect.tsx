@@ -1,5 +1,5 @@
-import type { LoopConfig } from '../../../shared/types'
 import presetsJson from '../../../shared/presets.json'
+import type { LoopConfig } from '../../../shared/types'
 
 interface PresetEntry {
   name: string

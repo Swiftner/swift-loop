@@ -23,7 +23,10 @@ export function HexField({ value, onChange, ariaLabel }: Props) {
 
   return (
     <span class="lp-hex">
-      <span class="lp-hex-swatch" style={{ background: `#${HEX6.test(value) ? value : '000000'}` }} />
+      <span
+        class="lp-hex-swatch"
+        style={{ background: `#${HEX6.test(value) ? value : '000000'}` }}
+      />
       <input
         class="lp-field lp-hex-input"
         type="text"

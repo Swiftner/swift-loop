@@ -5,7 +5,13 @@ import { NumberField } from './components/NumberField'
 import { PresetSelect } from './components/PresetSelect'
 import { SwatchRow } from './components/SwatchRow'
 import { Toggle } from './components/Toggle'
-import { type LooperParams, applyPreset, DEFAULT_PARAMS, fromConfig, toConfig } from './looper-params'
+import {
+  DEFAULT_PARAMS,
+  type LooperParams,
+  applyPreset,
+  fromConfig,
+  toConfig,
+} from './looper-params'
 
 // The faithful Looper Legacy panel. Owns the editable `draft` (a LooperParams),
 // the Auto-update flag, and the commit gating: when Auto-update is on every
@@ -71,34 +77,61 @@ export function LooperPanel({ config, update }: Props) {
       <section class="lp-section">
         <div class="lp-section-head">
           Position
-          <Toggle checked={draft.posRandom} onChange={(b) => set({ posRandom: b })} label="Random" />
+          <Toggle
+            checked={draft.posRandom}
+            onChange={(b) => set({ posRandom: b })}
+            label="Random"
+          />
         </div>
         <div class="lp-pair">
-          <label class="lp-axis">
+          <div class="lp-axis">
             <span>X</span>
-            <NumberField value={draft.posX} onChange={(v) => set({ posX: v })} ariaLabel="Position X" />
-          </label>
-          <label class="lp-axis">
+            <NumberField
+              value={draft.posX}
+              onChange={(v) => set({ posX: v })}
+              ariaLabel="Position X"
+            />
+          </div>
+          <div class="lp-axis">
             <span>Y</span>
-            <NumberField value={draft.posY} onChange={(v) => set({ posY: v })} ariaLabel="Position Y" />
-          </label>
+            <NumberField
+              value={draft.posY}
+              onChange={(v) => set({ posY: v })}
+              ariaLabel="Position Y"
+            />
+          </div>
         </div>
       </section>
 
       <section class="lp-section">
         <div class="lp-section-head">
           Rotation
-          <Toggle checked={draft.rotationRandom} onChange={(b) => set({ rotationRandom: b })} label="Random" />
+          <Toggle
+            checked={draft.rotationRandom}
+            onChange={(b) => set({ rotationRandom: b })}
+            label="Random"
+          />
         </div>
         <div class="lp-pair">
-          <label class="lp-axis">
+          <div class="lp-axis">
             <span>∟</span>
-            <NumberField value={draft.rotation} step={1} onChange={(v) => set({ rotation: v })} ariaLabel="Rotation" suffix="°" />
-          </label>
-          <label class="lp-axis">
+            <NumberField
+              value={draft.rotation}
+              step={1}
+              onChange={(v) => set({ rotation: v })}
+              ariaLabel="Rotation"
+              suffix="°"
+            />
+          </div>
+          <div class="lp-axis">
             <span>+/-</span>
-            <NumberField value={draft.rotationSpread} min={0} onChange={(v) => set({ rotationSpread: v })} ariaLabel="Rotation spread" />
-          </label>
+            <NumberField
+              value={draft.rotationSpread}
+              min={0}
+              onChange={(v) => set({ rotationSpread: v })}
+              ariaLabel="Rotation spread"
+            />
+          </div>
         </div>
       </section>
 
@@ -107,31 +140,57 @@ export function LooperPanel({ config, update }: Props) {
           Scale <span class="lp-hint">(px)</span>
         </div>
         <div class="lp-pair">
-          <label class="lp-axis">
+          <div class="lp-axis">
             <span>W</span>
-            <NumberField value={draft.scaleW} step={1} onChange={(v) => set({ scaleW: v })} ariaLabel="Scale width" />
-          </label>
-          <label class="lp-axis">
+            <NumberField
+              value={draft.scaleW}
+              step={1}
+              onChange={(v) => set({ scaleW: v })}
+              ariaLabel="Scale width"
+            />
+          </div>
+          <div class="lp-axis">
             <span>H</span>
-            <NumberField value={draft.scaleH} step={1} onChange={(v) => set({ scaleH: v })} ariaLabel="Scale height" />
-          </label>
+            <NumberField
+              value={draft.scaleH}
+              step={1}
+              onChange={(v) => set({ scaleH: v })}
+              ariaLabel="Scale height"
+            />
+          </div>
         </div>
       </section>
 
       <section class="lp-section">
         <div class="lp-section-head">
           Opacity <span class="lp-hint">(%)</span>
-          <Toggle checked={draft.opacityRandom} onChange={(b) => set({ opacityRandom: b })} label="Random" />
+          <Toggle
+            checked={draft.opacityRandom}
+            onChange={(b) => set({ opacityRandom: b })}
+            label="Random"
+          />
         </div>
         <div class="lp-pair">
-          <label class="lp-axis">
+          <div class="lp-axis">
             <span>◐</span>
-            <NumberField value={draft.opacityStart} min={0} max={100} onChange={(v) => set({ opacityStart: v })} ariaLabel="Opacity start" />
-          </label>
-          <label class="lp-axis">
+            <NumberField
+              value={draft.opacityStart}
+              min={0}
+              max={100}
+              onChange={(v) => set({ opacityStart: v })}
+              ariaLabel="Opacity start"
+            />
+          </div>
+          <div class="lp-axis">
             <span>◐</span>
-            <NumberField value={draft.opacityEnd} min={0} max={100} onChange={(v) => set({ opacityEnd: v })} ariaLabel="Opacity end" />
-          </label>
+            <NumberField
+              value={draft.opacityEnd}
+              min={0}
+              max={100}
+              onChange={(v) => set({ opacityEnd: v })}
+              ariaLabel="Opacity end"
+            />
+          </div>
         </div>
       </section>
 

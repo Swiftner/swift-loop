@@ -101,19 +101,24 @@ export function toConfig(p: LooperParams): LoopConfig {
     scaleX: { ...num(0), ramp: ramp2(0, p.scaleW * span) },
     scaleY: { ...num(0), ramp: ramp2(0, p.scaleH * span) },
     opacity: { ...num(p.opacityStart), ramp: ramp2(p.opacityStart, p.opacityEnd) },
-    opacityRandom: p.opacityRandom ? const1(Math.abs(p.opacityStart - p.opacityEnd) || 20) : undefined,
+    opacityRandom: p.opacityRandom
+      ? const1(Math.abs(p.opacityStart - p.opacityEnd) || 20)
+      : undefined,
     columnRandom: p.posRandom ? const1(Math.abs(p.posX)) : undefined,
     rowRandom: p.posRandom ? const1(Math.abs(p.posY)) : undefined,
     fill: p.fillEnabled ? colorRamp2(p.fillFrom, p.fillTo) : { stops: [] },
     stroke: p.strokeEnabled ? colorRamp2(p.strokeFrom, p.strokeTo) : { stops: [] },
-    strokeWeight: { ...num(p.strokeWeightStart), ramp: ramp2(p.strokeWeightStart, p.strokeWeightEnd) },
+    strokeWeight: {
+      ...num(p.strokeWeightStart),
+      ramp: ramp2(p.strokeWeightStart, p.strokeWeightEnd),
+    },
   }
 }
 
 const lastStop = (r: NumericRamp | undefined, fallback = 0): number =>
-  r && r.stops.length ? r.stops[r.stops.length - 1].value : fallback
+  r?.stops.length ? r.stops[r.stops.length - 1].value : fallback
 const firstStop = (r: NumericRamp | undefined, fallback = 0): number =>
-  r && r.stops.length ? r.stops[0].value : fallback
+  r?.stops.length ? r.stops[0].value : fallback
 const rampHex = (r: ColorRamp, idx: number, fallback: string): string =>
   r.stops[idx] ? rgbToHex(r.stops[idx].color) : fallback
 

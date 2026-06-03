@@ -39,7 +39,12 @@ describe('toConfig', () => {
 
   it('Fill disabled → empty ramp; enabled → 2 stops at 0 and 1', () => {
     expect(toConfig({ ...DEFAULT_PARAMS, fillEnabled: false }).fill.stops).toEqual([])
-    const on = toConfig({ ...DEFAULT_PARAMS, fillEnabled: true, fillFrom: 'FF0000', fillTo: '0000FF' })
+    const on = toConfig({
+      ...DEFAULT_PARAMS,
+      fillEnabled: true,
+      fillFrom: 'FF0000',
+      fillTo: '0000FF',
+    })
     expect(on.fill.stops).toHaveLength(2)
     expect(on.fill.stops[0].position).toBe(0)
     expect(on.fill.stops[1].position).toBe(1)

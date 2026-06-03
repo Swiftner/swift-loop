@@ -43,7 +43,7 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--fg);
-  font: 12px/1.4 "Inter", -apple-system, system-ui, sans-serif;
+  font: 12px / 1.4 "Inter", -apple-system, system-ui, sans-serif;
 }
 
 .app {
