@@ -1,17 +1,11 @@
-import { useEffect, useRef, useState } from 'preact/hooks'
+import { useEffect, useState } from 'preact/hooks'
 import type { LoopConfig } from '../../shared/types'
 import { IterationChips } from './components/IterationChips'
 import { NumberField } from './components/NumberField'
 import { PresetSelect } from './components/PresetSelect'
 import { SwatchRow } from './components/SwatchRow'
 import { Toggle } from './components/Toggle'
-import {
-  DEFAULT_PARAMS,
-  type LooperParams,
-  applyPreset,
-  fromConfig,
-  toConfig,
-} from './looper-params'
+import { type LooperParams, applyPreset, fromConfig, toConfig } from './looper-params'
 
 // The faithful Looper Legacy panel. Owns the editable `draft` (a LooperParams),
 // the Auto-update flag, and the commit gating: when Auto-update is on every
@@ -24,23 +18,20 @@ interface Props {
 }
 
 export function LooperPanel({ config, update }: Props) {
-  const [draft, setDraft] = useState<LooperParams>(DEFAULT_PARAMS)
+  const [draft, setDraft] = useState<LooperParams>(() => fromConfig(config))
   const [autoUpdate, setAutoUpdate] = useState(true)
-  const booted = useRef(false)
 
-  // Establish the Looper-faithful chain baseline once (commit:false = no undo
-  // entry). A persisted config, if any, arrives via loop:initial-config right
-  // after and overrides it through the [config] effect below.
-  useEffect(() => {
-    if (booted.current) return
-    booted.current = true
-    update(toConfig(DEFAULT_PARAMS), false)
-  }, [update])
-
-  // Re-sync the fields whenever the committed config changes underneath us.
+  // Keep the fields in sync with the committed config (undo / redo / selection /
+  // preset). Legacy only ever makes a chain, so if the loaded or default config
+  // is a grid (rows or layers > 1), flatten it to a chain — the canvas then
+  // matches the panel. The push is commit:false (no undo entry) and
+  // self-terminating: the flattened config has rows = 1.
   useEffect(() => {
     setDraft(fromConfig(config))
-  }, [config])
+    if (config.rows > 1 || (config.layers ?? 1) > 1) {
+      update(toConfig(fromConfig(config)), false)
+    }
+  }, [config, update])
 
   // Apply a draft edit. Always a commit from the fields' POV; whether it reaches
   // the host now depends on Auto-update.
