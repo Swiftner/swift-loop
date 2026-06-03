@@ -6,7 +6,7 @@ Work validated: the Looper-Legacy panel rebuild · branch `looper-legacy-rebuild
 
 ## Summary
 
-**1 critical · 1 serious · 3 moderate.** The panel nails the core job — both personas built faithful Looper patterns (grow, fade, diagonal, gradient) by typing values, live, with "Position" naming and no slider-fighting. Two issues undercut it: **undo doesn't reach the panel** (the exact thing Mia reported), and the **Auto-update toggle displays the wrong state** (reads OFF while updating live), which erodes trust for everyone.
+**1 critical · 0 serious · 3 moderate (1 already fixed).** The panel nails the core job — both personas built faithful Looper patterns (grow, fade, diagonal, gradient) by typing values, live, with "Position" naming and no slider-fighting. The one issue that still needs work is the headline one: **undo doesn't reach the panel** (the exact thing Mia reported). The Auto-update switch's unreadable ON-state was found and fixed during the run.
 
 ## Recommendations (prioritized)
 
@@ -16,11 +16,10 @@ Work validated: the Looper-Legacy panel rebuild · branch `looper-legacy-rebuild
 - **Fix:** Bridge Figma → panel. Figma doesn't fire undo events, so the panel must re-derive state when the document changes under it: persist the loop config in the group's `pluginData` on each commit, and on `figma.on('documentchange')` / selection change re-read it into `useLooperConfig`. Minimum bar: make panel undo work without requiring panel focus.
 - **Blocks:** Maja/Mia — "undo freely." **Verify in real Figma first.**
 
-### 2. SERIOUS — The Auto-update toggle lies about its state
-- **Evidence:** Maja T1 + Sander T1. On fresh load the switch renders **OFF** (knob left — zoomed to confirm), yet tapping a chip and typing values **updated the canvas live**, which only happens when auto-update is **on**. So `autoUpdate` is `true` (correct default, matches Looper) but the switch paints the off position.
-- **Why it matters:** Both personas were confused ("the switch says off but it's clearly updating"); a newcomer can't tell whether they need to press Create.
-- **Fix:** The switch's visual isn't reflecting `checked` — fix the `.lp-toggle-switch` checked-state styling in `styles.css` (the `input:checked + .lp-toggle-box` knob transform) so the knob position tracks `autoUpdate`.
-- **Blocks:** trust/comprehension for both personas.
+### 2. MODERATE — Auto-update switch ON-state was unreadable (low contrast) — FIXED
+- **Evidence:** Maja T1 + Sander T1. The switch *looked* OFF on load, yet typing/chips updated the canvas live. DOM inspection corrected the initial read: `inputChecked: true`, box `is-on`, knob translated right — the toggle **did** reflect state, but in dark theme the ON style was a **light track + white knob** (near-invisible), easily misread as off. (My first-pass "the toggle lies" was a misread of the low-contrast render — corrected here.)
+- **Fix (done):** ON track now uses the accent blue (`var(--accent)`) with a state-driven `is-on` class — high-contrast, unambiguous. Commit on branch.
+- **Blocks:** trust/comprehension — resolved.
 
 ### 3. MODERATE — No fit-to-view; long/large chains run off-canvas
 - **Evidence:** Maja T1–T2. 20 copies (and again once scaled) ran off the right edge with no way to frame the whole result in the playground.
