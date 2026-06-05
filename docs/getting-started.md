@@ -6,6 +6,8 @@ Okay, so you've never used Swift Loop. Let's fix that.
 
 Not the browser version. Plugins loaded from a manifest only work in the desktop app. Sorry. Get it [here](https://www.figma.com/downloads/) if you don't have it.
 
+(No Figma at all? Try the [browser playground](https://swift-loop.com/) — it's the same panel, running on a fake canvas.)
+
 ## Install the plugin
 
 Three steps.
@@ -20,54 +22,46 @@ That's the whole install. Swift Loop now lives in *Plugins, Development, Swift L
 
 ## Your first loop
 
-Draw a shape. Any shape. A 24x24 rectangle is a great starter. Just one of them.
+Draw a shape. Any shape. A 24×24 rectangle is a great starter. Just one of them.
 
 Select it.
 
 Open *Plugins, Development, Swift Loop*.
 
-The plugin window opens, and you'll see your shape sitting in the preview area on the right.
-
-## Drag a slider
-
-Look at the **Column** section. There's an `X step` showing `60` (and a matching `Y step` in **Row**). Drag `X step`. Watch the preview.
-
-You should see 100 copies of your shape arranged in a 10x10 grid, each one 60 pixels further along the X axis than the last.
+The panel opens. Type `20` into **Position X** (or just tap an Iterations chip). Copies of your shape march across the canvas, each one 20 pixels along from the last.
 
 Welcome to looping.
 
-## Try a preset
+## The controls, top to bottom
 
-Look at the **Presets** section. Click one. Try "Spin". The whole UI rearranges to show that preset's settings, and the preview updates instantly.
+**Iterations** is how many copies you get. Tap a chip (5 to 40) or type any number into the field.
 
-This is the fastest way to learn what's possible. Click through the presets. Read what changed. Mess with it.
+**Presets** is a dropdown with a few ready-made starting points — pick one and the panel fills itself in. A great way to see how the controls combine.
 
-## Try the Library
+**Position** moves each copy. `X 40, Y 0` is a horizontal line; `X 20, Y 20` is a diagonal. Flip on **Random** to scatter instead.
 
-Below Presets, you'll find the **Library**. 37 patterns by name. Click **Phyllotaxis** and you should see a sunflower. Click **Halftone** and you'll get a dot pattern that fades from the center.
+**Rotation** turns each copy a little more than the one before — `10°` over 36 copies is a full circle. The `+/-` field adds a random wobble on top, and **Random** makes every angle a roll of the dice.
 
-Library patterns are like presets, but they use formulas under the hood. Which means they can do things sliders can't, like spirals and waves and golden-angle phyllotaxis.
+**Scale** grows or shrinks each copy, in pixels. `W 4, H 4` means every copy is 4 pixels wider and taller than the last.
 
-## Commit it
+**Opacity** fades the loop from a start percentage to an end one. `100 → 0` is the classic comet tail. **Random** gives each copy its own opacity.
 
-Found something you like? Click **Generate** at the bottom.
+**Fill** blends each copy's colour from one HEX value to another across the loop. Tick the checkbox to turn it on, then type your two colours.
 
-This is the moment the loop becomes real geometry on your canvas. Up until you click Generate, the preview is just a preview. Closing the plugin without generating throws it away.
+**Stroke** does the same for outlines — two HEX colours, plus a start and end stroke width in pixels.
 
-After Generate:
+## Auto update, Create, and undo
 
-The loop is now a Group on your canvas, fully editable.
+At the bottom of the panel:
 
-Cmd/Ctrl+Z still works, all the way back to where you started.
+**Auto update** starts on, which means the canvas follows along as you type. Turn it off if you want to set up several values quietly and apply them in one go.
 
-You can re-open Swift Loop on the original shape (not the group) to try a different version.
+**Create** commits the panel's current settings. With Auto update off, this is the button that makes things happen.
+
+**Undo / Redo** — the ↶ ↷ buttons, or Cmd/Ctrl+Z and Shift+Cmd/Ctrl+Z. Every change is one undo step. Iterate freely.
 
 ## What next
 
-Keep clicking around. Honestly, that's the best way. If you want to read more:
+Honestly? Just play. Twenty copies, a bit of rotation, a fade — you'll be making nice things within a minute.
 
-[Controls reference](./controls.md) for what every slider does.
-
-[Recipe cookbook](./recipes.md) for things to try making.
-
-[Pattern gallery](./pattern-gallery.md) for the built-in library, illustrated.
+If something looks off, the [troubleshooting guide](./troubleshooting.md) covers the usual suspects.

@@ -1,7 +1,7 @@
 {
   "$schema": "https://biomejs.dev/schemas/1.9.0/schema.json",
   "files": {
-    "ignore": ["build/**", "node_modules/**", "src/ui/library/index.ts", "src/ui/styles.d.css.ts"]
+    "ignore": ["build/**", "node_modules/**", "src/ui/styles.d.css.ts"]
   },
   "formatter": {
     "enabled": true,

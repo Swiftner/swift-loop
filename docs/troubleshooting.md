@@ -20,64 +20,36 @@ You selected a Frame or something Figma doesn't let plugins clone directly.
 
 Fix: select exactly one Vector, Shape, Text node, or Group, then come back.
 
-## Preview looks great, canvas looks different
+## I typed a value and nothing happened
 
-A few things this could be:
+Check the **Auto update** switch at the bottom of the panel. When it's off, edits stay in the panel until you press **Create**. When it's on (blue), the canvas should follow every change.
 
-You forgot to click Generate. The preview is just a preview until you do.
+## Undo isn't doing what I expect
 
-You hit Generate but the new group is outside your viewport. Press `Shift+1` or `Shift+2` to fit, then look for it.
+Inside the panel, the ↶ button (or Cmd/Ctrl+Z) steps back one change at a time — one undo, one step.
 
-You re-opened Swift Loop on the generated group instead of the original. Re-opening on the group will read its bounds as the source, which is usually not what you want. Select the original shape instead.
-
-## I generated a loop and now I want to edit it
-
-You can. The generated loop is a Group of real Figma nodes, fully editable. You can also:
-
-Undo (Cmd/Ctrl+Z) until the generated group is gone, then re-open Swift Loop on the original to make a different version.
-
-Select the original (not the generated group) and run Swift Loop again. Generate creates a fresh group, it doesn't replace the old one. You may want to delete the previous group first.
+One thing to know: pressing Cmd/Ctrl+Z **on the canvas** (with the plugin window unfocused) runs Figma's own undo. The nodes revert, but the panel's fields may not follow until you click back into the plugin. If the panel and canvas ever disagree, change any value once and they'll fall back in sync.
 
 ## Performance gets weird at high counts
 
-Swift Loop renders all clones in real time, so once you get past a few thousand cells, your machine will start to feel it. Practical limits:
+Swift Loop applies all copies in real time, so once you get past a few thousand, your machine will start to feel it. Practical limits:
 
-Around 1000 cells, totally fine on any machine.
+Around 1,000 copies, totally fine on any machine.
 
-Around 5000, still fine on most.
+Around 5,000, still fine on most.
 
-Past 10000, you'll feel it. Drop the count, or use a simpler pattern.
+Past 10,000, you'll feel it. Drop the count.
 
-If you need a big arrangement, build it at smaller scale, generate, then scale the output group up on the canvas.
+If you need a big arrangement, build it at a smaller count first, then duplicate the result on the canvas.
 
-## "Formula error" on a property
+## My colours aren't showing up
 
-In `fx` mode, if Swift Loop can't evaluate a formula, you'll see a red error message under the input. The clone for that property keeps its last working value while you sort it out.
+The Fill and Stroke rows each have a checkbox — the colours only apply when it's ticked. And the fields want plain HEX (`FF6B00`), with or without the `#`.
 
-Common causes:
+## Where did the patterns / formulas / library go?
 
-Missing parenthesis or unbalanced parens.
-
-Typo in a function name. Check the spelling against the [formulas reference](./formulas.md).
-
-Reference to a variable that doesn't exist. Only the listed variables (`i`, `n`, `c`, `r`, `t`, `tx`, `ty`, `w`, `h`, `seed`, `cols`, `rows`) are available.
-
-Division by zero, or `log` of a non-positive number.
-
-The fix is almost always a typo. Read carefully.
-
-## Sliders feel jumpy
-
-If you're working on a laptop trackpad and the sliders are too sensitive, you can use the keyboard. Click any number, then use arrow keys to nudge. Shift+arrow for bigger steps. The numbers are also draggable horizontally (the `ScrubNum` control), which is sometimes more precise than the slider itself.
-
-## My snapshots disappeared
-
-Snapshots are stored in the plugin's local storage. They persist across plugin sessions but they're tied to the device. If you switched machines, or cleared Figma's plugin storage, they're gone. Sorry.
-
-## I made something cool and want to save it as a pattern
-
-Save it as a Snapshot first (it's automatic on reroll). Then, if you want to share it with others, package it as a library pattern. See [Contributing](../CONTRIBUTING.md) for how.
+If you used an earlier Swift Loop with a pattern library, custom formulas, and modulation: that direction is paused, not deleted. We've gone back to the focused, faithful Looper panel first. The full version lives on the [`main-archive-2026-06`](https://github.com/Swiftner/swift-loop/tree/main-archive-2026-06) branch.
 
 ## Still stuck?
 
-Open an issue on the [GitHub repo](https://github.com/Swiftner/swift-loop/issues). Include a screenshot of the preview and (if it's a formula thing) the exact formula text. We don't bite.
+Open an issue on the [GitHub repo](https://github.com/Swiftner/swift-loop/issues). Include a screenshot of what you're seeing and what you expected. We don't bite.

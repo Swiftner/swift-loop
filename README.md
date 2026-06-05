@@ -1,30 +1,26 @@
 # Swift Loop
 
-**Turn one shape into a hundred. In Figma. While you drag.**
+**Turn one shape into a hundred. In Figma. While you type.**
 
-Swift Loop is a Figma plugin for making patterns. Spirals, grids, waves, phyllotaxis, halftone, hex tiles, basically anything you can describe with a little math. Pick a shape, pick a pattern, drag a slider, and watch it bloom in real time.
+Swift Loop is a faithful rebuild of the classic [Looper](https://github.com/kuldar/figma-looper) plugin — same panel, same controls, same instant "oh that's nice" — on a modern engine that keeps up with today's Figma.
 
 You can play with it right now, no Figma required:
 
-→ **[Live preview in your browser](https://swiftner.github.io/swift-loop/)**
+→ **[Live playground in your browser](https://swift-loop.com/)**
 
 Or jump straight to the real thing:
 
 → **[Install in Figma](https://github.com/Swiftner/swift-loop/releases/latest)**
 
-## Why another loop plugin?
+## Why rebuild Looper?
 
-Because the original [Looper](https://github.com/kuldar/figma-looper) was lovely, and it's been quiet for a while. The Figma Plugin API has moved on, dynamic-page is the new normal, and there were a few things we kept wishing for:
+Because the original was lovely, and it's been quiet for a while. The Figma Plugin API has moved on — dynamic-page is the new normal — and the old plugin has started to creak. Swift Loop keeps the part everyone loved:
 
-A **live preview** that re-renders as you drag, so you're not stuck in a "Generate, undo, try again" loop.
+**One panel, no learning curve.** Iterations, Position, Rotation, Scale, Opacity, Fill, Stroke. If you've used Looper, you already know Swift Loop.
 
-**Grids, not just chains.** Set `cols × rows` and watch your shape tile.
+**Live on the canvas.** With Auto-update on, every value you type updates the loop as you go. No generate-undo-retry cycle.
 
-**Spirals without a math degree.** A **Spiral** ramp curls a line into a spiral or swirls a grid, no formula required — and because it's a ramp you can make the curl tighten along the loop.
-
-**A formula library** with 38 patterns to start from, browsable right in the UI.
-
-**Custom formulas** for when a slider won't cut it. Drop into `fx` mode and write the math yourself.
+**Undo that works.** One undo, one step back. There are visible Undo/Redo buttons too, so you don't have to trust the keyboard.
 
 Same spirit as Looper. New engine underneath.
 
@@ -49,82 +45,37 @@ bun run build
 
 Then do the same Figma import step on the cloned folder's `manifest.json`.
 
-### Penpot
-
-Swift Loop also builds as a [Penpot](https://penpot.app) plugin from the same source — the engine, UI, and pattern library are shared; only a thin host adapter differs.
-
-```bash
-bun run build:penpot
-```
-
-This emits `build/penpot/` (`manifest.json`, `plugin.js`, `ui.html`, `ui.js`). Serve that folder over HTTP and load the `manifest.json` URL from Penpot's plugin manager. A prebuilt `swift-loop-penpot-vX.Y.Z.zip` is also attached to each [release](https://github.com/Swiftner/swift-loop/releases/latest) — unzip, serve, and load the manifest the same way.
-
-> **Note:** verified in a self-hosted Penpot 2.15 instance — the UI↔plugin bridge and rotation behave correctly. It's a newer target than the Figma build, so if something looks off on a different Penpot version, please open an issue.
-
-
 ## Using it
 
 Pick something on your canvas. A Vector, a Shape, some Text, a Group, whatever you've got.
 
 Run **Plugins, Development, Swift Loop**.
 
-Set columns and rows. Leave rows at 1 if you want a line. Crank both if you want a grid. Bump the **Angle** slider a few degrees and the line curls into a spiral, the grid swirls.
+Set how many copies you want — tap a quick chip (5 to 40) or type a number.
 
-Drag X, Y, rotation, scale, opacity. The preview updates as you go.
+Give the copies somewhere to go: **Position** X/Y is how far each copy moves from the last one. **Rotation** turns each copy a little more than the one before. **Scale** grows (or shrinks) each copy by a few pixels. **Opacity** fades from a start value to an end value. **Fill** and **Stroke** blend from one colour to another across the whole loop.
 
-Want chaos? Open **Modulation** for randomness and sine waves.
+Each section has a **Random** toggle when tidy isn't the vibe.
 
-Want a head start? Hit a **Preset** or browse the **Library**.
+With **Auto update** on (it starts on), the canvas follows along as you type. Turn it off if you'd rather set everything up first and commit with **Create**.
 
-When you're happy, click **Generate** to commit it to the canvas. Undo always works, so iterate freely.
+And undo always works — buttons in the panel, or Cmd/Ctrl+Z.
 
-## The Library
-
-38 patterns ship with the plugin:
-
-Brick, Checker, Comet, Concentric Squares, Confetti, Cube, Curl, Cylinder, Damped Wave, Diamond, Fountain, Grid, Halftone, Heart, Helix, Hex Tile, Isometric, Lissajous, Mandala, Phyllotaxis, Pinwheel, Polar Grid, Radial Burst, Ribbon, Ring Tunnel, Ripple, Rose, Sphere, Spiral, Spiral Tower, Square Spiral, Starburst, Torus, Truchet, Vortex, Wave, Wave Field, Whirl.
-
-Each one is a tiny JSON file in [`library/`](./library) with the formulas inline. No code, no rebuild, just the math. If you want to add your own, it's one file and one PR. See [CONTRIBUTING.md](./CONTRIBUTING.md) for the schema.
+For the longer tour: [Getting started](./docs/getting-started.md).
 
 ## Docs
 
-If you want the full tour:
-
-- [Getting started](./docs/getting-started.md) for first-time setup.
-- [Controls reference](./docs/controls.md) for every slider, in plain language.
-- [Pattern gallery](./docs/pattern-gallery.md) for what each built-in pattern looks like and when to reach for it.
-- [Recipe cookbook](./docs/recipes.md) for "I want to make X" with step-by-step settings.
-- [Modulation](./docs/modulation.md) for randomness and sine waves.
-- [Formulas for designers](./docs/formulas.md) for `fx` mode without the math-textbook vibes.
+- [Getting started](./docs/getting-started.md) for install and your first loop.
 - [Troubleshooting](./docs/troubleshooting.md) for when things look weird.
+- [Changelog](./CHANGELOG.md) for what landed in each release.
 
-And one for the robots:
+## Looking for the formula version?
 
-- [Pattern authoring guide for LLMs](./docs/llm-pattern-guide.md). Paste this into Claude or ChatGPT and it'll help you write new library patterns from a plain-English description.
-- [Changelog](./CHANGELOG.md). What landed in each release.
-
-## Custom formulas
-
-Click the `fx` pill in the top-right of the UI and each property turns into a math expression you can edit live:
-
-```
-x        = cos(t * TAU) * 200
-y        = sin(t * TAU) * 200
-rotation = t * 360
-scale    = 0.4 + 0.6 * sin(t * PI)
-```
-
-You can use: `i` (index), `n` (total), `c` (column), `r` (row), `l` (layer), `cols`, `rows`, `layers`, `t` (0 to 1), `tx`, `ty`, `tz` (0 to 1 across layers), `w`, `h`, `seed`.
-
-Functions: `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `atan2`, `sqrt`, `pow`, `exp`, `log`, `abs`, `min`, `max`, `floor`, `ceil`, `round`, `mod`, `rand()`.
-
-Constants: `PI`, `E`, `TAU`.
-
-If you've used Desmos or written a shader, you already know the dialect.
+An earlier direction of Swift Loop grew grids, custom formulas, modulation, and a 38-pattern library. We've set it aside to ship the focused Looper experience first — the whole thing is preserved on the [`main-archive-2026-06`](https://github.com/Swiftner/swift-loop/tree/main-archive-2026-06) branch if you want to explore it.
 
 ## Contributing
 
-PRs welcome. Patterns especially. If you've got a layout you keep redrawing by hand, that's a contribution waiting to happen. See [CONTRIBUTING.md](./CONTRIBUTING.md).
+PRs welcome. See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## License
 
@@ -138,4 +89,4 @@ Standing on shoulders:
 
 [**Looper Legacy**](https://github.com/girafic/figma-looper), a fork by [Stas Haas](https://github.com/girafic) that kept it alive.
 
-**Swift Loop**, modernized, gridded, and formula-fied by [Swiftner](https://swiftner.com).
+**Swift Loop**, rebuilt for modern Figma by [Swiftner](https://swiftner.com).

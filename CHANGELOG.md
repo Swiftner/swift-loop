@@ -4,6 +4,13 @@ All notable changes to Swift Loop. Versions follow SemVer; the [v0.x.y] anchor l
 
 ## [Unreleased]
 
+### Changed
+- **Back to Looper.** Swift Loop is now a faithful rebuild of the classic Looper panel: Iterations, Presets, Position, Rotation, Scale, Opacity, Fill and Stroke, with Auto-update, Create, and working single-step Undo/Redo. The formula-flavoured direction (grids, custom `fx` formulas, modulation, the 38-pattern library, the experimental Penpot build) is set aside, preserved in full on the [`main-archive-2026-06`](https://github.com/Swiftner/swift-loop/tree/main-archive-2026-06) branch.
+
+### Fixed
+- **"Undo does nothing."** Number and hex fields double-committed on Enter (commit + blur-commit), so each edit pushed a duplicate undo entry and one undo appeared to do nothing. Fields now commit once, and only on a real change.
+- The Auto-update switch's ON state was nearly invisible in dark theme; it now uses the accent colour.
+
 ## [v0.3.0] — 2026-05-26
 
 ### Added

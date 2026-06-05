@@ -4,7 +4,7 @@ contact_links:
     url: https://github.com/Swiftner/swift-loop/security/advisories/new
     about: Found a security issue? Please report it privately, not as a public issue.
   - name: Try it in your browser
-    url: https://swiftner.github.io/swift-loop/
+    url: https://swift-loop.com/
     about: Play with the live preview before filing an issue — it might already do what you want.
   - name: Looper (the original)
     url: https://github.com/kuldar/figma-looper

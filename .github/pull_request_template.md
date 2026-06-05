@@ -1,8 +1,3 @@
-<!--
-Adding a new pattern to the library? Use the formula template instead:
-?template=new-formula.md
--->
-
 ### What does this change?
 <!-- One or two sentences. Plain English is fine. -->
 

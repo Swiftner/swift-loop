@@ -1,56 +1,35 @@
 # Contributing to Swift Loop
 
-Pull requests welcome. By a wide margin, the most useful thing you can do is **add a pattern to the library**. We'd love that.
+Pull requests welcome. Small ones especially — a fixed typo, a clearer label, a bug squashed.
 
-## Adding a pattern
+## Getting set up
 
-Anyone can do this. There's no TypeScript and no build step, just one JSON file.
-
-1. Fork this repo.
-2. Make a new file at `library/<id>.json`. The `<id>` is a lowercase, hyphenated slug, like `radial-burst` or `flower-of-life` or `vortex`.
-3. Fill it in using the schema below. The fastest way to learn the shape is to copy [`library/radial-burst.json`](./library/radial-burst.json) and start fiddling.
-4. Run `bun run test library` to validate (this is what CI runs).
-5. Open a PR using the new-formula template.
-
-If you'd rather have an LLM help you, paste [`docs/llm-pattern-guide.md`](./docs/llm-pattern-guide.md) into your chat of choice, describe what you want, and let it do the math.
-
-### Schema
-
-```json
-{
-  "id": "my-pattern",
-  "name": "My Pattern",
-  "description": "One sentence. What does it look like?",
-  "tags": ["radial", "organic"],
-  "author": "@yourhandle",
-  "cols": 24,
-  "rows": 1,
-  "formulas": {
-    "x": "x = ...",
-    "y": "y = ...",
-    "rotation": "rotation = ..."
-  }
-}
+```bash
+git clone https://github.com/Swiftner/swift-loop.git
+cd swift-loop
+bun install
+bun run build
 ```
 
-### What you can use in formulas
+Import the repo's `manifest.json` into Figma desktop (*Plugins, Development, Import plugin from manifest…*) to run your build, or use the browser playground:
 
-Variables: `i` (linear index), `n` (total cells), `c` (column), `r` (row), `cols`, `rows`, `t` (i/(n-1), 0 to 1), `tx`, `ty`, `w` (source width), `h` (source height), `seed`.
+```bash
+bun run dev
+```
 
-Functions: `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `atan2`, `sqrt`, `pow`, `exp`, `log`, `abs`, `min`, `max`, `floor`, `ceil`, `round`, `mod`, `rand`.
+That builds everything and serves the playground at `http://localhost:4173/` — the real panel and engine on a fake canvas, no Figma needed.
 
-Constants: `PI`, `E`, `TAU`.
+## Before you open a PR
 
-### Quality bar
+```bash
+bun run lint
+bun run test
+```
 
-CI checks that your formula parses and evaluates without errors. A human then takes a look and asks:
+Both should be clean. If you changed behaviour, give the relevant doc a quick look too — the docs are short on purpose, so it's usually a one-line edit.
 
-Does it render coherently at `seed=1`?
+## A note on scope
 
-Is it meaningfully different from what's already in the library?
-
-Does the description match what the eye actually sees?
-
-That's the whole bar. Don't overthink it. If it's pretty and it parses, it's in.
+Swift Loop is deliberately a faithful rebuild of the classic Looper panel. If your idea adds a new control or a new concept to the panel, open an issue first so we can talk about it — it might be wonderful, and it might belong in the [formula-flavoured branch](https://github.com/Swiftner/swift-loop/tree/main-archive-2026-06) instead.
 
 Happy looping.
