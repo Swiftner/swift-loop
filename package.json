@@ -1,6 +1,6 @@
 {
   "name": "swift-loop",
-  "version": "0.5.0",
+  "version": "0.0.1",
   "description": "Turn one shape into a hundred. A faithful rebuild of the classic Looper plugin for modern Figma.",
   "license": "ISC",
   "type": "module",
