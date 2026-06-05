@@ -1,6 +1,0 @@
-{
-  "name": "Swift Loop",
-  "description": "Turn one shape into a hundred — spirals, grids, waves, and anything you can describe with a little math.",
-  "code": "plugin.js",
-  "permissions": ["content:read", "content:write", "allow:localstorage", "allow:downloads"]
-}

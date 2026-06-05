@@ -451,15 +451,6 @@
         cursor: pointer;
       }
       .menu-item:hover { background: var(--accent-tint); color: var(--accent-ink); }
-      /* Download menu sits at the left of the topbar, so its list opens left-aligned. */
-      #download-menu .menu-list { left: 0; right: auto; }
-      .menu-item-tag {
-        margin-left: 6px;
-        font-size: 9px;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        color: var(--muted);
-      }
       .menu-item .kbd {
         float: right;
         font-family: var(--mono);
@@ -518,21 +509,12 @@
 
         <input id="shape-upload" type="file" accept=".svg,image/svg+xml,image/png,image/jpeg,image/webp" multiple hidden />
 
-        <div class="menu" id="download-menu">
-          <button id="download-btn" class="btn-ghost is-accent" type="button" aria-haspopup="menu" aria-expanded="false" title="Download the Swift Loop plugin">
-            <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
-              <path d="M5.5 1.5v6.5m0 0L2.75 5.25M5.5 8L8.25 5.25M2 9.5h7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Get the plugin
-            <svg width="8" height="8" viewBox="0 0 8 8" fill="none" aria-hidden="true" style="margin-left: 2px;">
-              <path d="M1.5 3L4 5.5 6.5 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-          <div class="menu-list" role="menu">
-            <a class="menu-item" role="menuitem" href="https://github.com/Swiftner/swift-loop/releases/latest/download/swift-loop-latest.zip" title="Figma plugin (.zip)">Figma</a>
-            <a class="menu-item" role="menuitem" href="https://github.com/Swiftner/swift-loop/releases/latest/download/swift-loop-penpot-latest.zip" title="Penpot plugin (.zip) — experimental">Penpot <span class="menu-item-tag">beta</span></a>
-          </div>
-        </div>
+        <a id="download-btn" class="btn-ghost is-accent" href="https://github.com/Swiftner/swift-loop/releases/latest/download/swift-loop-latest.zip" title="Download the Swift Loop plugin for Figma (.zip)">
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
+            <path d="M5.5 1.5v6.5m0 0L2.75 5.25M5.5 8L8.25 5.25M2 9.5h7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Get the plugin
+        </a>
 
         <div class="group" role="group" aria-label="Zoom">
           <button id="zoom-out" class="btn-ghost" type="button" title="Zoom out" aria-label="Zoom out">

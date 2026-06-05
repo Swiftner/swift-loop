@@ -692,20 +692,6 @@ exportMenu.addEventListener('click', (e) => {
   void exportCanvas(kind as 'svg' | 'png' | 'jpg')
 })
 
-// Plugin download dropdown (Figma / Penpot). The items are plain links, so the
-// browser handles the download; we only manage open/close, like the export menu.
-const downloadMenu = document.getElementById('download-menu')
-const downloadBtn = document.getElementById('download-btn')
-downloadBtn?.addEventListener('click', (e) => {
-  e.stopPropagation()
-  const open = downloadMenu?.classList.toggle('is-open')
-  downloadBtn.setAttribute('aria-expanded', open ? 'true' : 'false')
-})
-document.addEventListener('click', () => {
-  downloadMenu?.classList.remove('is-open')
-  downloadBtn?.setAttribute('aria-expanded', 'false')
-})
-
 // ---- Drop-to-add ----------------------------------------------------------
 
 stage.addEventListener('dragover', (e) => {
