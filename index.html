@@ -89,7 +89,10 @@
       .app {
         display: grid;
         grid-template-rows: auto 1fr;
-        grid-template-columns: 1fr 340px;
+        /* minmax(0, …) lets the stage column shrink below the topbar's
+           min-content width, so the sidebar never gets pushed off-screen
+           on narrow viewports (e.g. iPad portrait). */
+        grid-template-columns: minmax(0, 1fr) 340px;
         grid-template-areas:
           "topbar sidebar"
           "stage  sidebar";
@@ -103,6 +106,7 @@
       .topbar {
         grid-area: topbar;
         display: flex;
+        flex-wrap: wrap; /* controls wrap to a second row instead of clipping on narrow viewports */
         align-items: center;
         gap: 10px;
         padding: 8px 12px;
