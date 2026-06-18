@@ -213,6 +213,13 @@ export interface CompiledFormulas {
   opacity: CompiledFormula
 }
 
+// A user-saved preset: a complete config the designer named and stored, so it
+// reappears in the panel across sessions (persisted via the host's storage).
+export interface UserPreset {
+  name: string
+  config: LoopConfig
+}
+
 export type Msg =
   | { type: 'loop:update'; config: LoopConfig; commit: boolean }
   | { type: 'loop:revert' }
@@ -220,6 +227,9 @@ export type Msg =
   | { type: 'loop:initial-config'; config: LoopConfig | null }
   | { type: 'loop:selection-change'; valid: boolean }
   | { type: 'loop:formula-error'; property: string; message: string }
+  | { type: 'loop:user-presets'; presets: UserPreset[] }
+  | { type: 'loop:save-preset'; name: string; config: LoopConfig }
+  | { type: 'loop:delete-preset'; name: string }
 
 export interface Snapshot {
   config: LoopConfig

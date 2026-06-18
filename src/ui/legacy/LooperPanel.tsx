@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'preact/hooks'
-import type { LoopConfig } from '../../shared/types'
+import type { LoopConfig, UserPreset } from '../../shared/types'
 import { IterationChips } from './components/IterationChips'
 import { NumberField } from './components/NumberField'
 import { PresetSelect } from './components/PresetSelect'
 import { SwatchRow } from './components/SwatchRow'
 import { Toggle } from './components/Toggle'
+import { UserPresets } from './components/UserPresets'
 import { type LooperParams, applyPreset, fromConfig, toConfig } from './looper-params'
 
 // The faithful Looper Legacy panel. Owns the editable `draft` (a LooperParams),
@@ -18,9 +19,21 @@ interface Props {
   undo: () => void
   redo: () => void
   setBaseline: (next: LoopConfig) => void
+  userPresets: UserPreset[]
+  onSavePreset: (name: string, config: LoopConfig) => void
+  onDeletePreset: (name: string) => void
 }
 
-export function LooperPanel({ config, update, undo, redo, setBaseline }: Props) {
+export function LooperPanel({
+  config,
+  update,
+  undo,
+  redo,
+  setBaseline,
+  userPresets,
+  onSavePreset,
+  onDeletePreset,
+}: Props) {
   const [draft, setDraft] = useState<LooperParams>(() => fromConfig(config))
   const [autoUpdate, setAutoUpdate] = useState(true)
 
@@ -56,6 +69,11 @@ export function LooperPanel({ config, update, undo, redo, setBaseline }: Props) 
 
   const onApplyPreset = (preset: Partial<LoopConfig>) => commitNow(applyPreset(config, preset))
 
+  // Save the panel's current state (the live draft, including uncommitted edits)
+  // under a name; apply a saved preset by replacing the draft with its config.
+  const onSavePresetNow = (name: string) => onSavePreset(name, toConfig(draft))
+  const onApplyUserPreset = (preset: UserPreset) => onApplyPreset(preset.config)
+
   return (
     <div class="lp">
       <section class="lp-section">
@@ -66,6 +84,12 @@ export function LooperPanel({ config, update, undo, redo, setBaseline }: Props) 
       <section class="lp-section">
         <div class="lp-section-head">Presets</div>
         <PresetSelect onApply={onApplyPreset} />
+        <UserPresets
+          presets={userPresets}
+          onSave={onSavePresetNow}
+          onApply={onApplyUserPreset}
+          onDelete={onDeletePreset}
+        />
       </section>
 
       <section class="lp-section">

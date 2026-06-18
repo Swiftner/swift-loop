@@ -4,13 +4,14 @@
 // Penpot, DOM) imports; everything goes through the adapter and bridge.
 
 import { legacyColorStopToRamp } from '../shared/color'
-import type { LoopConfig } from '../shared/types'
+import type { LoopConfig, UserPreset } from '../shared/types'
 import type { HostAdapter, HostBridge } from './hosts/host'
 import { generate, revert } from './loop/orchestrator'
 import { LastRunStore } from './loop/state'
 
 const STORAGE_KEY = 'swift-loop:last-config'
 const SIZE_KEY = 'swift-loop:ui-size'
+const PRESETS_KEY = 'swift-loop:user-presets'
 
 export async function startHostLoop(adapter: HostAdapter, bridge: HostBridge): Promise<void> {
   const store = new LastRunStore()
@@ -25,6 +26,7 @@ export async function startHostLoop(adapter: HostAdapter, bridge: HostBridge): P
     saved.stroke = legacyColorStopToRamp(saved.stroke as never)
   }
   bridge.send('loop:initial-config', { config: saved ?? null })
+  bridge.send('loop:user-presets', { presets: await loadPresets(adapter) })
   bridge.send('loop:selection-change', selectionPayload(adapter))
 
   adapter.onSelectionChange(() => {
@@ -65,6 +67,30 @@ export async function startHostLoop(adapter: HostAdapter, bridge: HostBridge): P
     adapter.resizePanel(width, height)
     await adapter.storageSet(SIZE_KEY, { width, height })
   })
+
+  // Save the current config under a name. Re-read storage first so concurrent
+  // saves don't clobber each other, replace any preset of the same name, and
+  // broadcast the new list back so every panel reflects it.
+  bridge.on('loop:save-preset', async (payload) => {
+    const { name, config } = payload as { name: string; config: LoopConfig }
+    const clean = name.trim()
+    if (!clean) return
+    const list = await loadPresets(adapter)
+    const next = [...list.filter((p) => p.name !== clean), { name: clean, config }]
+    await adapter.storageSet(PRESETS_KEY, next)
+    bridge.send('loop:user-presets', { presets: next })
+  })
+
+  bridge.on('loop:delete-preset', async (payload) => {
+    const { name } = payload as { name: string }
+    const next = (await loadPresets(adapter)).filter((p) => p.name !== name)
+    await adapter.storageSet(PRESETS_KEY, next)
+    bridge.send('loop:user-presets', { presets: next })
+  })
+}
+
+async function loadPresets(adapter: HostAdapter): Promise<UserPreset[]> {
+  return (await adapter.storageGet<UserPreset[]>(PRESETS_KEY)) ?? []
 }
 
 function selectionPayload(adapter: HostAdapter): {

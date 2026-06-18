@@ -79,6 +79,20 @@ describe('startHostLoop boot handshake', () => {
     expect(sel?.payload).toEqual({ valid: true, width: 40, height: 30 })
   })
 
+  it('broadcasts saved user presets at boot', async () => {
+    const bridge = new FakeBridge()
+    const stored = [{ name: 'Spiral', config: DEFAULT_CONFIG }]
+    await startHostLoop(
+      makeAdapter({
+        storageGet: async (key: string) =>
+          key === 'swift-loop:user-presets' ? (stored as never) : null,
+      }),
+      bridge,
+    )
+    const sent = bridge.sent.find((s) => s.channel === 'loop:user-presets')
+    expect(sent?.payload).toEqual({ presets: stored })
+  })
+
   it('restores panel size from storage when present', async () => {
     const bridge = new FakeBridge()
     const sizes: { w: number; h: number }[] = []
@@ -91,6 +105,92 @@ describe('startHostLoop boot handshake', () => {
       bridge,
     )
     expect(sizes).toContainEqual({ w: 500, h: 600 })
+  })
+})
+
+describe('user presets', () => {
+  it('save-preset persists the named config and re-broadcasts the list', async () => {
+    const bridge = new FakeBridge()
+    const store = new Map<string, unknown>()
+    const adapter = makeAdapter({
+      storageGet: async (key: string) => (store.has(key) ? (store.get(key) as never) : null),
+      storageSet: async (key: string, value: unknown) => {
+        store.set(key, value)
+      },
+    })
+    await startHostLoop(adapter, bridge)
+    const save = bridge.handlers.get('loop:save-preset') as (p: unknown) => Promise<void>
+
+    await save({ name: '  Confetti  ', config: DEFAULT_CONFIG })
+    expect(store.get('swift-loop:user-presets')).toEqual([
+      { name: 'Confetti', config: DEFAULT_CONFIG },
+    ])
+    const last = bridge.sent.filter((s) => s.channel === 'loop:user-presets').pop()
+    expect(last?.payload).toEqual({ presets: [{ name: 'Confetti', config: DEFAULT_CONFIG }] })
+  })
+
+  it('save-preset with the same name overwrites rather than duplicates', async () => {
+    const bridge = new FakeBridge()
+    const store = new Map<string, unknown>()
+    const adapter = makeAdapter({
+      storageGet: async (key: string) => (store.has(key) ? (store.get(key) as never) : null),
+      storageSet: async (key: string, value: unknown) => {
+        store.set(key, value)
+      },
+    })
+    await startHostLoop(adapter, bridge)
+    const save = bridge.handlers.get('loop:save-preset') as (p: unknown) => Promise<void>
+
+    await save({ name: 'A', config: { ...DEFAULT_CONFIG, cols: 2 } })
+    await save({ name: 'A', config: { ...DEFAULT_CONFIG, cols: 9 } })
+    const list = store.get('swift-loop:user-presets') as {
+      name: string
+      config: { cols: number }
+    }[]
+    expect(list).toHaveLength(1)
+    expect(list[0].config.cols).toBe(9)
+  })
+
+  it('ignores a blank preset name', async () => {
+    const bridge = new FakeBridge()
+    const store = new Map<string, unknown>()
+    const adapter = makeAdapter({
+      storageGet: async (key: string) => (store.has(key) ? (store.get(key) as never) : null),
+      storageSet: async (key: string, value: unknown) => {
+        store.set(key, value)
+      },
+    })
+    await startHostLoop(adapter, bridge)
+    const save = bridge.handlers.get('loop:save-preset') as (p: unknown) => Promise<void>
+
+    await save({ name: '   ', config: DEFAULT_CONFIG })
+    expect(store.has('swift-loop:user-presets')).toBe(false)
+  })
+
+  it('delete-preset removes by name and re-broadcasts', async () => {
+    const bridge = new FakeBridge()
+    const store = new Map<string, unknown>([
+      [
+        'swift-loop:user-presets',
+        [
+          { name: 'Keep', config: DEFAULT_CONFIG },
+          { name: 'Drop', config: DEFAULT_CONFIG },
+        ],
+      ],
+    ])
+    const adapter = makeAdapter({
+      storageGet: async (key: string) => (store.has(key) ? (store.get(key) as never) : null),
+      storageSet: async (key: string, value: unknown) => {
+        store.set(key, value)
+      },
+    })
+    await startHostLoop(adapter, bridge)
+    const del = bridge.handlers.get('loop:delete-preset') as (p: unknown) => Promise<void>
+
+    await del({ name: 'Drop' })
+    expect(store.get('swift-loop:user-presets')).toEqual([{ name: 'Keep', config: DEFAULT_CONFIG }])
+    const last = bridge.sent.filter((s) => s.channel === 'loop:user-presets').pop()
+    expect(last?.payload).toEqual({ presets: [{ name: 'Keep', config: DEFAULT_CONFIG }] })
   })
 })
 

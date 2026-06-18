@@ -37,6 +37,38 @@ describe('toConfig', () => {
     ])
   })
 
+  describe('Rotation random', () => {
+    it('off → no rotationRandom', () => {
+      const c = toConfig({ ...DEFAULT_PARAMS, rotationRandom: false, rotationSpread: 20 })
+      expect(c.rotationRandom).toBeUndefined()
+    })
+
+    it('on with a +/- spread → uses the spread amount', () => {
+      const c = toConfig({ ...DEFAULT_PARAMS, rotationRandom: true, rotationSpread: 12 })
+      expect(c.rotationRandom?.stops[0].value).toBe(12)
+    })
+
+    it('on with no spread → falls back to the rotation magnitude', () => {
+      const c = toConfig({
+        ...DEFAULT_PARAMS,
+        rotationRandom: true,
+        rotationSpread: 0,
+        rotation: -30,
+      })
+      expect(c.rotationRandom?.stops[0].value).toBe(30)
+    })
+
+    it('on with no spread and no rotation → a sensible default so the toggle still does something', () => {
+      const c = toConfig({
+        ...DEFAULT_PARAMS,
+        rotationRandom: true,
+        rotationSpread: 0,
+        rotation: 0,
+      })
+      expect(c.rotationRandom?.stops[0].value).toBeGreaterThan(0)
+    })
+  })
+
   it('Fill disabled → empty ramp; enabled → 2 stops at 0 and 1', () => {
     expect(toConfig({ ...DEFAULT_PARAMS, fillEnabled: false }).fill.stops).toEqual([])
     const on = toConfig({

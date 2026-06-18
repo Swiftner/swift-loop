@@ -22,12 +22,27 @@ export function HexField({ value, onChange, ariaLabel }: Props) {
     setEditing(false)
   }
 
+  const pick = (e: Event) => {
+    const clean = (e.target as HTMLInputElement).value.replace(/^#/, '').toUpperCase()
+    if (HEX6.test(clean) && clean !== value) onChange(clean)
+  }
+
   return (
     <span class="lp-hex">
-      <span
+      {/* The swatch doubles as a native colour-picker trigger: an invisible
+          <input type="color"> fills it, so clicking opens the OS picker. */}
+      <label
         class="lp-hex-swatch"
         style={{ background: `#${HEX6.test(value) ? value : '000000'}` }}
-      />
+      >
+        <input
+          class="lp-hex-color"
+          type="color"
+          value={`#${HEX6.test(value) ? value : '000000'}`}
+          aria-label={ariaLabel ? `${ariaLabel} picker` : 'Colour picker'}
+          onChange={pick}
+        />
+      </label>
       <input
         class="lp-field lp-hex-input"
         type="text"

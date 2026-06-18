@@ -269,11 +269,28 @@ body {
 }
 
 .lp-hex-swatch {
+  position: relative;
   width: 16px;
   height: 16px;
   border-radius: 3px;
   border: 1px solid var(--field-border);
   flex: 0 0 auto;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+/* Invisible native colour input filling the swatch — clicking the swatch opens
+   the OS picker while our styled square stays visible underneath. */
+.lp-hex-color {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  opacity: 0;
+  cursor: pointer;
 }
 
 .lp-hex-input {
@@ -300,6 +317,93 @@ body {
   color: var(--fg);
   padding: 6px 8px;
   font: inherit;
+}
+
+/* saved (user) presets */
+.lp-presets {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lp-preset-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.lp-preset-chip {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--field-border);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.lp-preset-apply {
+  background: var(--field-bg);
+  color: var(--fg);
+  border: none;
+  padding: 4px 8px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.lp-preset-apply:hover {
+  background: var(--chip-active-bg);
+  color: var(--accent);
+}
+
+.lp-preset-del {
+  background: var(--field-bg);
+  color: var(--muted);
+  border: none;
+  border-left: 1px solid var(--field-border);
+  padding: 0 7px;
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.lp-preset-del:hover {
+  color: var(--accent);
+}
+
+.lp-preset-save {
+  align-self: flex-start;
+  background: none;
+  color: var(--accent);
+  border: none;
+  padding: 2px 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.lp-preset-saver {
+  display: flex;
+  gap: 6px;
+}
+
+.lp-preset-name {
+  flex: 1;
+}
+
+.lp-preset-confirm,
+.lp-preset-cancel {
+  background: var(--field-bg);
+  color: var(--fg);
+  border: 1px solid var(--field-border);
+  border-radius: 5px;
+  padding: 4px 10px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.lp-preset-confirm {
+  background: var(--accent);
+  color: var(--accent-fg);
+  border-color: transparent;
 }
 
 /* footer */

@@ -20,6 +20,11 @@ export interface ApplyInput {
   fillColor: Color | null
   strokeColor: Color | null
   dirty: Set<string>
+  // True only when populating a brand-new clone (full regen). A fresh clone is a
+  // copy of the source, so an empty fill/stroke ramp means "inherit the source",
+  // not "clear". On an in-place update the clone already carries a plugin paint,
+  // so an emptied ramp (the user turned Fill/Stroke off) must actively clear it.
+  freshClone?: boolean
 }
 
 export async function applyToClone(input: ApplyInput): Promise<void> {
@@ -36,6 +41,7 @@ export async function applyToClone(input: ApplyInput): Promise<void> {
     fillColor,
     strokeColor,
     dirty,
+    freshClone,
   } = input
 
   // Position, scale, and rotation compose into one transform: if any is dirty,
@@ -69,11 +75,15 @@ export async function applyToClone(input: ApplyInput): Promise<void> {
   if (dirty.has('fill')) {
     // Per-axis tint wins; otherwise sample the loop-level fill ramp at its factor.
     const c = fillColor ?? fillColorAt(fill, fillFactor)
+    // A resolved colour sets the fill; an emptied ramp on an existing clone
+    // clears it (Fill turned off). A fresh clone with no fill inherits the source.
     if (c) await adapter.setSolidFill(cloneId, c)
+    else if (!freshClone) await adapter.setSolidFill(cloneId, null)
   }
   const resolvedStroke = strokeColor ?? fillColorAt(stroke, strokeFactor)
-  if (dirty.has('stroke') && resolvedStroke) {
-    await adapter.setSolidStroke(cloneId, resolvedStroke)
+  if (dirty.has('stroke')) {
+    if (resolvedStroke) await adapter.setSolidStroke(cloneId, resolvedStroke)
+    else if (!freshClone) await adapter.setSolidStroke(cloneId, null)
   }
   if (dirty.has('strokeWeight') && resolvedStroke) {
     await adapter.setStrokeWeight(cloneId, Math.max(0, strokeWeight))

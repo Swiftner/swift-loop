@@ -139,6 +139,7 @@ async function fullRegen(
       strokeFactor: cell.strokeFactor,
       fillColor: cell.fillColor,
       strokeColor: cell.strokeColor,
+      freshClone: true,
       dirty: new Set<string>([
         'x',
         'y',

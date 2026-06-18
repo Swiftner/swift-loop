@@ -97,7 +97,12 @@ export function toConfig(p: LooperParams): LoopConfig {
     columnStepY: p.posY,
     rowStepX: 0,
     rotation: { ...num(0), ramp: ramp2(0, p.rotation * span) },
-    rotationRandom: p.rotationRandom && p.rotationSpread > 0 ? const1(p.rotationSpread) : undefined,
+    // Random on its own must do something. Prefer the explicit ± spread; else
+    // fall back to the rotation magnitude; else a small default — mirroring how
+    // Opacity (|| 20) and Position derive their jitter amount.
+    rotationRandom: p.rotationRandom
+      ? const1(p.rotationSpread > 0 ? p.rotationSpread : Math.abs(p.rotation) || 15)
+      : undefined,
     scaleX: { ...num(0), ramp: ramp2(0, p.scaleW * span) },
     scaleY: { ...num(0), ramp: ramp2(0, p.scaleH * span) },
     opacity: { ...num(p.opacityStart), ramp: ramp2(p.opacityStart, p.opacityEnd) },

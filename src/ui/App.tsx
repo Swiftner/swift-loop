@@ -2,10 +2,12 @@ import { on } from '@create-figma-plugin/utilities'
 import { useEffect, useState } from 'preact/hooks'
 import { ResizeHandle } from './components/ResizeHandle'
 import { useLooperConfig } from './hooks/useLooperConfig'
+import { useUserPresets } from './hooks/useUserPresets'
 import { LooperPanel } from './legacy/LooperPanel'
 
 export function App() {
   const { config, update, undo, redo, setBaseline } = useLooperConfig()
+  const { presets, save, remove } = useUserPresets()
   const [selectionValid, setSelectionValid] = useState(true)
 
   useEffect(() => {
@@ -61,6 +63,9 @@ export function App() {
         undo={undo}
         redo={redo}
         setBaseline={setBaseline}
+        userPresets={presets}
+        onSavePreset={save}
+        onDeletePreset={remove}
       />
       <ResizeHandle />
     </div>

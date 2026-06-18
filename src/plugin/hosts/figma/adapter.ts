@@ -138,11 +138,15 @@ export class FigmaAdapter implements HostAdapter {
   }
 
   async setSolidFill(id: NodeId, color: ColorRGB | null): Promise<void> {
-    if (color == null) return
     await this.ensurePages()
     const node = await figma.getNodeByIdAsync(id)
     if (!node || node.removed) return
     if ('fills' in node) {
+      // null clears the fill (Fill turned off) back to no paint.
+      if (color == null) {
+        ;(node as GeometryMixin).fills = []
+        return
+      }
       const { r, g, b } = color
       ;(node as GeometryMixin).fills = [
         { type: 'SOLID', color: { r, g, b }, opacity: color.a ?? 1 },
@@ -151,11 +155,15 @@ export class FigmaAdapter implements HostAdapter {
   }
 
   async setSolidStroke(id: NodeId, color: ColorRGB | null): Promise<void> {
-    if (color == null) return
     await this.ensurePages()
     const node = await figma.getNodeByIdAsync(id)
     if (!node || node.removed) return
     if ('strokes' in node) {
+      // null clears the stroke (Stroke turned off) back to no paint.
+      if (color == null) {
+        ;(node as GeometryMixin).strokes = []
+        return
+      }
       const { r, g, b } = color
       ;(node as GeometryMixin).strokes = [
         { type: 'SOLID', color: { r, g, b }, opacity: color.a ?? 1 },
