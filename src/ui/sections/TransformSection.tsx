@@ -32,7 +32,7 @@ const ROWS: { key: FormulaProperty; label: string; unit?: string }[] = [
 
 export function TransformSection({ config, update, sourceSize }: Props) {
   return (
-    <Section id="transform" title="Transform">
+    <Section id="transform" title="Transform" defaultOpen={false}>
       {ROWS.map((row) => {
         const cur = config[row.key]
         const range = sliderRangeFor(row.key, sourceSize)
