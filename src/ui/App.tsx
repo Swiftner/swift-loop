@@ -1,4 +1,4 @@
-import { on } from '@create-figma-plugin/utilities'
+import { emit, on } from '@create-figma-plugin/utilities'
 import { useEffect, useState } from 'preact/hooks'
 import { ResizeHandle } from './components/ResizeHandle'
 import { useLooperConfig } from './hooks/useLooperConfig'
@@ -12,6 +12,15 @@ export function App() {
 
   useEffect(() => {
     return on('loop:selection-change', (p: { valid: boolean }) => setSelectionValid(p.valid))
+  }, [])
+
+  // Tell the host we've mounted and our listeners are live, so it can send the
+  // initial config, selection, and saved presets. The host can't broadcast
+  // eagerly at boot — messages that arrive before this point are dropped, not
+  // queued — so without this signal saved presets stay missing from the list
+  // until the next save. Runs after the listener-registering effects above.
+  useEffect(() => {
+    emit('loop:ui-ready')
   }, [])
 
   // Cmd/Ctrl+Z undo, Cmd/Ctrl+Shift+Z (or Y) redo — but never while the user is

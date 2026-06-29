@@ -56,30 +56,38 @@ const SNAPSHOT: NodeSnapshot = {
   name: 'Rect',
 }
 
+// Drive the boot handshake the way the real UI does: mount registers the
+// message listeners, THEN signals ui-ready, and only then does the host reply
+// with the initial state. Returns once that reply has settled.
+async function boot(bridge: FakeBridge): Promise<void> {
+  const ready = bridge.handlers.get('loop:ui-ready') as (() => void | Promise<void>) | undefined
+  if (!ready) throw new Error('host did not register a loop:ui-ready handler')
+  await ready()
+}
+
 describe('startHostLoop boot handshake', () => {
-  it('emits initial-config and selection-change at boot', async () => {
+  it('does not broadcast initial state until the UI signals ready', async () => {
     const bridge = new FakeBridge()
     await startHostLoop(makeAdapter(), bridge)
+    // The UI registers its on() listeners only after it mounts; create-figma-
+    // plugin drops any message that arrives before its handler exists. So the
+    // host must stay silent until ui-ready, or the broadcast races the mount
+    // and saved presets vanish from the list until the next save.
+    const channels = bridge.sent.map((s) => s.channel)
+    expect(channels).not.toContain('loop:initial-config')
+    expect(channels).not.toContain('loop:user-presets')
+  })
+
+  it('emits initial-config and selection-change once the UI is ready', async () => {
+    const bridge = new FakeBridge()
+    await startHostLoop(makeAdapter(), bridge)
+    await boot(bridge)
     const channels = bridge.sent.map((s) => s.channel)
     expect(channels).toContain('loop:initial-config')
     expect(channels).toContain('loop:selection-change')
   })
 
-  it('reports invalid selection when nothing is selected', async () => {
-    const bridge = new FakeBridge()
-    await startHostLoop(makeAdapter({ getSelectedNode: () => null }), bridge)
-    const sel = bridge.sent.find((s) => s.channel === 'loop:selection-change')
-    expect(sel?.payload).toEqual({ valid: false })
-  })
-
-  it('reports valid selection with dimensions when a node is selected', async () => {
-    const bridge = new FakeBridge()
-    await startHostLoop(makeAdapter({ getSelectedNode: () => SNAPSHOT }), bridge)
-    const sel = bridge.sent.find((s) => s.channel === 'loop:selection-change')
-    expect(sel?.payload).toEqual({ valid: true, width: 40, height: 30 })
-  })
-
-  it('broadcasts saved user presets at boot', async () => {
+  it('replays saved user presets on every ui-ready (e.g. a panel remount)', async () => {
     const bridge = new FakeBridge()
     const stored = [{ name: 'Spiral', config: DEFAULT_CONFIG }]
     await startHostLoop(
@@ -89,6 +97,40 @@ describe('startHostLoop boot handshake', () => {
       }),
       bridge,
     )
+    await boot(bridge)
+    await boot(bridge)
+    const presetBroadcasts = bridge.sent.filter((s) => s.channel === 'loop:user-presets')
+    expect(presetBroadcasts).toHaveLength(2)
+    expect(presetBroadcasts.at(-1)?.payload).toEqual({ presets: stored })
+  })
+
+  it('reports invalid selection when nothing is selected', async () => {
+    const bridge = new FakeBridge()
+    await startHostLoop(makeAdapter({ getSelectedNode: () => null }), bridge)
+    await boot(bridge)
+    const sel = bridge.sent.find((s) => s.channel === 'loop:selection-change')
+    expect(sel?.payload).toEqual({ valid: false })
+  })
+
+  it('reports valid selection with dimensions when a node is selected', async () => {
+    const bridge = new FakeBridge()
+    await startHostLoop(makeAdapter({ getSelectedNode: () => SNAPSHOT }), bridge)
+    await boot(bridge)
+    const sel = bridge.sent.find((s) => s.channel === 'loop:selection-change')
+    expect(sel?.payload).toEqual({ valid: true, width: 40, height: 30 })
+  })
+
+  it('broadcasts saved user presets once the UI is ready', async () => {
+    const bridge = new FakeBridge()
+    const stored = [{ name: 'Spiral', config: DEFAULT_CONFIG }]
+    await startHostLoop(
+      makeAdapter({
+        storageGet: async (key: string) =>
+          key === 'swift-loop:user-presets' ? (stored as never) : null,
+      }),
+      bridge,
+    )
+    await boot(bridge)
     const sent = bridge.sent.find((s) => s.channel === 'loop:user-presets')
     expect(sent?.payload).toEqual({ presets: stored })
   })

@@ -130,6 +130,12 @@ const rampHex = (r: ColorRamp, idx: number, fallback: string): string =>
 export function fromConfig(c: LoopConfig): LooperParams {
   const n = Math.max(1, c.cols)
   const span = Math.max(1, n - 1) // avoid /0; for n=1 the per-step is 0 anyway
+  // The loop-level fill/stroke is the panel's home, but normalizeConfig (on load
+  // and on preset-apply) relocates it into columnFill/columnStroke. Read back
+  // from whichever holds the colour so the panel reflects it — otherwise Fill /
+  // Stroke read as "off" and the next edit drops it (the "Twisted tube" bug).
+  const fill = c.fill.stops.length ? c.fill : (c.columnFill ?? c.fill)
+  const stroke = c.stroke.stops.length ? c.stroke : (c.columnStroke ?? c.stroke)
   return {
     iterations: n,
     posX: c.x.value,
@@ -143,12 +149,12 @@ export function fromConfig(c: LoopConfig): LooperParams {
     opacityStart: firstStop(c.opacity.ramp, c.opacity.value),
     opacityEnd: lastStop(c.opacity.ramp, c.opacity.value),
     opacityRandom: !!c.opacityRandom?.stops.length,
-    fillEnabled: c.fill.stops.length > 0,
-    fillFrom: rampHex(c.fill, 0, DEFAULT_PARAMS.fillFrom),
-    fillTo: rampHex(c.fill, 1, DEFAULT_PARAMS.fillTo),
-    strokeEnabled: c.stroke.stops.length > 0,
-    strokeFrom: rampHex(c.stroke, 0, DEFAULT_PARAMS.strokeFrom),
-    strokeTo: rampHex(c.stroke, 1, DEFAULT_PARAMS.strokeTo),
+    fillEnabled: fill.stops.length > 0,
+    fillFrom: rampHex(fill, 0, DEFAULT_PARAMS.fillFrom),
+    fillTo: rampHex(fill, 1, DEFAULT_PARAMS.fillTo),
+    strokeEnabled: stroke.stops.length > 0,
+    strokeFrom: rampHex(stroke, 0, DEFAULT_PARAMS.strokeFrom),
+    strokeTo: rampHex(stroke, 1, DEFAULT_PARAMS.strokeTo),
     strokeWeightStart: firstStop(c.strokeWeight.ramp, c.strokeWeight.value),
     strokeWeightEnd: lastStop(c.strokeWeight.ramp, c.strokeWeight.value),
   }

@@ -20,14 +20,24 @@ export async function startHostLoop(adapter: HostAdapter, bridge: HostBridge): P
   const savedSize = await adapter.storageGet<{ width: number; height: number }>(SIZE_KEY)
   if (savedSize) adapter.resizePanel(savedSize.width, savedSize.height)
 
-  const saved = await adapter.storageGet<LoopConfig>(STORAGE_KEY)
-  if (saved) {
-    saved.fill = legacyColorStopToRamp(saved.fill as never)
-    saved.stroke = legacyColorStopToRamp(saved.stroke as never)
-  }
-  bridge.send('loop:initial-config', { config: saved ?? null })
-  bridge.send('loop:user-presets', { presets: await loadPresets(adapter) })
-  bridge.send('loop:selection-change', selectionPayload(adapter))
+  // Push the full initial state to the UI in response to `loop:ui-ready` rather
+  // than firing it eagerly at boot. The UI registers its message listeners only
+  // after Preact mounts, and create-figma-plugin DROPS any message that arrives
+  // before a handler exists (invokeEventHandler throws "No event handler") — it
+  // does not buffer. An eager broadcast races the mount and is often lost, which
+  // made saved presets vanish from the list until the next save re-broadcast
+  // them. Waiting for ui-ready guarantees the listeners are in place first; it
+  // also re-syncs the panel cleanly if it ever remounts.
+  bridge.on('loop:ui-ready', async () => {
+    const saved = await adapter.storageGet<LoopConfig>(STORAGE_KEY)
+    if (saved) {
+      saved.fill = legacyColorStopToRamp(saved.fill as never)
+      saved.stroke = legacyColorStopToRamp(saved.stroke as never)
+    }
+    bridge.send('loop:initial-config', { config: saved ?? null })
+    bridge.send('loop:selection-change', selectionPayload(adapter))
+    bridge.send('loop:user-presets', { presets: await loadPresets(adapter) })
+  })
 
   adapter.onSelectionChange(() => {
     bridge.send('loop:selection-change', selectionPayload(adapter))

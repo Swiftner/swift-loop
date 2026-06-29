@@ -4,6 +4,15 @@ All notable changes to Swift Loop. Versions follow SemVer; the [v0.x.y] anchor l
 
 ## [Unreleased]
 
+## [v0.0.3] — 2026-06-29
+
+### Added
+- **Eight built-in presets** from Mia's set — Wave, Wave 2, Funnel, Fan, Sonar, Vinyl record, Blob and Twisted tube — join the "Select presets" dropdown as ready-made starting points.
+
+### Fixed
+- **Saved presets vanishing from the list.** The panel could open with an empty saved-presets list that only reappeared after you saved a new one. The host broadcast the list at boot before the UI had registered its listener, so the message was dropped (the messaging layer doesn't buffer). The UI now signals when it's ready and the host replays the initial state — config, selection and presets — in response.
+- **Fill / Stroke dropped when applying a preset or reloading.** A loop's fill/stroke is relocated into a per-axis slot when a config is normalized (on load and on preset-apply), but the panel only read the original slot — so Fill/Stroke showed as off and the next edit discarded the colour. The panel now reads it back from whichever slot holds it. (Surfaced by the new Twisted tube preset's gradient.)
+
 ## [v0.0.1] — 2026-06-05
 
 A fresh start — the version number resets along with the product.

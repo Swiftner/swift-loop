@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { normalizeConfig } from '../../src/shared/migrate'
 import { DEFAULT_PARAMS, fromConfig, toConfig } from '../../src/ui/legacy/looper-params'
 
 describe('toConfig', () => {
@@ -80,6 +81,40 @@ describe('toConfig', () => {
     expect(on.fill.stops).toHaveLength(2)
     expect(on.fill.stops[0].position).toBe(0)
     expect(on.fill.stops[1].position).toBe(1)
+  })
+})
+
+// normalizeConfig (run on load and when applying a preset) relocates the
+// loop-level fill/stroke into the per-axis columnFill/columnStroke. fromConfig
+// must still surface them, or the panel shows Fill/Stroke as "off" and the next
+// edit drops the colour — which is exactly what happened to the "Twisted tube"
+// preset.
+describe('fill/stroke survive normalization', () => {
+  it('reads a relocated fill back from columnFill', () => {
+    const normalized = normalizeConfig(
+      toConfig({ ...DEFAULT_PARAMS, fillEnabled: true, fillFrom: '5e60d4', fillTo: 'a14b94' }),
+    )
+    expect(normalized.fill.stops).toEqual([]) // precondition: loop-level fill cleared
+    const back = fromConfig(normalized)
+    expect(back.fillEnabled).toBe(true)
+    expect(back.fillFrom).toBe('5e60d4')
+    expect(back.fillTo).toBe('a14b94')
+  })
+
+  it('reads a relocated stroke back from columnStroke', () => {
+    const normalized = normalizeConfig(
+      toConfig({
+        ...DEFAULT_PARAMS,
+        strokeEnabled: true,
+        strokeFrom: '112233',
+        strokeTo: '445566',
+      }),
+    )
+    expect(normalized.stroke.stops).toEqual([])
+    const back = fromConfig(normalized)
+    expect(back.strokeEnabled).toBe(true)
+    expect(back.strokeFrom).toBe('112233')
+    expect(back.strokeTo).toBe('445566')
   })
 })
 

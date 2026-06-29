@@ -5,8 +5,20 @@
       "config": {
         "cols": 20,
         "rows": 1,
-        "x": { "value": 12, "end": null, "random": 0, "unlocked": false, "formula": null },
-        "opacity": { "value": 100, "end": 0, "random": 0, "unlocked": false, "formula": null },
+        "x": {
+          "value": 12,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null
+        },
+        "opacity": {
+          "value": 100,
+          "end": 0,
+          "random": 0,
+          "unlocked": false,
+          "formula": null
+        },
         "easing": "easeOut"
       }
     },
@@ -15,8 +27,20 @@
       "config": {
         "cols": 36,
         "rows": 1,
-        "rotation": { "value": 10, "end": null, "random": 0, "unlocked": false, "formula": null },
-        "opacity": { "value": 100, "end": 30, "random": 0, "unlocked": false, "formula": null }
+        "rotation": {
+          "value": 10,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null
+        },
+        "opacity": {
+          "value": 100,
+          "end": 30,
+          "random": 0,
+          "unlocked": false,
+          "formula": null
+        }
       }
     },
     {
@@ -24,9 +48,1178 @@
       "config": {
         "cols": 8,
         "rows": 8,
-        "x": { "value": 30, "end": null, "random": 0, "unlocked": false, "formula": null },
-        "y": { "value": 30, "end": null, "random": 0, "unlocked": false, "formula": null },
-        "rotationSinusoidal": { "amplitude": 15, "frequency": 0.5, "phase": 0 }
+        "x": {
+          "value": 30,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null
+        },
+        "y": {
+          "value": 30,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null
+        },
+        "rotationSinusoidal": {
+          "amplitude": 15,
+          "frequency": 0.5,
+          "phase": 0
+        }
+      }
+    },
+    {
+      "name": "Wave",
+      "config": {
+        "cols": 50,
+        "rows": 1,
+        "layers": 1,
+        "angle": 0,
+        "x": {
+          "value": 60,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null
+        },
+        "y": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null
+        },
+        "rotation": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 0,
+                "position": 0
+              },
+              {
+                "value": 98,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "scaleX": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 0,
+                "position": 0
+              },
+              {
+                "value": 735,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "scaleY": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 0,
+                "position": 0
+              },
+              {
+                "value": 2940,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "opacity": {
+          "value": 100,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 100,
+                "position": 0
+              },
+              {
+                "value": 20,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "fill": {
+          "stops": []
+        },
+        "stroke": {
+          "stops": []
+        },
+        "strokeWeight": {
+          "value": 1,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 1,
+                "position": 0
+              },
+              {
+                "value": 1,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "rotationSinusoidal": {
+          "amplitude": 0,
+          "frequency": 0,
+          "phase": 0
+        },
+        "scaleSinusoidal": {
+          "amplitude": 0,
+          "frequency": 0,
+          "phase": 0
+        },
+        "easing": "linear",
+        "fxMode": false,
+        "seed": 1,
+        "showFirst": true,
+        "columnStepY": 0,
+        "rowStepX": 0
+      }
+    },
+    {
+      "name": "Wave 2",
+      "config": {
+        "cols": 80,
+        "rows": 1,
+        "layers": 1,
+        "angle": 0,
+        "x": {
+          "value": 30,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null
+        },
+        "y": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null
+        },
+        "rotation": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 0,
+                "position": 0
+              },
+              {
+                "value": 474,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "scaleX": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 0,
+                "position": 0
+              },
+              {
+                "value": 395,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "scaleY": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 0,
+                "position": 0
+              },
+              {
+                "value": 790,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "opacity": {
+          "value": 100,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 100,
+                "position": 0
+              },
+              {
+                "value": 100,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "fill": {
+          "stops": []
+        },
+        "stroke": {
+          "stops": []
+        },
+        "strokeWeight": {
+          "value": 1,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 1,
+                "position": 0
+              },
+              {
+                "value": 1,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "rotationSinusoidal": {
+          "amplitude": 0,
+          "frequency": 0,
+          "phase": 0
+        },
+        "scaleSinusoidal": {
+          "amplitude": 0,
+          "frequency": 0,
+          "phase": 0
+        },
+        "easing": "linear",
+        "fxMode": false,
+        "seed": 1,
+        "showFirst": true,
+        "columnStepY": 4,
+        "rowStepX": 0
+      }
+    },
+    {
+      "name": "Funnel",
+      "config": {
+        "cols": 140,
+        "rows": 1,
+        "layers": 1,
+        "angle": 0,
+        "x": {
+          "value": 4,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null
+        },
+        "y": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null
+        },
+        "rotation": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 0,
+                "position": 0
+              },
+              {
+                "value": 0,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "scaleX": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 0,
+                "position": 0
+              },
+              {
+                "value": 1390,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "scaleY": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 0,
+                "position": 0
+              },
+              {
+                "value": 1390,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "opacity": {
+          "value": 100,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 100,
+                "position": 0
+              },
+              {
+                "value": 100,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "fill": {
+          "stops": []
+        },
+        "stroke": {
+          "stops": []
+        },
+        "strokeWeight": {
+          "value": 1,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 1,
+                "position": 0
+              },
+              {
+                "value": 1,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "rotationSinusoidal": {
+          "amplitude": 0,
+          "frequency": 0,
+          "phase": 0
+        },
+        "scaleSinusoidal": {
+          "amplitude": 0,
+          "frequency": 0,
+          "phase": 0
+        },
+        "easing": "linear",
+        "fxMode": false,
+        "seed": 1,
+        "showFirst": true,
+        "columnStepY": 5,
+        "rowStepX": 0
+      }
+    },
+    {
+      "name": "Fan",
+      "config": {
+        "cols": 120,
+        "rows": 1,
+        "layers": 1,
+        "angle": 0,
+        "x": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null
+        },
+        "y": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null
+        },
+        "rotation": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 0,
+                "position": 0
+              },
+              {
+                "value": 714,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "scaleX": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 0,
+                "position": 0
+              },
+              {
+                "value": 2380,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "scaleY": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 0,
+                "position": 0
+              },
+              {
+                "value": 2380,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "opacity": {
+          "value": 100,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 100,
+                "position": 0
+              },
+              {
+                "value": 100,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "fill": {
+          "stops": []
+        },
+        "stroke": {
+          "stops": []
+        },
+        "strokeWeight": {
+          "value": 1,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 1,
+                "position": 0
+              },
+              {
+                "value": 1,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "rotationSinusoidal": {
+          "amplitude": 0,
+          "frequency": 0,
+          "phase": 0
+        },
+        "scaleSinusoidal": {
+          "amplitude": 0,
+          "frequency": 0,
+          "phase": 0
+        },
+        "easing": "linear",
+        "fxMode": false,
+        "seed": 1,
+        "showFirst": true,
+        "columnStepY": 0,
+        "rowStepX": 0,
+        "columnRandom": {
+          "stops": [
+            {
+              "value": 0,
+              "position": 0
+            }
+          ]
+        },
+        "rowRandom": {
+          "stops": [
+            {
+              "value": 0,
+              "position": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Sonar",
+      "config": {
+        "cols": 120,
+        "rows": 1,
+        "layers": 1,
+        "angle": 0,
+        "x": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null
+        },
+        "y": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null
+        },
+        "rotation": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 0,
+                "position": 0
+              },
+              {
+                "value": 0,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "scaleX": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 0,
+                "position": 0
+              },
+              {
+                "value": 2380,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "scaleY": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 0,
+                "position": 0
+              },
+              {
+                "value": 2380,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "opacity": {
+          "value": 100,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 100,
+                "position": 0
+              },
+              {
+                "value": 100,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "fill": {
+          "stops": []
+        },
+        "stroke": {
+          "stops": []
+        },
+        "strokeWeight": {
+          "value": 1,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 1,
+                "position": 0
+              },
+              {
+                "value": 1,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "rotationSinusoidal": {
+          "amplitude": 0,
+          "frequency": 0,
+          "phase": 0
+        },
+        "scaleSinusoidal": {
+          "amplitude": 0,
+          "frequency": 0,
+          "phase": 0
+        },
+        "easing": "linear",
+        "fxMode": false,
+        "seed": 1,
+        "showFirst": true,
+        "columnStepY": 0,
+        "rowStepX": 0
+      }
+    },
+    {
+      "name": "Vinyl record",
+      "config": {
+        "cols": 60,
+        "rows": 1,
+        "layers": 1,
+        "angle": 0,
+        "x": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null
+        },
+        "y": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null
+        },
+        "rotation": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 0,
+                "position": 0
+              },
+              {
+                "value": 0,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "scaleX": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 0,
+                "position": 0
+              },
+              {
+                "value": 2950,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "scaleY": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 0,
+                "position": 0
+              },
+              {
+                "value": 2950,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "opacity": {
+          "value": 100,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 100,
+                "position": 0
+              },
+              {
+                "value": 20,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "fill": {
+          "stops": []
+        },
+        "stroke": {
+          "stops": []
+        },
+        "strokeWeight": {
+          "value": 1,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 1,
+                "position": 0
+              },
+              {
+                "value": 1,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "rotationSinusoidal": {
+          "amplitude": 0,
+          "frequency": 0,
+          "phase": 0
+        },
+        "scaleSinusoidal": {
+          "amplitude": 0,
+          "frequency": 0,
+          "phase": 0
+        },
+        "easing": "linear",
+        "fxMode": false,
+        "seed": 1,
+        "showFirst": true,
+        "columnStepY": 0,
+        "rowStepX": 0
+      }
+    },
+    {
+      "name": "Blob",
+      "config": {
+        "cols": 60,
+        "rows": 1,
+        "layers": 1,
+        "angle": 0,
+        "x": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null
+        },
+        "y": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null
+        },
+        "rotation": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 0,
+                "position": 0
+              },
+              {
+                "value": 59,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "scaleX": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 0,
+                "position": 0
+              },
+              {
+                "value": 2950,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "scaleY": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 0,
+                "position": 0
+              },
+              {
+                "value": 2950,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "opacity": {
+          "value": 100,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 100,
+                "position": 0
+              },
+              {
+                "value": 20,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "fill": {
+          "stops": []
+        },
+        "stroke": {
+          "stops": []
+        },
+        "strokeWeight": {
+          "value": 1,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 1,
+                "position": 0
+              },
+              {
+                "value": 1,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "rotationSinusoidal": {
+          "amplitude": 0,
+          "frequency": 0,
+          "phase": 0
+        },
+        "scaleSinusoidal": {
+          "amplitude": 0,
+          "frequency": 0,
+          "phase": 0
+        },
+        "easing": "linear",
+        "fxMode": false,
+        "seed": 1,
+        "showFirst": true,
+        "columnStepY": 0,
+        "rowStepX": 0
+      }
+    },
+    {
+      "name": "Twisted tube",
+      "config": {
+        "cols": 100,
+        "rows": 1,
+        "layers": 1,
+        "angle": 0,
+        "x": {
+          "value": 11,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null
+        },
+        "y": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null
+        },
+        "rotation": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 0,
+                "position": 0
+              },
+              {
+                "value": 396,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "scaleX": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 0,
+                "position": 0
+              },
+              {
+                "value": 99,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "scaleY": {
+          "value": 0,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 0,
+                "position": 0
+              },
+              {
+                "value": 99,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "opacity": {
+          "value": 100,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 100,
+                "position": 0
+              },
+              {
+                "value": 100,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "fill": {
+          "stops": [
+            {
+              "color": {
+                "r": 0.3686274509803922,
+                "g": 0.3764705882352941,
+                "b": 0.8313725490196079
+              },
+              "position": 0
+            },
+            {
+              "color": {
+                "r": 0.6313725490196078,
+                "g": 0.29411764705882354,
+                "b": 0.5803921568627451
+              },
+              "position": 1
+            }
+          ]
+        },
+        "stroke": {
+          "stops": []
+        },
+        "strokeWeight": {
+          "value": 1,
+          "end": null,
+          "random": 0,
+          "unlocked": false,
+          "formula": null,
+          "ramp": {
+            "stops": [
+              {
+                "value": 1,
+                "position": 0
+              },
+              {
+                "value": 1,
+                "position": 1
+              }
+            ]
+          }
+        },
+        "rotationSinusoidal": {
+          "amplitude": 0,
+          "frequency": 0,
+          "phase": 0
+        },
+        "scaleSinusoidal": {
+          "amplitude": 0,
+          "frequency": 0,
+          "phase": 0
+        },
+        "easing": "linear",
+        "fxMode": false,
+        "seed": 1,
+        "showFirst": true,
+        "columnStepY": 18,
+        "rowStepX": 0
       }
     }
   ]
